@@ -8,13 +8,11 @@ from .stage import get_stage, BaseStage
 class Node:
     id: str
     type: str
-    guards: list
     metadata: dict
 
-    def __init__(self, id: str, type: str, guards: list = None, metadata: dict = None):
+    def __init__(self, id: str, type: str, metadata: dict = None):
         self.id = id
         self.type = type
-        self.guards = guards or []
         self.metadata = metadata or {}
 
     @staticmethod
@@ -49,10 +47,9 @@ class ConditionNode(Node):
         type: str,
         conditions: list[Condition],
         else_goto: str | None = None,
-        guards: list = None,
         metadata: dict = None,
     ):
-        super().__init__(id, type, guards, metadata)
+        super().__init__(id, type, metadata)
         self.conditions = conditions
         self.else_goto = else_goto
 
@@ -66,14 +63,12 @@ class ConditionNode(Node):
             for cond in conditions_data
         ]
         else_goto = data.get("else")
-        guards = data.get("guards", [])
         metadata = data.get("metadata", {})
         return ConditionNode(
             id=id,
             type=type,
             conditions=conditions,
             else_goto=else_goto,
-            guards=guards,
             metadata=metadata,
         )
 
@@ -90,21 +85,20 @@ class ParallelNode(Node):
         children: list[str],
         policy: Literal["all", "any"] = "all",
         next: str | None = None,
-        guards: list = None,
         metadata: dict = None,
     ):
-        super().__init__(id, type, guards, metadata)
+        super().__init__(id, type, metadata)
         self.children = children
         self.policy = policy
         self.next = next
 
+    @staticmethod
     def from_dict(data: dict) -> "ParallelNode":
         id = data.get("id")
         type = data.get("type")
         children = data.get("children", [])
         policy = data.get("policy", "all")
         next = data.get("next")
-        guards = data.get("guards", [])
         metadata = data.get("metadata", {})
         return ParallelNode(
             id=id,
@@ -112,7 +106,6 @@ class ParallelNode(Node):
             children=children,
             policy=policy,
             next=next,
-            guards=guards,
             metadata=metadata,
         )
 
@@ -127,10 +120,9 @@ class TerminalNode(Node):
         type: str,
         artifact_paths: list[str] = None,
         result: dict | None = None,
-        guards: list = None,
         metadata: dict = None,
     ):
-        super().__init__(id, type, guards, metadata)
+        super().__init__(id, type, metadata)
         self.artifact_paths = artifact_paths or []
         self.result = result
 
@@ -140,14 +132,12 @@ class TerminalNode(Node):
         type = data.get("type")
         artifact_paths = data.get("artifacts", [])
         result = data.get("result")
-        guards = data.get("guards", [])
         metadata = data.get("metadata", {})
         return TerminalNode(
             id=id,
             type=type,
             artifact_paths=artifact_paths,
             result=result,
-            guards=guards,
             metadata=metadata,
         )
 
@@ -160,6 +150,7 @@ class StageNode(Node):
     inputs: dict = {}
     outputs: dict = {}
     next: str | None = None
+    fallback: str | None = None
 
     def __init__(
         self,
@@ -170,10 +161,10 @@ class StageNode(Node):
         arguments: dict = None,
         outputs: dict = None,
         next: str | None = None,
-        guards: list = None,
+        fallback: str | None = None,
         metadata: dict = None,
     ):
-        super().__init__(id, type, guards, metadata)
+        super().__init__(id, type, metadata)
         if not get_stage(stage):
             raise ValueError(f"Stage '{stage}' not found in registry")
         self.stage = stage
@@ -181,6 +172,7 @@ class StageNode(Node):
         self.arguments = arguments or {}
         self.outputs = outputs or {}
         self.next = next
+        self.fallback = fallback
 
     @staticmethod
     def from_dict(data: dict) -> "StageNode":
@@ -191,7 +183,7 @@ class StageNode(Node):
         arguments = data.get("arguments", {})
         outputs = data.get("outputs", {})
         next = data.get("next")
-        guards = data.get("guards", [])
+        fallback = data.get("fallback")
         metadata = data.get("metadata", {})
         return StageNode(
             id=id,
@@ -201,7 +193,7 @@ class StageNode(Node):
             arguments=arguments,
             outputs=outputs,
             next=next,
-            guards=guards,
+            fallback=fallback,
             metadata=metadata,
         )
 

@@ -193,16 +193,14 @@ class Session:
                 await asyncio.wait_for(stage_instance.run(), timeout=stage_instance.timeout)
             except asyncio.TimeoutError as e:
                 self.emit(Event(type="stage_timeout", session_id=self.id, stage_id=node.id))
-                self.result = "timeout"
                 errors.append("timeout: " + str(e))
                 continue
             except Exception as e:
                 self.emit(Event(type="stage_failed", session_id=self.id, stage_id=node.id, payload={"error": str(e)}))
-                self.result = "failed"
                 errors.append(str(e))
                 continue
             return self.pipeline.get_node(node.next) if node.next else None
-        raise RuntimeError(f"Stage {node.id} failed after {stage_instance.retries} retries in session {self.id}: {errors}")
+        return self.pipeline.get_node(node.fallback) if node.fallback else None
 
     async def _handle_condition(self, node: ConditionNode):
         next_node = None
