@@ -1,161 +1,155 @@
-# stageflow
-Библиотека для исполнения json пайплайнов
+# StageFlow
 
-# Проблемы и риски
+StageFlow is a lightweight framework for describing and running JSON pipelines with nodes, stages, and schema validation.
 
-Этот список основан на быстром ревью текущего состояния репозитория.
+## Features
+- Node types: `stage`, `condition`, `parallel`, `map`, `subpipeline`, `terminal`.
+- Custom stages (async `run`) with documented arguments/config/outputs.
+- Input waiting (`wait_input`), event history, session snapshots.
+- Built-in stages for dict/list/string/logic utilities.
+- Pipeline JSON Schema (stage enum injected on the fly) and HTML doc generator.
 
-- Нет зависимости: PyYAML используется в `stageflow/core/stage.py` и
-  `stageflow/docs/schema.py`, но не объявлен в `pyproject.toml`.
-- `Pipeline.from_dict` использует `{}` как дефолт для `nodes`; при итерации
-  словаря берутся ключи, и `Node.from_dict` ломается.
-- `Session.result` типизирован как `dict | None`, но при ошибках/таймаутах
-  выставляется строка (`"failed"`, `"timeout"`), что ломает контракт.
-- Риск циклического импорта: `stageflow/core/stage.py` импортирует
-  `from stageflow.core import EventSpec, InputSpec` вместо локального импорта.
-- `StageNode` содержит классовые изменяемые dict (`config/arguments/outputs`),
-  что может дать shared-state ошибки; нужно избегать классовых mutables.
-  shared-state ошибки.
-- `BaseStage.allowed_events` / `allowed_inputs` — изменяемые списки на уровне
-  класса, которые легко случайно разделить между наследниками.
-- Валидация пайплайна не проверяет `node.next` для `StageNode`/`ParallelNode`,
-  поэтому отсутствие ребер обнаружится только в рантайме.
-- `ParallelNode.from_dict` без `@staticmethod`, стиль не согласован с остальными.
-- `Session.wait_input` использует `asyncio.get_event_loop()` в async-контексте;
-  предпочтительнее `get_running_loop()` в современном Python.
-- Временные метки событий — naive UTC без timezone, что может быть неоднозначно.
-- `py.typed` заявлен в package data, но файла нет в репозитории.
-- `README.md` — дефолтный GitLab-шаблон; нет описания, установки, использования.
-- В репозитории есть `__pycache__`/`.pyc`, которые не стоит коммитить.
-- `test.py` импортирует `list_stages`, но публичный API экспортирует `get_stages`.
+## Installation
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -e .
+```
+Requires Python 3.10+.
 
+## Quickstart
+1) Register your stage:
+```python
+from stageflow.core.stage import BaseStage, register_stage
 
-# Задачи
+@register_stage("HelloStage")
+class HelloStage(BaseStage):
+    """
+    description: "Custom stage example"
+    arguments:
+      name: string
+    outputs:
+      greeting: string
+    """
+    async def run(self):
+        name = self.get_arguments().get("name", "world")
+        self.set_outputs({"greeting": f"Hello, {name}!"})
+```
 
-## P0 (ядро, корректность)
-
-- ~~Добавить модель обработки ошибок на уровне пайплайна (fallback/on_error) как
-  часть графа, а не только retries внутри стадии~~.
-- ~~Порефакторить `Context`: изоляция/слияние при параллельных ветках, понятные
-  правила конфликтов и копирования.~~
-- ~~Переделать `wait_input`: поддержка нескольких ожиданий на один тип и
-  рассылка входа всем ожидающим стадиям.~~
-
-## P1 (стабильность и DX)
-
-- ~~Софт-валидация событий: расширить `EventSpec`/`InputSpec` схемами (JSON
-  Schema), добавить режимы `validate_events = off|warn|strict` на уровне
-  `Session`/`Pipeline`. В `warn` — логировать `event_validation_failed` в
-  history; в `strict` — останавливать/кидать ошибку. Проверять прежде всего
-  входы, которые пришли в активные ожидания (`wait_input`).~~
-- ~~Обновить `JsonLogic` после рефакторинга `Context`, чтобы условия могли
-  работать с новой моделью данных (`payload`).~~
-- ~~Валидация пайплайна по JSON Schema с версионированием (`api_version`), чтобы
-  проверять формат и безопасно эволюционировать схему.~~
-- ~~Добавить JSON-сериализацию состояния сессии (snapshot) для сохранения и
-  восстановления: `Session.to_dict()`/`Session.from_dict()` с контрактом на
-  `current_node`, `Context`, флаги и history; хранение делегировать пользователю.~~
-- ~~Удалить `guards` из модели узлов, чтобы не усложнять (есть `condition`).~~
-- ~~Порефакторить `parallel`: запускать полноценные ветки (подграфы), определить
-  семантику отмены остальных веток и сбор результатов.~~
-- С~~делать удобный тестер пайплайнов: описывать кейсы входов и прогонять их по
-  пайплайну (ограничение на шаги/события, проверка ожидаемого результата).~~
-
-## P2 (расширения)
-
-- ~~Добавить встроенные базовые стадии для ожидания и таймеров (`WaitStage`,
-  `SleepStage`) как стандартные stage-узлы.~~
-- ~~Расширить типы нод: ~~подпайплайны как “суперноды” (вложенный пайплайн с
-  входами/терминалами)~~, foreach/map.~~
-- ~~Удалить LLM-провайдеры из ядра (вынести в отдельный пакет/плагин), чтобы
-  не тянуть зависимости и лишнюю логику в базовой библиотеке.~~
-
-## Генерация HTML-дока по схемам и стадиям
-
-- Запустить генератор: `python scripts/generate_docs_html.py`
-- Открыть результат: `docs/index.html`
-
-# Глоссарий
-
-- Пайплайн: граф выполнения, описанный JSON-конфигом.
-- Нода (узел): элемент графа (stage/condition/parallel/terminal и т.п.).
-- Stage (стадия): исполняемая единица логики (код), которую вызывает StageNode.
-- StageNode: нода, которая запускает конкретную Stage.
-- ConditionNode: нода, которая выбирает следующую ветку по условию.
-- ParallelNode: нода, которая запускает несколько веток параллельно.
-- TerminalNode: нода завершения, возвращает результат и артефакты.
-- Контекст (Context): общие данные пайплайна (`payload`).
-- Сессия (Session): запуск пайплайна с конкретным контекстом и историей событий.
-- Событие (Event): структурированная запись о действии в сессии.
-- Вход (Input): внешнее событие/данные, которые приходят в Session.
-- Аргументы (arguments): маппинг путей контекста в входы стадии.
-- Выходы (outputs): маппинг результатов стадии обратно в контекст.
-- Артефакты: выбранные пути контекста, которые возвращаются в результате.
-
-# Тестовый пайплайн (опорный)
-
-Минимальный JSON, который использует все текущие возможности движка:
-stage → condition → parallel → terminal, с аргументами, выходами и артефактами.
-
-```json
-{
-  "api_version": "1.0",
-  "entry": "start",
-  "metadata": { "name": "demo_full_flow" },
-  "nodes": [
-    {
-      "id": "start",
-      "type": "stage",
-      "stage": "InitStage",
-      "config": { "mode": "demo" },
-      "arguments": {
-        "user_id": "user_id",
-        "text": "text"
-      },
-      "outputs": {
-        "score": "score",
-        "need_parallel": "need_parallel"
-      },
-      "next": "decide"
-    },
-    {
-      "id": "decide",
-      "type": "condition",
-      "conditions": [
+2) Describe a pipeline in JSON:
+```python
+pipeline_dict = {
+    "entry": "start",
+    "nodes": [
         {
-          "if": { "==": [ { "var": "need_parallel" }, true ] },
-          "then": "fanout"
-        }
-      ],
-      "else": "finish"
-    },
-    {
-      "id": "fanout",
-      "type": "parallel",
-      "policy": "all",
-      "children": ["branch_a", "branch_b"],
-      "next": "finish"
-    },
-    {
-      "id": "branch_a",
-      "type": "stage",
-      "stage": "WorkerAStage",
-      "arguments": { "score": "score" },
-      "outputs": { "a_result": "a_result" }
-    },
-    {
-      "id": "branch_b",
-      "type": "stage",
-      "stage": "WorkerBStage",
-      "arguments": { "score": "score" },
-      "outputs": { "b_result": "b_result" }
-    },
-    {
-      "id": "finish",
-      "type": "terminal",
-      "result": { "status": "ok" },
-      "artifacts": ["score", "a_result", "b_result"]
-    }
-  ]
+            "id": "start",
+            "type": "stage",
+            "stage": "HelloStage",
+            "arguments": {"name": "user_name"},
+            "outputs": {"greeting": "greeting"},
+            "next": "finish",
+        },
+        {
+            "id": "finish",
+            "type": "terminal",
+            "result": {"status": "ok"},
+            "artifacts": ["greeting"],
+        },
+    ],
 }
 ```
+
+3) Run:
+```python
+import asyncio
+from stageflow.core.pipeline import Pipeline
+from stageflow.core.session import Session
+from stageflow.core.context import Context
+
+async def main():
+    pipe = Pipeline.from_dict(pipeline_dict)
+    session = Session(id="demo", pipeline=pipe, context=Context(payload={"user_name": "Alice"}))
+    result = await session.run()
+    print(result.result)        # {'status': 'ok'}
+    print(result.artifacts)     # {'greeting': 'Hello, Alice!'}
+
+asyncio.run(main())
+```
+
+## Docs and schema generation
+- Programmatic:
+```python
+from stageflow.docs.html import generate_docs_assets
+
+html_page, pipeline_schema, stages_json = generate_docs_assets()
+# html_page — ready-to-serve HTML
+# pipeline_schema — dict with JSON Schema (stage enum injected)
+# stages_json — raw JSON with stage specs
+```
+- CLI (prints JSON payload with `html`, `pipeline_schema`, `stages_json` to stdout):
+```bash
+python scripts/generate_docs_html.py > docs_assets.json
+```
+If needed, persist the `html` from the JSON payload yourself.
+
+## Tests
+```bash
+python -m unittest
+```
+
+## Node types overview
+- `stage`: Executes a registered Stage. Fields: `stage` (name), `config`/`arguments`/`outputs` mappings, `next`, optional `fallback`.
+- `condition`: List of `{if, then}` branches (JsonLogic conditions), optional `else`.
+- `parallel`: Runs several children; `policy` = `all|any`, `cancel_on_error` flag, optional `next`.
+- `map`: Iterates over items path, runs body node for each item (sequential/parallel), collects mapped outputs.
+- `subpipeline`: Invokes nested pipeline by id, with `inputs` mapping, `artifact_outputs`, optional `result_output`, `next`.
+- `terminal`: Ends execution, returns `result` and selects `artifacts`.
+
+### Node types in detail
+- **Stage node**
+  - Required: `id`, `type="stage"`, `stage` (registered stage name).
+  - Data flow: `arguments` map context paths -> stage inputs; `outputs` map stage return keys -> context paths.
+  - Control flow: `next` points to following node; optional `fallback` node is used on stage exceptions.
+  - Stage class declares `skipable`, `allowed_events`, `allowed_inputs`, `timeout`, `retries`.
+- **Condition node**
+  - Required: `id`, `type="condition"`, non-empty `conditions` list.
+  - Each condition: `{ "if": <JsonLogic>, "then": "<node id>" }`; first matched branch wins.
+  - Optional `else` target if no branch matches.
+- **Parallel node**
+  - Required: `id`, `type="parallel"`, non-empty `children` (node ids).
+  - `policy`: `all` (default) waits all children; `any` completes on first success.
+  - `cancel_on_error`: whether to cancel siblings on failure.
+  - `next`: node id to continue after parallel finishes.
+- **Map node**
+  - Required: `id`, `type="map"`, `items` (context path with iterable), `body` (node id).
+  - `mode`: `sequential` (default) or `parallel` for body executions.
+  - `output_map`: map of body outputs -> target context paths for aggregated results.
+  - `item_path`/`index_path`: where to inject current item/index into context for body runs.
+  - `cancel_on_error`: abort remaining iterations on error.
+  - `next`: node id after all iterations finish.
+- **Subpipeline node**
+  - Required: `id`, `type="subpipeline"`, `subpipeline_id` (key in `subpipelines` dict of pipeline).
+  - `inputs`: context mapping passed into subpipeline root context.
+  - `artifact_outputs`: map subpipeline artifacts -> parent context paths.
+  - `result_output`: path in parent context to store subpipeline `result`.
+  - `next`: next node in parent pipeline.
+- **Terminal node**
+  - Required: `id`, `type="terminal"`.
+  - `result`: arbitrary object returned as final result.
+  - `artifacts`: list of context paths that will be returned as artifacts map.
+
+## Built-in stages
+- Vars: `SetValueStage`, `CopyValueStage`, `IncrementStage`, `MergeDictStage`.
+- Dicts: `PickKeysStage`, `DropKeysStage`.
+- Lists: `AppendListStage`, `ExtendListStage`, `FilterListStage`, `UniqueListStage`, `PopListStage`.
+- Strings: `ConcatStage`, `TemplateStage`.
+- Logic: `AssertStage`, `FailStage`, `LogStage`, `SleepStage`.
+
+Each stage docstring describes arguments/config/outputs; they are also available via `generate_docs_assets()` / `stages_json`.
+
+## Useful refs
+- `stageflow/core` — core (pipeline, session, nodes, context).
+- `stageflow/builtins` — built-in stages.
+- `stageflow/docs` — schema/HTML generation helpers.
+- `scripts/` — helpers (docs generator wrapper).
+- `tests/` — unit tests.
