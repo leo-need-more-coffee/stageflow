@@ -1,11 +1,11 @@
 from .node import Node, StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode, MapNode
-from .jsonlogic import JsonLogic
 from stageflow.docs.schema import load_pipeline_schema
 
 try:
     from jsonschema import validate, ValidationError
 except ImportError:  # pragma: no cover - optional dependency
     validate = None
+
     class ValidationError(Exception):
         pass
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from .jsonlogic import JsonLogic
-from .stage import get_stage, BaseStage
+from .stage import get_stage
 
 
 class Node:
@@ -262,6 +262,8 @@ class MapNode(Node):
             next=next,
             metadata=metadata,
         )
+
+
 class StageNode(Node):
     id: str
     type: str

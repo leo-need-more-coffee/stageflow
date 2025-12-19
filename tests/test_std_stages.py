@@ -4,7 +4,7 @@ from stageflow.core.context import Context
 from stageflow.core.session import Session
 from stageflow.core.pipeline import Pipeline
 from stageflow.core.node import StageNode, TerminalNode
-from stageflow.builtins import (
+from stageflow.builtins import (  # noqa: F401 - imports register stages
     SetValueStage,
     CopyValueStage,
     IncrementStage,
