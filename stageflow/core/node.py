@@ -29,6 +29,8 @@ class Node:
                 return StageNode.from_dict(data)
             case "subpipeline":
                 return SubPipelineNode.from_dict(data)
+            case "map":
+                return MapNode.from_dict(data)
             case _:
                 raise ValueError(f"Unknown node type: {node_type}")
 
@@ -193,6 +195,70 @@ class SubPipelineNode(Node):
             inputs=inputs,
             artifact_outputs=artifact_outputs,
             result_output=result_output,
+            next=next,
+            metadata=metadata,
+        )
+
+
+class MapNode(Node):
+    items_path: str
+    body: str
+    output_map: dict
+    mode: Literal["sequential", "parallel"]
+    cancel_on_error: bool
+    item_path: str
+    index_path: str | None
+    next: str | None
+
+    def __init__(
+        self,
+        id: str,
+        type: str,
+        items_path: str,
+        body: str,
+        output_map: dict = None,
+        mode: Literal["sequential", "parallel"] = "sequential",
+        cancel_on_error: bool = True,
+        item_path: str = "item",
+        index_path: str | None = None,
+        next: str | None = None,
+        metadata: dict = None,
+    ):
+        super().__init__(id, type, metadata)
+        self.items_path = items_path
+        self.body = body
+        self.output_map = output_map or {}
+        self.mode = mode
+        self.cancel_on_error = cancel_on_error
+        self.item_path = item_path
+        self.index_path = index_path
+        self.next = next
+
+    @staticmethod
+    def from_dict(data: dict) -> "MapNode":
+        id = data.get("id")
+        type = data.get("type")
+        items_path = data.get("items")
+        body = data.get("body")
+        if items_path is None or body is None:
+            raise ValueError("MapNode requires 'items' and 'body'")
+        output_map = data.get("output_map", {})
+        mode = data.get("mode", "sequential")
+        cancel_on_error = data.get("cancel_on_error", True)
+        item_path = data.get("item_path", "item")
+        index_path = data.get("index_path")
+        next = data.get("next")
+        metadata = data.get("metadata", {})
+        return MapNode(
+            id=id,
+            type=type,
+            items_path=items_path,
+            body=body,
+            output_map=output_map,
+            mode=mode,
+            cancel_on_error=cancel_on_error,
+            item_path=item_path,
+            index_path=index_path,
             next=next,
             metadata=metadata,
         )
