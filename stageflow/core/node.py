@@ -79,6 +79,7 @@ class ParallelNode(Node):
     children: list[str]
     policy: Literal["all", "any"]
     next: str | None
+    cancel_on_error: bool
 
     def __init__(
         self,
@@ -87,12 +88,14 @@ class ParallelNode(Node):
         children: list[str],
         policy: Literal["all", "any"] = "all",
         next: str | None = None,
+        cancel_on_error: bool = True,
         metadata: dict = None,
     ):
         super().__init__(id, type, metadata)
         self.children = children
         self.policy = policy
         self.next = next
+        self.cancel_on_error = cancel_on_error
 
     @staticmethod
     def from_dict(data: dict) -> "ParallelNode":
@@ -101,6 +104,7 @@ class ParallelNode(Node):
         children = data.get("children", [])
         policy = data.get("policy", "all")
         next = data.get("next")
+        cancel_on_error = data.get("cancel_on_error", True)
         metadata = data.get("metadata", {})
         return ParallelNode(
             id=id,
@@ -108,6 +112,7 @@ class ParallelNode(Node):
             children=children,
             policy=policy,
             next=next,
+            cancel_on_error=cancel_on_error,
             metadata=metadata,
         )
 
