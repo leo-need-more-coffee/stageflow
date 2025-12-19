@@ -44,7 +44,7 @@ class Pipeline:
             except ValidationError as e:
                 raise ValueError(f"Pipeline schema validation failed: {e.message}") from e
         entry = data.get("entry")
-        nodes_data = data.get("nodes", {})
+        nodes_data = data.get("nodes", [])
         nodes = [Node.from_dict(node) for node in nodes_data]
         metadata = data.get("metadata", {})
         subpipelines = data.get("subpipelines", {})
@@ -75,6 +75,10 @@ class Pipeline:
                     stage_class = node.get_stage_class()
                     if not stage_class:
                         raise ValueError(f"Stage class for node {node.id} not found")
+                    if node.next and node.next not in self._nodes_map:
+                        raise ValueError(f"Next node '{node.next}' for stage {node.id} not found in pipeline")
+                    if node.fallback and node.fallback not in self._nodes_map:
+                        raise ValueError(f"Fallback node '{node.fallback}' for stage {node.id} not found in pipeline")
                 case ConditionNode():
                     for cond in node.conditions:
                         if cond.then_goto not in self._nodes_map:
@@ -85,6 +89,8 @@ class Pipeline:
                     for child in node.children:
                         if child not in self._nodes_map:
                             raise ValueError(f"Parallel branch '{child}' not found in pipeline")
+                    if node.next and node.next not in self._nodes_map:
+                        raise ValueError(f"Parallel next '{node.next}' not found in pipeline")
                 case TerminalNode():
                     pass
                 case SubPipelineNode():
@@ -94,8 +100,8 @@ class Pipeline:
                     if node.subpipeline_id == self.entry:
                         raise ValueError(f"Subpipeline '{node.subpipeline_id}' cannot reference root entry")
                 case MapNode():
-                    # body may refer to node or subpipeline; existence checked at runtime
-                    pass
+                    if node.next and node.next not in self._nodes_map:
+                        raise ValueError(f"Map next '{node.next}' not found in pipeline")
                 case _:
                     raise ValueError(f"Unknown node type: {type(node)}")
 

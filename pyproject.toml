@@ -20,4 +20,4 @@ where = ["."]
 include = ["stageflow*"]
 
 [tool.setuptools.package-data]
-"stageflow" = ["py.typed"]
+"stageflow" = ["py.typed", "docs/schemas/pipeline.json"]
