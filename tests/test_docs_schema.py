@@ -22,6 +22,8 @@ class DocStage(BaseStage):
 
     allowed_events = [EventSpec(type="progress", description="Progress event")]
     allowed_inputs = [InputSpec(type="user_input", description="User input")]
+    category = "demo"
+
     async def run(self):
         return None
 
@@ -36,6 +38,7 @@ class DocsSchemaTests(unittest.TestCase):
         self.assertIn("foo", specs["DocStage"]["arguments"])
         self.assertEqual(specs["DocStage"]["allowed_events"][0]["type"], "progress")
         self.assertEqual(specs["DocStage"]["allowed_inputs"][0]["type"], "user_input")
+        self.assertEqual(specs["DocStage"]["category"], "demo")
 
     def test_generate_yaml_contains_description(self):
         doc_yaml = generate_stages_yaml({"DocStage": DocStage})
