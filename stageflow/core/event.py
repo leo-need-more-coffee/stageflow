@@ -8,13 +8,14 @@ class InputSpec:
     description: str | None = None
     required: bool = True
     default: str | int | float | bool | None = None
+    payload_schema: object | None = None
 
 
 @dataclass
 class EventSpec:
     type: str
     description: str | None = None
-    payload: dict | None = None
+    payload_schema: object | None = None
 
 
 class Event:
