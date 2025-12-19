@@ -1,6 +1,6 @@
 import asyncio
 from dataclasses import dataclass
-from typing import Any, Sequence
+from typing import Sequence
 
 from stageflow.core.context import Context
 from stageflow.core.pipeline import Pipeline

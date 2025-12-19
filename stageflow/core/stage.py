@@ -1,11 +1,14 @@
 import copy
-from typing import Any
+from typing import Any, TYPE_CHECKING
 import yaml
 from stageflow.core import EventSpec, InputSpec
 from .utils import validate_schema
 
 
 STAGE_REGISTRY: dict[str, type["BaseStage"]] = {}
+
+if TYPE_CHECKING:
+    from .session import Session
 
 
 def register_stage(name: str):

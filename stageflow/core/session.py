@@ -412,7 +412,7 @@ class Session:
             for idx, item in enumerate(items):
                 try:
                     await run_item(idx, item)
-                except Exception as e:
+                except Exception:
                     if node.cancel_on_error:
                         raise
         next_node = self.pipeline.get_node(node.next) if node.next else None

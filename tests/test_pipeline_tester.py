@@ -1,4 +1,3 @@
-import asyncio
 import unittest
 
 from stageflow.testing import PipelineTestSpec, run_pipeline_test
