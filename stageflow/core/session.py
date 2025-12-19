@@ -1,4 +1,5 @@
 import asyncio
+import copy
 from typing import Callable, Any
 
 from .context import Context
@@ -48,6 +49,7 @@ class Session:
 
         self.input_history: list[dict[str, Any]] = []
         self._waiting: dict[str, list[asyncio.Future]] = {}
+        self._pending_inputs: dict[str, list[dict[str, Any]]] = {}
 
         self._stopped = False
         self._paused = False
@@ -81,10 +83,17 @@ class Session:
             for fut in list(self._waiting[type_]):
                 if not fut.done():
                     fut.set_result(entry)
+        else:
+            self._pending_inputs.setdefault(type_, []).append(entry)
         return entry
 
     async def wait_input(self, type_: str, timeout: float | None = None):
-        fut = asyncio.get_event_loop().create_future()
+        # Deliver buffered input if it arrived before waiter.
+        pending = self._pending_inputs.get(type_)
+        if pending:
+            return pending.pop(0)
+        loop = asyncio.get_running_loop()
+        fut = loop.create_future()
         self._waiting.setdefault(type_, []).append(fut)
         self.emit(Event(type="waiting_for_input", session_id=self.id, payload={"type": type_}))
         try:
@@ -265,7 +274,9 @@ class Session:
                 errors.append(str(e))
                 continue
             return self.pipeline.get_node(node.next) if node.next else None
-        return self.pipeline.get_node(node.fallback) if node.fallback else None
+        if node.fallback:
+            return self.pipeline.get_node(node.fallback)
+        raise RuntimeError(f"Stage {node.id} failed after retries: {errors}")
 
     async def _handle_condition(self, node: ConditionNode):
         next_node = None
@@ -379,13 +390,15 @@ class Session:
                 for parent_path, child_path in node.output_map.items():
                     self.context.set(parent_path, self.context.get(child_path))
             finally:
-                if original_value is None:
-                    # best effort cleanup
-                    pass
-                else:
+                if original_value is not None:
                     self.context.set(node.item_path, original_value)
-                if node.index_path and original_index is not None:
-                    self.context.set(node.index_path, original_index)
+                else:
+                    self.context.set(node.item_path, None)
+                if node.index_path:
+                    if original_index is not None:
+                        self.context.set(node.index_path, original_index)
+                    else:
+                        self.context.set(node.index_path, None)
 
         tasks = []
         if node.mode == "parallel":
@@ -413,7 +426,7 @@ class Session:
         subpipeline = Pipeline.from_dict(subpipeline_data)
         child_ctx = Context(payload={})
         for child_path, parent_path in node.inputs.items():
-            child_ctx.set(child_path, self.context.get(parent_path))
+            child_ctx.set(child_path, copy.deepcopy(self.context.get(parent_path)))
 
         def proxy_event(event: Event):
             event.payload = {"subpipeline_node": node.id, **(event.payload or {})}
