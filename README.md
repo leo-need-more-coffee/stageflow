@@ -13,8 +13,8 @@
   выставляется строка (`"failed"`, `"timeout"`), что ломает контракт.
 - Риск циклического импорта: `stageflow/core/stage.py` импортирует
   `from stageflow.core import EventSpec, InputSpec` вместо локального импорта.
-- `StageNode` содержит классовые изменяемые dict (`config/inputs/outputs`), а
-  `inputs` вообще не используется; это вводит в заблуждение и может дать
+- `StageNode` содержит классовые изменяемые dict (`config/arguments/outputs`),
+  что может дать shared-state ошибки; нужно избегать классовых mutables.
   shared-state ошибки.
 - `BaseStage.allowed_events` / `allowed_inputs` — изменяемые списки на уровне
   класса, которые легко случайно разделить между наследниками.
@@ -34,14 +34,14 @@
 
 ## P0 (ядро, корректность)
 
-- Добавить модель обработки ошибок на уровне пайплайна (fallback/on_error) как
-  часть графа, а не только retries внутри стадии.
+- ~~Добавить модель обработки ошибок на уровне пайплайна (fallback/on_error) как
+  часть графа, а не только retries внутри стадии~~.
 - Порефакторить `parallel`: запускать полноценные ветки (подграфы), определить
   семантику отмены остальных веток и сбор результатов.
-- Порефакторить `Context`: изоляция/слияние при параллельных ветках, понятные
-  правила конфликтов и копирования.
-- Переделать `wait_input`: поддержка нескольких ожиданий на один тип и
-  рассылка входа всем ожидающим стадиям.
+- ~~Порефакторить `Context`: изоляция/слияние при параллельных ветках, понятные
+  правила конфликтов и копирования.~~
+- ~~Переделать `wait_input`: поддержка нескольких ожиданий на один тип и
+  рассылка входа всем ожидающим стадиям.~~
 - Сделать удобный тестер пайплайнов: описывать кейсы входов и прогонять их по
   пайплайну (ограничение на шаги/события, проверка ожидаемого результата).
 
@@ -53,7 +53,7 @@
   history; в `strict` — останавливать/кидать ошибку. Проверять прежде всего
   входы, которые пришли в активные ожидания (`wait_input`).
 - Обновить `JsonLogic` после рефакторинга `Context`, чтобы условия могли
-  работать с `inputs/docs` и новой моделью данных.
+  работать с новой моделью данных (`payload`).
 - Валидация пайплайна по JSON Schema с версионированием (`api_version`), чтобы
   проверять формат и безопасно эволюционировать схему.
 - Добавить JSON-сериализацию состояния сессии (snapshot) для сохранения и
@@ -81,7 +81,7 @@
 - ConditionNode: нода, которая выбирает следующую ветку по условию.
 - ParallelNode: нода, которая запускает несколько веток параллельно.
 - TerminalNode: нода завершения, возвращает результат и артефакты.
-- Контекст (Context): общие данные пайплайна (inputs/vars/docs/functions/scratch).
+- Контекст (Context): общие данные пайплайна (`payload`).
 - Сессия (Session): запуск пайплайна с конкретным контекстом и историей событий.
 - Событие (Event): структурированная запись о действии в сессии.
 - Вход (Input): внешнее событие/данные, которые приходят в Session.
@@ -106,12 +106,12 @@ stage → condition → parallel → terminal, с аргументами, вых
       "stage": "InitStage",
       "config": { "mode": "demo" },
       "arguments": {
-        "user_id": "inputs.user_id",
-        "text": "inputs.text"
+        "user_id": "user_id",
+        "text": "text"
       },
       "outputs": {
-        "score": "vars.score",
-        "need_parallel": "vars.need_parallel"
+        "score": "score",
+        "need_parallel": "need_parallel"
       },
       "next": "decide"
     },
@@ -120,7 +120,7 @@ stage → condition → parallel → terminal, с аргументами, вых
       "type": "condition",
       "conditions": [
         {
-          "if": { "==": [ { "var": "vars.need_parallel" }, true ] },
+          "if": { "==": [ { "var": "need_parallel" }, true ] },
           "then": "fanout"
         }
       ],
@@ -137,21 +137,21 @@ stage → condition → parallel → terminal, с аргументами, вых
       "id": "branch_a",
       "type": "stage",
       "stage": "WorkerAStage",
-      "arguments": { "score": "vars.score" },
-      "outputs": { "a_result": "vars.a_result" }
+      "arguments": { "score": "score" },
+      "outputs": { "a_result": "a_result" }
     },
     {
       "id": "branch_b",
       "type": "stage",
       "stage": "WorkerBStage",
-      "arguments": { "score": "vars.score" },
-      "outputs": { "b_result": "vars.b_result" }
+      "arguments": { "score": "score" },
+      "outputs": { "b_result": "b_result" }
     },
     {
       "id": "finish",
       "type": "terminal",
       "result": { "status": "ok" },
-      "artifacts": ["vars.score", "vars.a_result", "vars.b_result"]
+      "artifacts": ["score", "a_result", "b_result"]
     }
   ]
 }

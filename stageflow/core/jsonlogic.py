@@ -6,7 +6,7 @@ class JsonLogic:
         self.condition = condition
 
     def evaluate(self, context: Context) -> bool:
-        return self._eval(self.condition, {"vars": context.vars})
+        return self._eval(self.condition, {"payload": context.payload})
 
     def _eval(self, expr, data):
         if isinstance(expr, dict):

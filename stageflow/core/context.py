@@ -1,4 +1,3 @@
-from collections import defaultdict
 from typing import Any
 
 
@@ -24,34 +23,19 @@ class DotDict(dict):
 
 
 class Context:
-    def __init__(self, inputs: dict[str, Any] | None = None):
-        self.inputs: DotDict = DotDict(inputs or {})
-        self.vars: DotDict = DotDict()
-        self.docs: dict[str, list[dict[str, Any]]] = defaultdict(list)
-        self.functions: DotDict = DotDict()
-        self.scratch: DotDict = DotDict()
+    def __init__(self, payload: dict[str, Any] | None = None):
+        self.payload: DotDict = DotDict(payload or {})
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            "inputs": dict(self.inputs),
-            "vars": dict(self.vars),
-            "docs": dict(self.docs),
-            "functions": dict(self.functions),
-            "scratch": dict(self.scratch)
-        }
+        return dict(self._deep_copy(self.payload))
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Context":
-        ctx = cls(inputs=data.get("inputs", {}))
-        ctx.vars = DotDict(data.get("vars", {}))
-        ctx.docs = defaultdict(list, data.get("docs", {}))
-        ctx.functions = DotDict(data.get("functions", {}))
-        ctx.scratch = DotDict(data.get("scratch", {}))
-        return ctx
+        return cls(payload=data)
 
     def get(self, path: str, default=None):
         parts = path.split(".")
-        cur: Any = self.to_dict()
+        cur: Any = self.payload
         for p in parts:
             if isinstance(cur, dict):
                 cur = cur.get(p, default)
@@ -67,23 +51,7 @@ class Context:
 
     def set(self, path: str, value: Any):
         parts = path.split(".")
-        root = parts[0]
-
-        if root == "inputs":
-            target = self.inputs
-        elif root == "vars":
-            target = self.vars
-        elif root == "docs":
-            target = self.docs
-        elif root == "functions":
-            target = self.functions
-        elif root == "scratch":
-            target = self.scratch
-        else:
-            raise ValueError(f"Unknown context root: {root}")
-
-        parts = parts[1:]
-        cur = target
+        cur = self.payload
         for p in parts[:-1]:
             if isinstance(cur, dict):
                 cur = cur.setdefault(p, DotDict())
@@ -105,3 +73,10 @@ class Context:
             cur[idx] = value
         else:
             raise ValueError(f"Can't set into {type(cur)}")
+
+    def _deep_copy(self, obj: Any) -> Any:
+        if isinstance(obj, dict):
+            return {k: self._deep_copy(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [self._deep_copy(v) for v in obj]
+        return obj

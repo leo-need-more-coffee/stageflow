@@ -47,7 +47,7 @@ class Session:
         self.event_history: list[Event] = []
 
         self.input_history: list[dict[str, Any]] = []
-        self._waiting: dict[str, asyncio.Future] = {}
+        self._waiting: dict[str, list[asyncio.Future]] = {}
 
         self._stopped = False
         self._paused = False
@@ -76,13 +76,15 @@ class Session:
                 self._paused = False
                 self.emit(Event(type="session_resumed", session_id=self.id))
 
-        if type_ in self._waiting and not self._waiting[type_].done():
-            self._waiting[type_].set_result(entry)
+        if type_ in self._waiting:
+            for fut in list(self._waiting[type_]):
+                if not fut.done():
+                    fut.set_result(entry)
         return entry
 
     async def wait_input(self, type_: str, timeout: float | None = None):
         fut = asyncio.get_event_loop().create_future()
-        self._waiting[type_] = fut
+        self._waiting.setdefault(type_, []).append(fut)
         self.emit(Event(type="waiting_for_input", session_id=self.id, payload={"type": type_}))
         try:
             return await asyncio.wait_for(fut, timeout=timeout)
@@ -90,7 +92,11 @@ class Session:
             self.emit(Event(type="input_timeout", session_id=self.id, payload={"type": type_}))
             return None
         finally:
-            del self._waiting[type_]
+            waiters = self._waiting.get(type_)
+            if waiters and fut in waiters:
+                waiters.remove(fut)
+                if not waiters:
+                    del self._waiting[type_]
 
     def last_input(self, type_: str | None = None):
         if not self.input_history:
