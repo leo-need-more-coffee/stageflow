@@ -4,9 +4,19 @@ from stageflow.core.stage import BaseStage, register_stage
 @register_stage("SetValueStage")
 class SetValueStage(BaseStage):
     """
-    description: "Set a value at the given path"
+    description: "Set value from arguments or config to the target path"
+    arguments:
+      value:
+        type: any
+        description: "Value to set (overrides config)"
     config:
-      value: any
+      value:
+        type: any
+        description: "Fallback value when argument is missing"
+    outputs:
+      value:
+        type: any
+        description: "Value that was written"
     """
     category = "builtin.vars"
 
@@ -21,9 +31,19 @@ class SetValueStage(BaseStage):
 @register_stage("CopyValueStage")
 class CopyValueStage(BaseStage):
     """
-    description: "Copy value from src to dst path"
+    description: "Copy value from arguments (or default) to output path"
+    arguments:
+      value:
+        type: any
+        description: "Value to copy"
     config:
-      default: any
+      default:
+        type: any
+        description: "Default value when argument is missing"
+    outputs:
+      value:
+        type: any
+        description: "Copied value"
     """
     category = "builtin.vars"
 
@@ -38,9 +58,22 @@ class CopyValueStage(BaseStage):
 @register_stage("IncrementStage")
 class IncrementStage(BaseStage):
     """
-    description: "Increment numeric value at path by delta"
+    description: "Increment numeric value by delta (from args or config)"
+    arguments:
+      current:
+        type: number
+        description: "Current numeric value"
+      delta:
+        type: number
+        description: "Delta overriding config"
     config:
-      delta: number
+      delta:
+        type: number
+        description: "Default delta (1 if missing)"
+    outputs:
+      value:
+        type: number
+        description: "Result after increment"
     """
     category = "builtin.vars"
 
@@ -56,9 +89,22 @@ class IncrementStage(BaseStage):
 @register_stage("MergeDictStage")
 class MergeDictStage(BaseStage):
     """
-    description: "Shallow merge dict from src into dst path"
+    description: "Shallow merge src dict into dst (config default if missing)"
+    arguments:
+      src:
+        type: object
+        description: "Dict with overrides"
+      dst:
+        type: object
+        description: "Base dict to merge into"
     config:
-      default_dst: object
+      default_dst:
+        type: object
+        description: "Fallback base dict if dst is missing"
+    outputs:
+      merged:
+        type: object
+        description: "Merged dict result"
     """
     category = "builtin.vars"
 
