@@ -2,6 +2,7 @@ import copy
 from typing import Any
 import yaml
 from stageflow.core import EventSpec, InputSpec
+from .utils import validate_schema
 
 
 STAGE_REGISTRY: dict[str, type["BaseStage"]] = {}
@@ -59,6 +60,13 @@ class BaseStage:
 
     def emit(self, event_type: str, payload: dict | None = None):
         from .event import Event
+        if self.allowed_events:
+            allowed = {spec.type for spec in self.allowed_events if spec.type}
+            if allowed and event_type not in allowed:
+                raise ValueError(f"Event type '{event_type}' is not allowed for stage '{self.stage_name}'")
+            matching = next((spec for spec in self.allowed_events if spec.type == event_type), None)
+            if matching and matching.payload_schema is not None:
+                validate_schema(payload or {}, matching.payload_schema, "Event payload")
         self.session.emit(Event(
             type=event_type,
             session_id=self.session.id,
@@ -67,7 +75,19 @@ class BaseStage:
         ))
 
     async def wait_input(self, type_: str, timeout: float | None = None):
-        return await self.session.wait_input(type_, timeout=timeout)
+        if self.allowed_inputs:
+            allowed = {spec.type for spec in self.allowed_inputs if spec.type}
+            if allowed and type_ not in allowed:
+                raise ValueError(f"Input type '{type_}' is not allowed for stage '{self.stage_name}'")
+            matching = next((spec for spec in self.allowed_inputs if spec.type == type_), None)
+        else:
+            matching = None
+        result = await self.session.wait_input(type_, timeout=timeout)
+        if result is None:
+            return None
+        if matching and matching.payload_schema is not None:
+            validate_schema(result.get("payload", {}), matching.payload_schema, "Input payload")
+        return result
 
     @classmethod
     def get_specs(cls) -> dict[str, Any]:
