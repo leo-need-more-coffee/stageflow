@@ -97,7 +97,7 @@ class BaseStage:
             "skipable": cls.skipable,
             "allowed_events": [e.__dict__ for e in cls.allowed_events],
             "allowed_inputs": [i.__dict__ for i in cls.allowed_inputs],
-            "description": parsed_description.get("description", ""),
+            "description": parsed_description.get("description", "") if isinstance(parsed_description, dict) else "",
             "arguments": parsed_description.get("arguments", {}),
             "config": parsed_description.get("config", {}),
             "outputs": parsed_description.get("outputs", {}),

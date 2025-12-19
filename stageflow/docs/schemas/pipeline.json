@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StageFlow Pipeline",
+  "type": "object",
+  "required": ["entry", "nodes"],
+  "properties": {
+    "api_version": { "type": ["string", "null"] },
+    "entry": { "type": "string" },
+    "metadata": { "type": "object" },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" },
+      "minItems": 1
+    },
+    "subpipelines": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/pipeline" },
+      "default": {}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "pipeline": { "$ref": "#" },
+    "node": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "metadata": { "type": "object" }
+      },
+      "discriminator": {
+        "propertyName": "type",
+        "mapping": {
+          "stage": { "$ref": "#/$defs/stage_node" },
+          "condition": { "$ref": "#/$defs/condition_node" },
+          "parallel": { "$ref": "#/$defs/parallel_node" },
+          "terminal": { "$ref": "#/$defs/terminal_node" },
+          "subpipeline": { "$ref": "#/$defs/subpipeline_node" }
+        }
+      }
+    },
+    "stage_node": {
+      "type": "object",
+      "required": ["id", "type", "stage"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "stage" },
+        "stage": { "type": "string" },
+        "config": { "type": "object" },
+        "arguments": { "type": "object" },
+        "outputs": { "type": "object" },
+        "next": { "type": ["string", "null"] },
+        "fallback": { "type": ["string", "null"] },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "condition": {
+      "type": "object",
+      "required": ["if", "then"],
+      "properties": {
+        "if": { "type": "object" },
+        "then": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "condition_node": {
+      "type": "object",
+      "required": ["id", "type", "conditions"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "condition" },
+        "conditions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/condition" },
+          "minItems": 1
+        },
+        "else": { "type": ["string", "null"] },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "parallel_node": {
+      "type": "object",
+      "required": ["id", "type", "children"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "parallel" },
+        "children": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "policy": { "type": "string", "enum": ["all", "any"], "default": "all" },
+        "cancel_on_error": { "type": "boolean", "default": true },
+        "next": { "type": ["string", "null"] },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "terminal_node": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "terminal" },
+        "artifacts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "result": { "type": ["object", "null"] },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "subpipeline_node": {
+      "type": "object",
+      "required": ["id", "type", "subpipeline_id"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "subpipeline" },
+        "subpipeline_id": { "type": "string" },
+        "inputs": { "type": "object" },
+        "artifact_outputs": { "type": "object" },
+        "result_output": { "type": ["string", "null"] },
+        "next": { "type": ["string", "null"] },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
