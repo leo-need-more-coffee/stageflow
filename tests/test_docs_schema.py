@@ -10,22 +10,20 @@ from stageflow.core.event import EventSpec, InputSpec
 
 @register_stage("DocStage")
 class DocStage(BaseStage):
+    """
+    description: "Demo stage"
+    arguments:
+      foo: string
+    config:
+      bar: int
+    outputs:
+      baz: string
+    """
+
     allowed_events = [EventSpec(type="progress", description="Progress event")]
     allowed_inputs = [InputSpec(type="user_input", description="User input")]
     async def run(self):
         return None
-
-
-# Attach docstring separately to avoid decorator overriding __doc__.
-DocStage.__doc__ = """
-description: "Demo stage"
-arguments:
-  foo: string
-config:
-  bar: int
-outputs:
-  baz: string
-"""
 
 
 class DocsSchemaTests(unittest.TestCase):
