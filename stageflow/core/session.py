@@ -335,17 +335,14 @@ class Session:
         ))
         return next_node
 
-    async def _run_branch_graph(self, start_id: str) -> dict:
+    async def _run_branch_graph(self, start_id: str) -> None:
         node = self.pipeline.get_node(start_id)
         while node:
             if isinstance(node, TerminalNode):
-                artifacts = {a: self.context.get(a, None) for a in node.artifact_paths}
-                return {"artifacts": artifacts, "result": node.result}
+                return
             handler = self._get_handler(node)
             if handler is self._handle_terminal:
-                # Avoid side effects of main terminal handler.
-                artifacts = {a: self.context.get(a, None) for a in node.artifact_paths}
-                return {"artifacts": artifacts, "result": node.result}
+                return
             next_node = await handler(node)
             node = next_node
 
