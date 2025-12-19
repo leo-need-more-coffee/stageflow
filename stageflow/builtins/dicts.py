@@ -4,9 +4,19 @@ from stageflow.core.stage import BaseStage, register_stage
 @register_stage("PickKeysStage")
 class PickKeysStage(BaseStage):
     """
-    description: "Pick subset of keys from a dict into output"
+    description: "Pick only specified keys from a dict and return new object"
+    arguments:
+      src:
+        type: object
+        description: "Source dict"
     config:
-      keys: list
+      keys:
+        type: list
+        description: "Keys to keep in the result"
+    outputs:
+      result:
+        type: object
+        description: "Dict containing only picked keys"
     """
     category = "builtin.dicts"
 
@@ -23,9 +33,19 @@ class PickKeysStage(BaseStage):
 @register_stage("DropKeysStage")
 class DropKeysStage(BaseStage):
     """
-    description: "Drop keys from dict and write result"
+    description: "Remove specified keys from dict and return cleaned object"
+    arguments:
+      src:
+        type: object
+        description: "Source dict"
     config:
-      keys: list
+      keys:
+        type: list
+        description: "Keys to remove from the dict"
+    outputs:
+      result:
+        type: object
+        description: "Dict without removed keys"
     """
     category = "builtin.dicts"
 

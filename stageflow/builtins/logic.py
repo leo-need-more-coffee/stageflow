@@ -6,10 +6,15 @@ from stageflow.core.jsonlogic import JsonLogic
 @register_stage("AssertStage")
 class AssertStage(BaseStage):
     """
-    description: "Assert JsonLogic condition holds, else raise"
+    description: "Validate JsonLogic condition against context, raise on failure"
     config:
-      condition: object
-      message: string
+      condition:
+        type: object
+        description: "JsonLogic condition to check"
+      message:
+        type: string
+        description: "Error message when condition fails"
+    outputs: {}
     """
     category = "builtin.logic"
 
@@ -25,9 +30,12 @@ class AssertStage(BaseStage):
 @register_stage("FailStage")
 class FailStage(BaseStage):
     """
-    description: "Always raise an error with message"
+    description: "Always raise a runtime error with provided message"
     config:
-      message: string
+      message:
+        type: string
+        description: "Message for raised error"
+    outputs: {}
     """
     category = "builtin.logic"
 
@@ -39,10 +47,15 @@ class FailStage(BaseStage):
 @register_stage("LogStage")
 class LogStage(BaseStage):
     """
-    description: "Emit event with payload from config or arguments"
+    description: "Emit log event with message and payload resolved from context paths"
     config:
-      message: string
-      paths: object
+      message:
+        type: string
+        description: "Log message"
+      paths:
+        type: object
+        description: "Mapping of payload fields to context paths"
+    outputs: {}
     """
     category = "builtin.logic"
 
@@ -57,9 +70,12 @@ class LogStage(BaseStage):
 @register_stage("SleepStage")
 class SleepStage(BaseStage):
     """
-    description: "Async sleep for given seconds"
+    description: "Async sleep for configured number of seconds"
     config:
-      seconds: number
+      seconds:
+        type: number
+        description: "Duration to sleep in seconds"
+    outputs: {}
     """
     category = "builtin.logic"
 

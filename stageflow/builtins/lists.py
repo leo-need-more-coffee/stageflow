@@ -4,9 +4,22 @@ from stageflow.core.stage import BaseStage, register_stage
 @register_stage("AppendListStage")
 class AppendListStage(BaseStage):
     """
-    description: "Append value to a list (creates list if missing)"
+    description: "Append value from args/config to list (creates list if missing)"
+    arguments:
+      list:
+        type: list
+        description: "List to append to (from context)"
+      value:
+        type: any
+        description: "Value to append (overrides config)"
     config:
-      value: any
+      value:
+        type: any
+        description: "Fallback value when argument is missing"
+    outputs:
+      list:
+        type: list
+        description: "Resulting list after append"
     """
     category = "builtin.lists"
 
@@ -25,9 +38,22 @@ class AppendListStage(BaseStage):
 @register_stage("ExtendListStage")
 class ExtendListStage(BaseStage):
     """
-    description: "Extend list with iterable from items"
+    description: "Extend list with items from arguments (or default list)"
+    arguments:
+      list:
+        type: list
+        description: "Base list to extend"
+      items:
+        type: list
+        description: "Items to extend the list with"
     config:
-      default_list: list
+      default_list:
+        type: list
+        description: "Fallback list when argument is missing"
+    outputs:
+      list:
+        type: list
+        description: "Resulting list after extend"
     """
     category = "builtin.lists"
 

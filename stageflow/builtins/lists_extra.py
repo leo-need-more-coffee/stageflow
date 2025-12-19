@@ -6,10 +6,22 @@ from stageflow.core.context import Context
 @register_stage("FilterListStage")
 class FilterListStage(BaseStage):
     """
-    description: "Filter list by JsonLogic condition"
+    description: "Filter list items by JsonLogic condition using item_path binding"
+    arguments:
+      items:
+        type: list
+        description: "List to filter"
     config:
-      condition: object
-      item_path: string
+      condition:
+        type: object
+        description: "JsonLogic condition evaluated for each item"
+      item_path:
+        type: string
+        description: "Context key to bind current item during evaluation"
+    outputs:
+      list:
+        type: list
+        description: "Filtered list"
     """
     category = "builtin.lists"
 
@@ -35,8 +47,15 @@ class FilterListStage(BaseStage):
 @register_stage("UniqueListStage")
 class UniqueListStage(BaseStage):
     """
-    description: "Deduplicate list while preserving order"
-    config: {}
+    description: "Deduplicate list while preserving original order"
+    arguments:
+      items:
+        type: list
+        description: "List to deduplicate"
+    outputs:
+      list:
+        type: list
+        description: "List with unique items"
     """
     category = "builtin.lists"
 
@@ -57,9 +76,25 @@ class UniqueListStage(BaseStage):
 @register_stage("PopListStage")
 class PopListStage(BaseStage):
     """
-    description: "Pop from list (default last)"
+    description: "Pop element from list (default last) and return list+popped value"
+    arguments:
+      items:
+        type: list
+        description: "List to pop from"
+      index:
+        type: int
+        description: "Index to pop (overrides config)"
     config:
-      index: int
+      index:
+        type: int
+        description: "Default index to pop, -1 means last element"
+    outputs:
+      list:
+        type: list
+        description: "List after pop"
+      popped:
+        type: any
+        description: "Popped value"
     """
     category = "builtin.lists"
 

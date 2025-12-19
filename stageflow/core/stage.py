@@ -39,6 +39,41 @@ def get_stages_by_category() -> dict[str, list[type["BaseStage"]]]:
     return categories
 
 
+def _normalize_field_entry(name: str | None, spec: Any) -> dict[str, Any]:
+    if isinstance(spec, dict):
+        entry = {"name": name, **spec} if name else dict(spec)
+    else:
+        entry = {"name": name, "type": spec}
+    entry.setdefault("type", "any")
+    entry.setdefault("optional", False)
+    entry.setdefault("description", "")
+    return entry
+
+
+def _normalize_fields(raw: Any) -> list[dict[str, Any]]:
+    if not raw:
+        return []
+    normalized: list[dict[str, Any]] = []
+    if isinstance(raw, dict):
+        for name, spec in raw.items():
+            normalized.append(_normalize_field_entry(name, spec))
+        return normalized
+
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, dict):
+                if "name" in item:
+                    normalized.append(_normalize_field_entry(item.get("name"), {k: v for k, v in item.items() if k != "name"}))
+                elif len(item) == 1:
+                    name, spec = next(iter(item.items()))
+                    normalized.append(_normalize_field_entry(name, spec))
+            else:
+                normalized.append(_normalize_field_entry(str(item), {"type": "any"}))
+        return normalized
+
+    return normalized
+
+
 class BaseStage:
     skipable: bool = False
     stage_name: str = "BaseStage"
@@ -111,7 +146,7 @@ class BaseStage:
             "allowed_inputs": [i.__dict__ for i in cls.allowed_inputs],
             "category": cls.category,
             "description": parsed_description.get("description", "") if isinstance(parsed_description, dict) else "",
-            "arguments": parsed_description.get("arguments", {}),
-            "config": parsed_description.get("config", {}),
-            "outputs": parsed_description.get("outputs", {}),
+            "arguments": _normalize_fields(parsed_description.get("arguments", [])) if isinstance(parsed_description, dict) else [],
+            "config": _normalize_fields(parsed_description.get("config", [])) if isinstance(parsed_description, dict) else [],
+            "outputs": _normalize_fields(parsed_description.get("outputs", [])) if isinstance(parsed_description, dict) else [],
         }
