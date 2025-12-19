@@ -280,16 +280,18 @@ class Session:
         tasks = []
         for branch_id in node.children:
             branch_node = self.pipeline.get_node(branch_id)
-            if not isinstance(branch_node, StageNode):
-                raise ValueError(f"Parallel branch node must be a StageNode, got {type(branch_node)}")
+            if isinstance(branch_node, StageNode):
+                stage_class = branch_node.get_stage_class()
+                if stage_class is None:
+                    raise ValueError(f"Stage class for node {branch_node.id} not found")
 
-            stage_class = branch_node.get_stage_class()
-            if stage_class is None:
-                raise ValueError(f"Stage class for node {branch_node.id} not found")
-
-            stage_instance = stage_class(stage_id=branch_node.id, config=branch_node.config,
-                                         arguments=branch_node.arguments, outputs=branch_node.outputs, session=self)
-            tasks.append(stage_instance.run())
+                stage_instance = stage_class(stage_id=branch_node.id, config=branch_node.config,
+                                             arguments=branch_node.arguments, outputs=branch_node.outputs, session=self)
+                tasks.append(stage_instance.run())
+            elif isinstance(branch_node, SubPipelineNode):
+                tasks.append(self._run_subpipeline(branch_node))
+            else:
+                raise ValueError(f"Parallel branch node must be a StageNode or SubPipelineNode, got {type(branch_node)}")
 
         if node.policy == "all":
             await asyncio.gather(*tasks)
@@ -302,6 +304,46 @@ class Session:
             session_id=self.id,
             stage_id=node.id,
             payload={"next_node": next_node.id if next_node else None},
+        ))
+        return next_node
+
+    async def _run_subpipeline(self, node: SubPipelineNode):
+        if node.subpipeline_id not in self.pipeline.subpipelines:
+            raise ValueError(f"Subpipeline '{node.subpipeline_id}' not found")
+        subpipeline_data = dict(self.pipeline.subpipelines[node.subpipeline_id])
+        subpipeline_data["subpipelines"] = self.pipeline.subpipelines
+        subpipeline = Pipeline.from_dict(subpipeline_data)
+        child_ctx = Context(payload={})
+        for child_path, parent_path in node.inputs.items():
+            child_ctx.set(child_path, self.context.get(parent_path))
+
+        def proxy_event(event: Event):
+            event.payload = {"subpipeline_node": node.id, **(event.payload or {})}
+            self.emit(event)
+
+        child_session = Session(
+            id=f"{self.id}:{node.id}",
+            pipeline=subpipeline,
+            context=child_ctx,
+            event_handler=proxy_event,
+        )
+        result = await child_session.run()
+        for parent_path, child_art in node.artifact_outputs.items():
+            if child_art not in result.artifacts:
+                raise ValueError(f"Artifact '{child_art}' not found in subpipeline '{node.subpipeline_id}'")
+            self.context.set(parent_path, result.artifacts[child_art])
+        if node.result_output:
+            self.context.set(node.result_output, result.result)
+        return result
+
+    async def _handle_subpipeline(self, node: SubPipelineNode):
+        await self._run_subpipeline(node)
+        next_node = self.pipeline.get_node(node.next) if node.next else None
+        self.emit(Event(
+            type="subpipeline_completed",
+            session_id=self.id,
+            stage_id=node.id,
+            payload={"next_node": next_node.id if next_node else None, "subpipeline_id": node.subpipeline_id},
         ))
         return next_node
 

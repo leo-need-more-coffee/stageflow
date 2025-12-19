@@ -62,6 +62,9 @@ class Pipeline:
                     for child in node.children:
                         if child not in self._nodes_map:
                             raise ValueError(f"Parallel branch '{child}' not found in pipeline")
+                        child_node = self._nodes_map[child]
+                        if not isinstance(child_node, (StageNode, SubPipelineNode)):
+                            raise ValueError(f"Parallel branch '{child}' must be StageNode or SubPipelineNode")
                 case TerminalNode():
                     pass
                 case SubPipelineNode():

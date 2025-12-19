@@ -157,6 +157,33 @@ class SubpipelineTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             await session.run()
 
+    async def test_subpipeline_in_parallel(self):
+        subpipelines = {
+            "inner_flow": {
+                "entry": "inner",
+                "nodes": [
+                    {"id": "inner", "type": "stage", "stage": "InnerStage",
+                     "arguments": {"a": "a", "b": "b"},
+                     "outputs": {"sum": "sum"},
+                     "next": "end"},
+                    {"id": "end", "type": "terminal", "result": {"status": "ok"}, "artifacts": ["sum"]},
+                ],
+            }
+        }
+        pipeline_data = {
+            "entry": "par",
+            "nodes": [
+                {"id": "par", "type": "parallel", "children": ["child"], "policy": "all", "next": "finish"},
+                {"id": "child", "type": "subpipeline", "subpipeline_id": "inner_flow",
+                 "inputs": {"a": "a", "b": "b"}, "artifact_outputs": {"sum_out": "sum"}, "next": "finish"},
+                {"id": "finish", "type": "terminal", "result": {"status": "ok"}, "artifacts": ["sum_out"]},
+            ],
+            "subpipelines": subpipelines,
+        }
+        ctx = Context(payload={"a": 2, "b": 3})
+        result = await Session(id="outer", pipeline=Pipeline.from_dict(pipeline_data), context=ctx).run()
+        self.assertEqual(result.artifacts["sum_out"], 5)
+
 
 if __name__ == "__main__":
     unittest.main()
