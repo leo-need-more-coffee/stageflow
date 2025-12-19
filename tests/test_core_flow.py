@@ -17,12 +17,6 @@ class EchoStage(BaseStage):
         self.set_outputs({"echo": args.get("value", None)})
 
 
-@register_stage("FailStage")
-class FailStage(BaseStage):
-    async def run(self):
-        raise RuntimeError("fail")
-
-
 class SessionFlowTests(unittest.IsolatedAsyncioTestCase):
     async def test_stage_success_and_outputs(self):
         nodes = [
