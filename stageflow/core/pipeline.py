@@ -1,4 +1,4 @@
-from .node import Node, StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode
+from .node import Node, StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode, MapNode
 from .jsonlogic import JsonLogic
 from stageflow.docs.schema import load_pipeline_schema
 
@@ -93,6 +93,9 @@ class Pipeline:
                     # Basic cycle check: prevent direct self-reference
                     if node.subpipeline_id == self.entry:
                         raise ValueError(f"Subpipeline '{node.subpipeline_id}' cannot reference root entry")
+                case MapNode():
+                    # body may refer to node or subpipeline; existence checked at runtime
+                    pass
                 case _:
                     raise ValueError(f"Unknown node type: {type(node)}")
 
