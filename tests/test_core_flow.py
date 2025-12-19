@@ -55,7 +55,7 @@ class SessionFlowTests(unittest.IsolatedAsyncioTestCase):
 class JsonLogicContextTests(unittest.TestCase):
     def test_jsonlogic_reads_payload(self):
         ctx = Context(payload={"score": 10, "flag": True})
-        cond = JsonLogic({"and": [{"==": [{"var": "payload.score"}, 10]}, {"var": "payload.flag"}]})
+        cond = JsonLogic({"and": [{"==": [{"var": "score"}, 10]}, {"var": "flag"}]})
         self.assertTrue(cond.evaluate(ctx))
 
     def test_context_get_set_paths(self):

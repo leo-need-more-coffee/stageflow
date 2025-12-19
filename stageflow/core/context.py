@@ -35,6 +35,8 @@ class Context:
 
     def get(self, path: str, default=None):
         parts = path.split(".")
+        if parts and parts[0] == "payload":
+            parts = parts[1:]
         cur: Any = self.payload
         for p in parts:
             if isinstance(cur, dict):
@@ -51,6 +53,8 @@ class Context:
 
     def set(self, path: str, value: Any):
         parts = path.split(".")
+        if parts and parts[0] == "payload":
+            parts = parts[1:]
         cur = self.payload
         for p in parts[:-1]:
             if isinstance(cur, dict):

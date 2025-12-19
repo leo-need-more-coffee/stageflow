@@ -4,7 +4,7 @@ from typing import Callable, Any
 from .context import Context
 from .event import Event
 from .pipeline import Pipeline
-from .node import StageNode, ConditionNode, ParallelNode, TerminalNode
+from .node import StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode
 
 
 class SessionResult:
@@ -228,6 +228,8 @@ class Session:
             return self._handle_condition
         if isinstance(node, ParallelNode):
             return self._handle_parallel
+        if isinstance(node, SubPipelineNode):
+            return self._handle_subpipeline
         raise ValueError(f"Unknown node type: {type(node)}")
 
     async def _handle_terminal(self, node: TerminalNode):
@@ -300,5 +302,46 @@ class Session:
             session_id=self.id,
             stage_id=node.id,
             payload={"next_node": next_node.id if next_node else None},
+        ))
+        return next_node
+
+    async def _handle_subpipeline(self, node: SubPipelineNode):
+        if node.subpipeline_id not in self.pipeline.subpipelines:
+            raise ValueError(f"Subpipeline '{node.subpipeline_id}' not found")
+        subpipeline_data = dict(self.pipeline.subpipelines[node.subpipeline_id])
+        subpipeline_data["subpipelines"] = self.pipeline.subpipelines
+        subpipeline = Pipeline.from_dict(subpipeline_data)
+        # Build child context with isolation.
+        child_ctx = Context(payload={})
+        for child_path, parent_path in node.inputs.items():
+            child_ctx.set(child_path, self.context.get(parent_path))
+
+        # Proxy events with subpipeline info.
+        def proxy_event(event: Event):
+            event.payload = {"subpipeline_node": node.id, **(event.payload or {})}
+            self.emit(event)
+
+        child_session = Session(
+            id=f"{self.id}:{node.id}",
+            pipeline=subpipeline,
+            context=child_ctx,
+            event_handler=proxy_event,
+        )
+        result = await child_session.run()
+
+        # Map artifacts back.
+        for parent_path, child_art in node.artifact_outputs.items():
+            if child_art not in result.artifacts:
+                raise ValueError(f"Artifact '{child_art}' not found in subpipeline '{node.subpipeline_id}'")
+            self.context.set(parent_path, result.artifacts[child_art])
+        if node.result_output:
+            self.context.set(node.result_output, result.result)
+
+        next_node = self.pipeline.get_node(node.next) if node.next else None
+        self.emit(Event(
+            type="subpipeline_completed",
+            session_id=self.id,
+            stage_id=node.id,
+            payload={"next_node": next_node.id if next_node else None, "subpipeline_id": node.subpipeline_id},
         ))
         return next_node
