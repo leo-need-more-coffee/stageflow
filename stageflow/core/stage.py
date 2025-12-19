@@ -28,9 +28,18 @@ def get_stages() -> dict[str, Any]:
     return STAGE_REGISTRY
 
 
+def get_stages_by_category() -> dict[str, list[type["BaseStage"]]]:
+    categories: dict[str, list[type["BaseStage"]]] = {}
+    for stage in STAGE_REGISTRY.values():
+        category = stage.category or "default"
+        categories.setdefault(category, []).append(stage)
+    return categories
+
+
 class BaseStage:
     skipable: bool = False
     stage_name: str = "BaseStage"
+    category: str | None = None
     allowed_events: list[EventSpec] = []
     allowed_inputs: list[InputSpec] = []
     timeout: float | None = 30
@@ -97,6 +106,7 @@ class BaseStage:
             "skipable": cls.skipable,
             "allowed_events": [e.__dict__ for e in cls.allowed_events],
             "allowed_inputs": [i.__dict__ for i in cls.allowed_inputs],
+            "category": cls.category,
             "description": parsed_description.get("description", "") if isinstance(parsed_description, dict) else "",
             "arguments": parsed_description.get("arguments", {}),
             "config": parsed_description.get("config", {}),
