@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 @dataclass
@@ -42,7 +42,7 @@ class Event:
         self.stage_id = stage_id
         self.action_id = action_id
         self.payload = payload or {}
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(UTC)
 
     def to_dict(self) -> dict:
         return {
@@ -54,3 +54,18 @@ class Event:
             "payload": self.payload,
             "timestamp": self.timestamp.isoformat(),
         }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Event":
+        ts_raw = data.get("timestamp")
+        timestamp = datetime.fromisoformat(ts_raw) if ts_raw else datetime.now(UTC)
+        ev = cls(
+            type=data.get("type"),
+            session_id=data.get("session_id"),
+            node_id=data.get("node_id"),
+            stage_id=data.get("stage_id"),
+            action_id=data.get("action_id"),
+            payload=data.get("payload"),
+        )
+        ev.timestamp = timestamp
+        return ev

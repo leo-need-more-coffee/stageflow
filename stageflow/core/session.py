@@ -52,6 +52,7 @@ class Session:
         self._stopped = False
         self._paused = False
         self._skip_requested = False
+        self._current_node_id: str | None = None
 
     def emit(self, event: Event):
         self.event_history.append(event)
@@ -108,11 +109,58 @@ class Session:
                 return entry
         return None
 
+    def snapshot(self) -> dict:
+        return {
+            "session_id": self.id,
+            "current_node_id": self._current_node_id,
+            "result": self.result,
+            "artifact_paths": list(self.artifact_paths),
+            "context": self.context.to_dict(),
+            "event_history": [e.to_dict() for e in self.event_history],
+            "input_history": list(self.input_history),
+            "stopped": self._stopped,
+            "paused": self._paused,
+            "skip_requested": self._skip_requested,
+            "pipeline": self.pipeline.raw_json,
+        }
+
+    @classmethod
+    def from_snapshot(
+        cls,
+        snapshot: dict,
+        pipeline: Pipeline | None = None,
+        event_handler: Callable[[Event], None] | None = None,
+    ) -> "Session":
+        pipe = pipeline
+        if pipe is None:
+            raw = snapshot.get("pipeline")
+            if raw:
+                pipe = Pipeline.from_dict(raw)
+        if pipe is None:
+            raise ValueError("Pipeline is required to restore session")
+        ctx = Context.from_dict(snapshot.get("context", {}))
+        sess = cls(
+            id=snapshot.get("session_id"),
+            pipeline=pipe,
+            context=ctx,
+            event_handler=event_handler,
+        )
+        sess._current_node_id = snapshot.get("current_node_id")
+        sess.result = snapshot.get("result")
+        sess.artifact_paths = snapshot.get("artifact_paths", [])
+        sess.input_history = snapshot.get("input_history", [])
+        sess._stopped = snapshot.get("stopped", False)
+        sess._paused = snapshot.get("paused", False)
+        sess._skip_requested = snapshot.get("skip_requested", False)
+        sess.event_history = [Event.from_dict(e) for e in snapshot.get("event_history", [])]
+        return sess
+
     async def run(self) -> SessionResult:
         self.emit(Event(type="session_started", session_id=self.id))
-        node = self.pipeline.get_entry_node()
+        node = self.pipeline.get_node(self._current_node_id) if self._current_node_id else self.pipeline.get_entry_node()
 
         while node:
+            self._current_node_id = node.id
             while self._paused and not self._stopped:
                 await asyncio.sleep(0.1)
 
@@ -158,6 +206,7 @@ class Session:
 
             node = next_node
 
+        self._current_node_id = None
         self.emit(Event(type="session_completed", session_id=self.id))
         artifacts = {
             a: self.context.get(a, None)
