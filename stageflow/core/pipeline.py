@@ -1,5 +1,13 @@
 from .node import Node, StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode
 from .jsonlogic import JsonLogic
+from stageflow.docs.schema import load_pipeline_schema
+
+try:
+    from jsonschema import validate, ValidationError
+except ImportError:  # pragma: no cover - optional dependency
+    validate = None
+    class ValidationError(Exception):
+        pass
 
 
 class Pipeline:
@@ -27,11 +35,26 @@ class Pipeline:
 
     @staticmethod
     def from_dict(data: dict) -> "Pipeline":
+        # Schema validation before constructing nodes (if jsonschema available).
+        schema = None
+        if validate:
+            try:
+                schema = load_pipeline_schema()
+                validate(instance=data, schema=schema)
+            except ValidationError as e:
+                raise ValueError(f"Pipeline schema validation failed: {e.message}") from e
         entry = data.get("entry")
         nodes_data = data.get("nodes", {})
         nodes = [Node.from_dict(node) for node in nodes_data]
         metadata = data.get("metadata", {})
         subpipelines = data.get("subpipelines", {})
+        # Validate subpipelines recursively.
+        if validate and schema:
+            for sub_id, sub_data in subpipelines.items():
+                try:
+                    validate(instance=sub_data, schema=schema)
+                except ValidationError as e:
+                    raise ValueError(f"Subpipeline '{sub_id}' schema validation failed: {e.message}") from e
         return Pipeline(entry=entry, nodes=nodes, metadata=metadata, raw_json=data, subpipelines=subpipelines)
 
     def get_node(self, node_id: str) -> Node:
