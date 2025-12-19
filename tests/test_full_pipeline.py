@@ -91,7 +91,7 @@ class FullPipelineTests(unittest.IsolatedAsyncioTestCase):
             ConditionNode(
                 id="decide",
                 type="condition",
-                conditions=[Condition(if_condition=JsonLogic({"var": "payload.need_wait"}), then_goto="wait")],
+                conditions=[Condition(if_condition=JsonLogic({"var": "need_wait"}), then_goto="wait")],
                 else_goto="worker",
             ),
             StageNode(
@@ -145,7 +145,7 @@ class FullPipelineTests(unittest.IsolatedAsyncioTestCase):
                 {"id": "maybe_fail", "type": "stage", "stage": "MaybeFailStage", "next": "decide", "fallback": "recover"},
                 {"id": "recover", "type": "stage", "stage": "RecoverStage", "outputs": {"recovered": "recovered"}, "next": "decide"},
                 {"id": "decide", "type": "condition",
-                 "conditions": [{"if": {"var": "payload.need_wait"}, "then": "wait"}],
+                 "conditions": [{"if": {"var": "need_wait"}, "then": "wait"}],
                  "else": "worker"},
                 {"id": "wait", "type": "stage", "stage": "WaitStage", "outputs": {"waited_value": "waited_value"}, "next": "worker"},
                 {"id": "worker", "type": "stage", "stage": "WorkerStage",

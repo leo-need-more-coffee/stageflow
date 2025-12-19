@@ -1,4 +1,5 @@
-from .node import Node, StageNode, ConditionNode, ParallelNode, TerminalNode
+from .node import Node, StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode
+from .jsonlogic import JsonLogic
 
 
 class Pipeline:
@@ -7,6 +8,7 @@ class Pipeline:
     _nodes_map: dict[str, Node]
     metadata: dict
     raw_json: dict
+    subpipelines: dict
 
     def __init__(
         self,
@@ -14,12 +16,14 @@ class Pipeline:
         nodes: list[Node],
         metadata: dict = None,
         raw_json: dict = None,
+        subpipelines: dict | None = None,
     ):
         self.entry = entry
         self.nodes = nodes
         self._nodes_map = {node.id: node for node in nodes}
         self.metadata = metadata or {}
         self.raw_json = raw_json or {}
+        self.subpipelines = subpipelines or {}
 
     @staticmethod
     def from_dict(data: dict) -> "Pipeline":
@@ -27,7 +31,8 @@ class Pipeline:
         nodes_data = data.get("nodes", {})
         nodes = [Node.from_dict(node) for node in nodes_data]
         metadata = data.get("metadata", {})
-        return Pipeline(entry=entry, nodes=nodes, metadata=metadata, raw_json=data)
+        subpipelines = data.get("subpipelines", {})
+        return Pipeline(entry=entry, nodes=nodes, metadata=metadata, raw_json=data, subpipelines=subpipelines)
 
     def get_node(self, node_id: str) -> Node:
         if node_id not in self._nodes_map:
@@ -59,6 +64,12 @@ class Pipeline:
                             raise ValueError(f"Parallel branch '{child}' not found in pipeline")
                 case TerminalNode():
                     pass
+                case SubPipelineNode():
+                    if node.subpipeline_id not in self.subpipelines:
+                        raise ValueError(f"Subpipeline '{node.subpipeline_id}' not found for node {node.id}")
+                    # Basic cycle check: prevent direct self-reference
+                    if node.subpipeline_id == self.entry:
+                        raise ValueError(f"Subpipeline '{node.subpipeline_id}' cannot reference root entry")
                 case _:
                     raise ValueError(f"Unknown node type: {type(node)}")
 

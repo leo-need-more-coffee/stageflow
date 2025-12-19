@@ -27,6 +27,8 @@ class Node:
                 return TerminalNode.from_dict(data)
             case "stage":
                 return StageNode.from_dict(data)
+            case "subpipeline":
+                return SubPipelineNode.from_dict(data)
             case _:
                 raise ValueError(f"Unknown node type: {node_type}")
 
@@ -142,6 +144,53 @@ class TerminalNode(Node):
         )
 
 
+class SubPipelineNode(Node):
+    subpipeline_id: str
+    inputs: dict
+    artifact_outputs: dict
+    result_output: str | None
+    next: str | None
+
+    def __init__(
+        self,
+        id: str,
+        type: str,
+        subpipeline_id: str,
+        inputs: dict = None,
+        artifact_outputs: dict = None,
+        result_output: str | None = None,
+        next: str | None = None,
+        metadata: dict = None,
+    ):
+        super().__init__(id, type, metadata)
+        self.subpipeline_id = subpipeline_id
+        self.inputs = inputs or {}
+        self.artifact_outputs = artifact_outputs or {}
+        self.result_output = result_output
+        self.next = next
+
+    @staticmethod
+    def from_dict(data: dict) -> "SubPipelineNode":
+        id = data.get("id")
+        type = data.get("type")
+        subpipeline_id = data.get("subpipeline_id")
+        if not subpipeline_id:
+            raise ValueError("subpipeline_id is required for subpipeline node")
+        inputs = data.get("inputs", {})
+        artifact_outputs = data.get("artifact_outputs", {})
+        result_output = data.get("result_output")
+        next = data.get("next")
+        metadata = data.get("metadata", {})
+        return SubPipelineNode(
+            id=id,
+            type=type,
+            subpipeline_id=subpipeline_id,
+            inputs=inputs,
+            artifact_outputs=artifact_outputs,
+            result_output=result_output,
+            next=next,
+            metadata=metadata,
+        )
 class StageNode(Node):
     id: str
     type: str
