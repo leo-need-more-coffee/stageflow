@@ -87,15 +87,20 @@ class Session:
             self._pending_inputs.setdefault(type_, []).append(entry)
         return entry
 
-    async def wait_input(self, type_: str, timeout: float | None = None):
-        # Deliver buffered input if it arrived before waiter.
+    def start_wait_input(self, type_: str) -> asyncio.Future:
         pending = self._pending_inputs.get(type_)
         if pending:
-            return pending.pop(0)
+            loop = asyncio.get_running_loop()
+            fut = loop.create_future()
+            fut.set_result(pending.pop(0))
+            return fut
         loop = asyncio.get_running_loop()
         fut = loop.create_future()
         self._waiting.setdefault(type_, []).append(fut)
         self.emit(Event(type="waiting_for_input", session_id=self.id, payload={"type": type_}))
+        return fut
+
+    async def finish_wait_input(self, type_: str, fut: asyncio.Future, timeout: float | None = None):
         try:
             return await asyncio.wait_for(fut, timeout=timeout)
         except asyncio.TimeoutError:
@@ -107,6 +112,10 @@ class Session:
                 waiters.remove(fut)
                 if not waiters:
                     del self._waiting[type_]
+
+    async def wait_input(self, type_: str, timeout: float | None = None):
+        fut = self.start_wait_input(type_)
+        return await self.finish_wait_input(type_, fut, timeout=timeout)
 
     def last_input(self, type_: str | None = None):
         if not self.input_history:
