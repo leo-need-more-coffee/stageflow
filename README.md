@@ -13,7 +13,9 @@ StageFlow is a lightweight framework for describing and running JSON pipelines w
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -e .
+pip install stageflow-framework
+# or for local dev:
+# pip install -e .
 ```
 Requires Python 3.10+.
 

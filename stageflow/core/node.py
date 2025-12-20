@@ -29,8 +29,6 @@ class Node:
                 return StageNode.from_dict(data)
             case "subpipeline":
                 return SubPipelineNode.from_dict(data)
-            case "map":
-                return MapNode.from_dict(data)
             case _:
                 raise ValueError(f"Unknown node type: {node_type}")
 

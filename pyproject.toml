@@ -3,9 +3,10 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "stageflow"
+name = "stageflow-framework"
 version = "0.1.0"
 description = "StageFlow: Pipeline framework for stages"
+readme = "README.md"
 authors = [
     { name="lethargy" }
 ]
