@@ -1,4 +1,4 @@
-from .node import Node, StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode, MapNode
+from .node import Node, StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode
 from stageflow.docs.schema import load_pipeline_schema
 
 try:
@@ -99,9 +99,6 @@ class Pipeline:
                     # Basic cycle check: prevent direct self-reference
                     if node.subpipeline_id == self.entry:
                         raise ValueError(f"Subpipeline '{node.subpipeline_id}' cannot reference root entry")
-                case MapNode():
-                    if node.next and node.next not in self._nodes_map:
-                        raise ValueError(f"Map next '{node.next}' not found in pipeline")
                 case _:
                     raise ValueError(f"Unknown node type: {type(node)}")
 
