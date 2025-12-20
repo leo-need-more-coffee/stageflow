@@ -5,7 +5,7 @@ from typing import Callable, Any
 from .context import Context
 from .event import Event
 from .pipeline import Pipeline
-from .node import StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode, MapNode
+from .node import StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode
 
 
 class SessionResult:
@@ -245,8 +245,6 @@ class Session:
             return self._handle_parallel
         if isinstance(node, SubPipelineNode):
             return self._handle_subpipeline
-        if isinstance(node, MapNode):
-            return self._handle_map
         raise ValueError(f"Unknown node type: {type(node)}")
 
     async def _handle_terminal(self, node: TerminalNode):
@@ -358,65 +356,6 @@ class Session:
                 return
             next_node = await handler(node)
             node = next_node
-
-    async def _handle_map(self, node: MapNode):
-        items = self.context.get(node.items_path, [])
-        if not isinstance(items, list):
-            raise ValueError(f"MapNode '{node.id}' items is not a list")
-
-        async def run_item(idx, item):
-            # Save and restore context around item.
-            original_value = self.context.get(node.item_path)
-            original_index = self.context.get(node.index_path) if node.index_path else None
-            self.context.set(node.item_path, item)
-            if node.index_path:
-                self.context.set(node.index_path, idx)
-            try:
-                if node.body in self.pipeline._nodes_map:
-                    await self._run_branch_graph(node.body)
-                elif node.body in self.pipeline.subpipelines:
-                    sp_node = SubPipelineNode(
-                        id=f"{node.id}:{idx}",
-                        type="subpipeline",
-                        subpipeline_id=node.body,
-                        inputs={node.item_path: node.item_path, **({node.index_path: node.index_path} if node.index_path else {})},
-                        artifact_outputs=node.output_map,
-                        result_output=None,
-                        next=None,
-                    )
-                    await self._run_subpipeline(sp_node)
-                else:
-                    raise ValueError(f"Map body '{node.body}' not found as node or subpipeline")
-                for parent_path, child_path in node.output_map.items():
-                    self.context.set(parent_path, self.context.get(child_path))
-            finally:
-                if original_value is not None:
-                    self.context.set(node.item_path, original_value)
-                else:
-                    self.context.set(node.item_path, None)
-                if node.index_path:
-                    if original_index is not None:
-                        self.context.set(node.index_path, original_index)
-                    else:
-                        self.context.set(node.index_path, None)
-
-        tasks = []
-        if node.mode == "parallel":
-            for idx, item in enumerate(items):
-                tasks.append(asyncio.create_task(run_item(idx, item)))
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            errors = [r for r in results if isinstance(r, Exception)]
-            if errors and node.cancel_on_error:
-                raise RuntimeError(f"Map node {node.id} failed: {errors}")
-        else:
-            for idx, item in enumerate(items):
-                try:
-                    await run_item(idx, item)
-                except Exception:
-                    if node.cancel_on_error:
-                        raise
-        next_node = self.pipeline.get_node(node.next) if node.next else None
-        return next_node
 
     async def _run_subpipeline(self, node: SubPipelineNode):
         if node.subpipeline_id not in self.pipeline.subpipelines:
