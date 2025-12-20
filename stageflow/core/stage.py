@@ -105,7 +105,7 @@ class BaseStage:
     async def run(self):
         raise NotImplementedError
 
-    def emit(self, event_type: str, payload: dict | None = None):
+    def emit(self, event_type: str, payload: object | None = None):
         from .event import Event
         if self.allowed_events:
             allowed = {spec.type for spec in self.allowed_events if spec.type}
