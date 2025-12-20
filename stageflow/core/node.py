@@ -200,8 +200,6 @@ class SubPipelineNode(Node):
         )
 
 class StageNode(Node):
-    id: str
-    type: str
     stage: str
     config: dict = {}
     inputs: dict = {}
