@@ -1,3 +1,4 @@
+import asyncio
 import copy
 from typing import Any, TYPE_CHECKING
 import yaml
@@ -121,14 +122,29 @@ class BaseStage:
             payload=payload or {},
         ))
 
-    async def wait_input(self, type_: str, timeout: float | None = None):
+    def _get_allowed_input(self, type_: str) -> InputSpec | None:
         if self.allowed_inputs:
             allowed = {spec.type for spec in self.allowed_inputs if spec.type}
             if allowed and type_ not in allowed:
                 raise ValueError(f"Input type '{type_}' is not allowed for stage '{self.stage_name}'")
-            matching = next((spec for spec in self.allowed_inputs if spec.type == type_), None)
-        else:
-            matching = None
+            return next((spec for spec in self.allowed_inputs if spec.type == type_), None)
+        return None
+
+    def start_wait_input(self, type_: str) -> asyncio.Future:
+        self._get_allowed_input(type_)
+        return self.session.start_wait_input(type_)
+
+    async def finish_wait_input(self, type_: str, fut: asyncio.Future, timeout: float | None = None):
+        matching = self._get_allowed_input(type_)
+        result = await self.session.finish_wait_input(type_, fut, timeout=timeout)
+        if result is None:
+            return None
+        if matching and matching.payload_schema is not None:
+            validate_schema(result.get("payload", {}), matching.payload_schema, "Input payload")
+        return result
+
+    async def wait_input(self, type_: str, timeout: float | None = None):
+        matching = self._get_allowed_input(type_)
         result = await self.session.wait_input(type_, timeout=timeout)
         if result is None:
             return None
