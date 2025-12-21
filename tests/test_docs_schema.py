@@ -28,8 +28,20 @@ class DocStage(BaseStage):
         type: string
     """
 
-    allowed_events = [EventSpec(type="progress", description="Progress event")]
-    allowed_inputs = [InputSpec(type="user_input", description="User input")]
+    allowed_events = [
+        EventSpec(
+            type="progress",
+            description="Progress event",
+            payload_schema={"step": int, "tags": list[str]},
+        )
+    ]
+    allowed_inputs = [
+        InputSpec(
+            type="user_input",
+            description="User input",
+            payload_schema={"answer": str, "meta": {"id": int}, "tags": [str]},
+        )
+    ]
     category = "demo"
 
     async def run(self):
@@ -68,6 +80,11 @@ class DocsSchemaTests(unittest.TestCase):
 
         self.assertEqual(doc_spec["allowed_events"][0]["type"], "progress")
         self.assertEqual(doc_spec["allowed_inputs"][0]["type"], "user_input")
+        self.assertEqual(doc_spec["allowed_events"][0]["payload_schema"], {"step": "int", "tags": ["str"]})
+        self.assertEqual(
+            doc_spec["allowed_inputs"][0]["payload_schema"],
+            {"answer": "str", "meta": {"id": "int"}, "tags": ["str"]},
+        )
         self.assertEqual(doc_spec["category"], "demo")
 
     def test_generate_yaml_contains_description(self):
