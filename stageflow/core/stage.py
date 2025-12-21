@@ -158,8 +158,8 @@ class BaseStage:
         return {
             "stage_name": cls.stage_name,
             "skipable": cls.skipable,
-            "allowed_events": [e.__dict__ for e in cls.allowed_events],
-            "allowed_inputs": [i.__dict__ for i in cls.allowed_inputs],
+            "allowed_events": [e.to_dict() for e in cls.allowed_events],
+            "allowed_inputs": [i.to_dict() for i in cls.allowed_inputs],
             "category": cls.category,
             "description": parsed_description.get("description", "") if isinstance(parsed_description, dict) else "",
             "arguments": _normalize_fields(parsed_description.get("arguments", [])) if isinstance(parsed_description, dict) else [],
