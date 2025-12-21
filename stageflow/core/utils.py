@@ -60,3 +60,49 @@ def validate_schema(value: Any, schema: object, path: str = "payload"):
         return
     if not isinstance(value, expected):
         raise ValueError(f"{path} expected {schema}, got {type(value).__name__}")
+
+
+_TYPE_NAME_OVERRIDES = {
+    str: "str",
+    int: "int",
+    float: "float",
+    bool: "bool",
+    dict: "object",
+    list: "list",
+    type(None): "null",
+}
+
+
+def schema_to_jsonable(schema: object) -> object:
+    """Convert payload schema hint into a JSON-serializable structure."""
+    origin = get_origin(schema)
+    args = get_args(schema)
+
+    if schema is None:
+        return None
+
+    if schema is Any or schema is object:
+        return "any"
+
+    if origin is Union and args:
+        return {"anyOf": [schema_to_jsonable(arg) for arg in args]}
+
+    if origin is list and args:
+        return [schema_to_jsonable(args[0])]
+
+    if origin is dict and args:
+        return {"key": schema_to_jsonable(args[0]), "value": schema_to_jsonable(args[1])}
+
+    if isinstance(schema, dict):
+        return {k: schema_to_jsonable(v) for k, v in schema.items()}
+
+    if isinstance(schema, list):
+        return [schema_to_jsonable(v) for v in schema]
+
+    if isinstance(schema, tuple):
+        return [schema_to_jsonable(v) for v in schema]
+
+    if isinstance(schema, type):
+        return _TYPE_NAME_OVERRIDES.get(schema, getattr(schema, "__name__", str(schema)))
+
+    return str(schema)

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, UTC
+from .utils import schema_to_jsonable
 
 
 @dataclass
@@ -16,7 +17,7 @@ class InputSpec:
             "description": self.description,
             "required": self.required,
             "default": self.default,
-            "payload_schema": str(self.payload_schema),
+            "payload_schema": schema_to_jsonable(self.payload_schema),
         }
 
 
@@ -30,7 +31,7 @@ class EventSpec:
         return {
             "type": self.type,
             "description": self.description,
-            "payload_schema": str(self.payload_schema),
+            "payload_schema": schema_to_jsonable(self.payload_schema),
         }
 
 
