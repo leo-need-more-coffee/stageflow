@@ -10,12 +10,28 @@ class InputSpec:
     default: str | int | float | bool | None = None
     payload_schema: object | None = None
 
+    def to_dict(self) -> dict:
+        return {
+            "type": self.type,
+            "description": self.description,
+            "required": self.required,
+            "default": self.default,
+            "payload_schema": str(self.payload_schema),
+        }
+
 
 @dataclass
 class EventSpec:
     type: str
     description: str | None = None
     payload_schema: object | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "type": self.type,
+            "description": self.description,
+            "payload_schema": str(self.payload_schema),
+        }
 
 
 class Event:
