@@ -16,8 +16,6 @@ from stageflow.exceptions import PipelineValidationError
 
 @register_stage("BoomStage")
 class BoomStage(BaseStage):
-    """Падает ошибкой того типа, что указан в аргументе ``kind``."""
-
     async def run(self):
         args = self.get_arguments()
         kind = args.get("kind", "runtime")
@@ -31,8 +29,6 @@ class BoomStage(BaseStage):
 
 @register_stage("MarkStage")
 class MarkStage(BaseStage):
-    """Отмечается во фрейме, чтобы было видно, какие узлы отработали."""
-
     async def run(self):
         self.set_outputs({"mark": self.get_arguments().get("mark", "?")})
 
@@ -53,8 +49,6 @@ class TryBlockTests(unittest.IsolatedAsyncioTestCase):
         return await session.run(), session
 
     async def test_catches_error_from_deep_inside_body(self):
-        """Ошибка ловится, даже если упал не первый узел тела, а третий —
-        именно этим блок отличается от обработчика на узле."""
         data = {
             "entry": "guard",
             "nodes": [
@@ -75,7 +69,6 @@ class TryBlockTests(unittest.IsolatedAsyncioTestCase):
         }
         result, _ = await self._run(data)
         self.assertEqual(result.result, {"status": "handled"})
-        # фрейм, накопленный до падения, сохранён
         self.assertEqual(result.artifacts["m1"], "one")
         self.assertEqual(result.artifacts["m2"], "two")
         self.assertEqual(result.artifacts["err"]["message"], "deep failure")
@@ -121,7 +114,6 @@ class TryBlockTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("try_completed", [e.type for e in session.event_history])
 
     async def test_nested_try_inner_handles_first(self):
-        """Вложенные блоки: ошибку забирает ближайший подходящий обработчик."""
         data = {
             "entry": "outer",
             "nodes": [
@@ -178,8 +170,6 @@ class TryBlockTests(unittest.IsolatedAsyncioTestCase):
             await self._run(data)
 
     async def test_retry_runs_before_block_catches(self):
-        """Повторы узла исчерпываются первыми; блок ловит, только если узел
-        так и не смог отработать."""
         attempts = {"n": 0}
 
         @register_stage("FlakyTwiceStage")

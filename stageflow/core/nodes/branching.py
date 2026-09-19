@@ -1,9 +1,3 @@
-"""Узлы ветвления: бинарный ``condition`` и n-way ``switch``.
-
-Условия — CEL-выражения. Control flow всегда задан
-явной структурой полей, без динамического роутинга через выражение: граф
-должен оставаться статически проверяемым и рисуемым для UI-редактора.
-"""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -18,8 +12,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @register_node("condition")
 class ConditionNode(Node):
-    """Бинарное ветвление: ``then`` при истинном ``condition``, иначе ``else``."""
-
     def __init__(self, id: str, condition: str, then: str, else_: str | None = None, **common):
         super().__init__(id, **common)
         self.condition = condition
@@ -56,9 +48,6 @@ class ConditionNode(Node):
 
 @register_node("switch")
 class SwitchNode(Node):
-    """n-way ветвление: список ``cases`` с CEL в ``when`` плюс ``default``.
-    Побеждает первый истинный case."""
-
     def __init__(self, id: str, cases: list[dict], default: str | None = None, **common):
         super().__init__(id, **common)
         self.cases = cases

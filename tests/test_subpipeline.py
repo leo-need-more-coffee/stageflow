@@ -53,7 +53,6 @@ class SubpipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts["inner_result"], {"status": "inner_ok"})
 
     async def test_child_does_not_see_parent_frame(self):
-        """Граница скоупа: в ребёнка попадает только то, что перечислено в inputs."""
         pipeline_data = {
             "entry": "child",
             "nodes": [
@@ -78,9 +77,7 @@ class SubpipelineTests(unittest.IsolatedAsyncioTestCase):
         }
         ctx = Context(vars={"a": 7, "secret": 1000})
         result = await Session(id="outer", pipeline=Pipeline.from_dict(pipeline_data), context=ctx).run()
-        # secret в inputs не указан -> внутри его нет, сумма = a + 0
         self.assertEqual(result.artifacts["seen"], 7)
-        # у родителя он при этом на месте
         self.assertEqual(result.artifacts["secret"], 1000)
 
     async def test_nested_subpipeline_isolated_context(self):
@@ -114,7 +111,6 @@ class SubpipelineTests(unittest.IsolatedAsyncioTestCase):
         ctx = Context(vars={"b": 4})
         result = await Session(id="outer", pipeline=Pipeline.from_dict(pipeline_data), context=ctx).run()
         self.assertEqual(result.artifacts["final_sum"], 5)
-        # промежуточные имена наружу не протекли
         self.assertNotIn("sum", result.context.var_names())
         self.assertNotIn("sum_mid", result.context.var_names())
 

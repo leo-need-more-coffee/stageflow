@@ -1,23 +1,3 @@
-"""
-Простой визуализатор пайплайна: JSON -> Mermaid -> самодостаточный HTML.
-
-Читает текущий формат узлов: бакеты arguments/outputs, consume, expose,
-retry, try/except, switch, parallel.branches, subpipeline.
-
-    python -m stageflow.docs.graph pipeline.json -o graph.html
-    python -m stageflow.docs.graph pipeline.json --mermaid   # только текст диаграммы
-    python -m stageflow.docs.graph                           # демо-пайплайн
-
-Что рисуется:
-  - форма узла = его тип (entry / stage / condition / switch / parallel / try /
-    subpipeline / terminal);
-  - сплошная стрелка  — обычный переход `next` и вход в тело `try` (`body`);
-  - подписанная       — ветка условия (`then`/`else`, `when`, `default`);
-  - пунктир           — вход в ветку `parallel` и прыжок в обработчик `except`;
-  - отдельный subgraph на каждый вложенный subpipeline.
-Ниже графа — таблица потока данных: что узел читает, пишет, удаляет (`consume`)
-и переименовывает (`expose`).
-"""
 from __future__ import annotations
 
 import argparse
@@ -26,7 +6,6 @@ import json
 import sys
 from typing import Any
 
-# ------------------------------------------------------------------ mermaid
 
 _SHAPES = {
     "entry": ('(("', '"))'),
@@ -41,9 +20,6 @@ _SHAPES = {
 
 
 def _esc(text: str) -> str:
-    """Метка внутри mermaid-кавычек. HTML-сущности тут не годятся: страница
-    отдаёт mermaid уже декодированный textContent, и `&quot;` доехал бы до
-    диаграммы буквально — поэтому кавычку просто меняем на одинарную."""
     return str(text).replace('"', "'").replace("\n", " ")
 
 
@@ -87,8 +63,6 @@ def _declare(node: dict, prefix: str = "") -> str:
 
 
 def _edges(node: dict, prefix: str = "") -> list[str]:
-    """prefix — префикс идентификаторов внутри subgraph субпайплайна,
-    чтобы одинаковые id в разных пайплайнах не слипались."""
     nid = f'{prefix}{node["id"]}'
     node_type = node.get("type")
     out: list[str] = []
@@ -109,8 +83,6 @@ def _edges(node: dict, prefix: str = "") -> list[str]:
                 f'  {nid} -.->|"branch {_esc(branch.get("id", ""))}"| {prefix}{branch["entry"]}'
             )
     elif node_type == "try":
-        # тело — обычный переход: с него исполнение и продолжается, а `next`
-        # ниже рисуется как выход из блока (туда же сходится и обработчик)
         if node.get("body"):
             out.append(f'  {nid} -->|body| {prefix}{node["body"]}')
         for handler in node.get("except", []):
@@ -124,8 +96,6 @@ def _edges(node: dict, prefix: str = "") -> list[str]:
 
 
 def _entry_of(graph: dict) -> str | None:
-    """Точка входа: поле ``entry`` или единственный узел типа ``entry``
-    (с 0.7.0 поле необязательно — начало видно по графу)."""
     if graph.get("entry"):
         return graph["entry"]
     found = [n["id"] for n in graph.get("nodes", []) if n.get("type") == "entry"]
@@ -163,8 +133,6 @@ def to_mermaid(pipeline: dict) -> str:
 
     return "\n".join(lines)
 
-
-# --------------------------------------------------------------- data table
 
 def _bucket_names(bucket: Any) -> list[str]:
     if isinstance(bucket, list):
@@ -216,8 +184,6 @@ def _rows(pipeline: dict) -> list[dict]:
         })
     return rows
 
-
-# --------------------------------------------------------------------- html
 
 _HTML = """<!DOCTYPE html>
 <html lang="ru">
@@ -322,8 +288,6 @@ def to_html(pipeline: dict, title: str = "StageFlow pipeline") -> str:
     )
 
 
-# --------------------------------------------------------------------- demo
-
 DEMO_PIPELINE = {
     "entry": "auth",
     "subpipelines": {
@@ -343,15 +307,12 @@ DEMO_PIPELINE = {
          "arguments": {"const": {"creds": "***"}},
          "outputs": {"token": "token"},
          "next": "guard"},
-        # обработка ошибок — блочная: `try` накрывает тело (`fetch_data`), а
-        # выход из блока и обработчики сходятся дальше по графу
         {"id": "guard", "type": "try", "body": "fetch_data", "next": "fan_out",
          "except": [
              {"error_equals": ["TimeoutError", "ConnectionError"],
               "next": "handle_failure", "result_var": "error"},
              {"error_equals": ["*"], "next": "report_bug", "result_var": "error"},
          ]},
-        # у последнего узла тела нет `next`: дальше исполнение продолжит `try`
         {"id": "fetch_data", "type": "stage", "stage": "FetchDataStage",
          "arguments": {"vars": ["token"], "const": {"n_max": 10}},
          "outputs": {"data": "data", "count": "count"},

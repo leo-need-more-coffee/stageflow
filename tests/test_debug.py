@@ -1,9 +1,3 @@
-"""Пошаговая отладка сессии.
-
-Проверяется то, ради чего отладчик вообще появился в ядре: остановка МЕЖДУ
-узлами (снаружи её не сделать), видимый в этой точке фрейм и правка фрейма,
-которая влияет на дальнейшее исполнение — вплоть до выбора ветки.
-"""
 import asyncio
 import time
 import unittest
@@ -13,7 +7,6 @@ from stageflow.exceptions import StageFlowError
 
 
 def chain_pipeline():
-    """start → bump (n += 5) → done."""
     return Pipeline.from_dict({
         "nodes": [
             {"id": "start", "type": "entry", "variables": {"n": 1}, "next": "bump"},
@@ -26,7 +19,6 @@ def chain_pipeline():
 
 
 def branch_pipeline():
-    """start → check(n > 3) → big / small."""
     return Pipeline.from_dict({
         "nodes": [
             {"id": "start", "type": "entry", "variables": {"n": 1}, "next": "check"},
@@ -39,7 +31,6 @@ def branch_pipeline():
 
 
 async def wait_until(predicate, timeout=2.0):
-    """Ждёт условия, не занимая цикл событий (сессия крутится рядом)."""
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if predicate():
@@ -49,8 +40,6 @@ async def wait_until(predicate, timeout=2.0):
 
 
 class StepModeTests(unittest.TestCase):
-    """Шаг за шагом: сессия стоит перед каждым узлом, пока не скажут «дальше»."""
-
     def test_steps_node_by_node(self):
         async def scenario():
             events = []
@@ -87,7 +76,7 @@ class StepModeTests(unittest.TestCase):
             session = Session("s", chain_pipeline(), debugger=debugger)
             task = asyncio.create_task(session.run())
             self.assertTrue(await wait_until(lambda: debugger.waiting))
-            debugger.step(2)  # пустить два узла и снова встать
+            debugger.step(2)
             self.assertTrue(await wait_until(lambda: debugger.node == "done" and debugger.waiting))
             self.assertFalse(task.done())
             debugger.resume()
@@ -99,7 +88,7 @@ class StepModeTests(unittest.TestCase):
         async def scenario():
             debugger = StepDebugger(mode="run")
             session = Session("s", chain_pipeline(), debugger=debugger)
-            debugger.pause()  # ещё до старта: встанет на первом же узле
+            debugger.pause()
             task = asyncio.create_task(session.run())
             self.assertTrue(await wait_until(lambda: debugger.waiting))
             self.assertEqual(debugger.node, "start")
@@ -122,8 +111,6 @@ class StepModeTests(unittest.TestCase):
 
 
 class FrameEditingTests(unittest.TestCase):
-    """Правка фрейма в точке остановки — то, чего нельзя сделать снаружи."""
-
     def test_edit_changes_branch(self):
         async def scenario():
             debugger = StepDebugger(mode="step")
@@ -133,10 +120,9 @@ class FrameEditingTests(unittest.TestCase):
             self.assertTrue(await wait_until(lambda: debugger.node == "start" and debugger.waiting))
             debugger.step()
             self.assertTrue(await wait_until(lambda: debugger.node == "check" and debugger.waiting))
-            debugger.set_vars({"n": 10})  # применится перед узлом `check`
+            debugger.set_vars({"n": 10})
             debugger.resume()
             result = await asyncio.wait_for(task, 2)
-            # без правки условие `vars.n > 3` было бы ложным (n = 1)
             self.assertEqual(result.result, {"branch": "big"})
 
         asyncio.run(scenario())
@@ -151,8 +137,6 @@ class FrameEditingTests(unittest.TestCase):
             self.assertTrue(await wait_until(lambda: debugger.node == "bump" and debugger.waiting))
             debugger.set_vars(drop=["n"])
             debugger.resume()
-            # аргумент `current` ссылается на удалённую переменную — это ошибка
-            # исполнения, а не молчаливый None
             with self.assertRaises(StageFlowError):
                 await asyncio.wait_for(task, 2)
 
@@ -199,8 +183,6 @@ class DelayTests(unittest.TestCase):
 
 
 class CoverageTests(unittest.TestCase):
-    """Отладчик обязан видеть узлы везде, где они исполняются."""
-
     def test_sees_try_body_and_handler(self):
         pipeline = Pipeline.from_dict({
             "nodes": [

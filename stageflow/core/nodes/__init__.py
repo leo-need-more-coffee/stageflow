@@ -1,9 +1,3 @@
-"""Узлы графа пайплайна.
-
-Импорт подмодулей здесь — не только реэкспорт: он же регистрирует все
-встроенные типы узлов в реестре (декоратор ``@register_node`` срабатывает
-при импорте класса).
-"""
 from .base import Node, get_node_types, register_node
 from .branching import ConditionNode, SwitchNode
 from .entry import EntryNode

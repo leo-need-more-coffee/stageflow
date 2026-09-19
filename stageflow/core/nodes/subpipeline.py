@@ -1,9 +1,3 @@
-"""Узел ``subpipeline`` — вызов вложенного пайплайна.
-
-Единственная настоящая граница видимости данных:
-ребёнок стартует со СВЕЖИМ фреймом, пересечение с родителем — только через
-явные ``inputs`` / ``artifact_outputs`` / ``result_output``.
-"""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

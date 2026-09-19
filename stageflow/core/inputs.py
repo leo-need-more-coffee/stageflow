@@ -1,17 +1,8 @@
-"""Ожидание пользовательского ввода — выделено из Session.
-
-InputHub решает одну задачу: свести асинхронного поставщика сообщений
-(``deliver``) с асинхронными потребителями (``start_wait``/``finish_wait``).
-Сообщение, пришедшее раньше слушателя, буферизуется в ``pending`` и будет
-отдано первому подписчику; сообщение при живых слушателях раздаётся ВСЕМ
-ожидающим этого типа (broadcast).
-"""
 from __future__ import annotations
 
 import asyncio
 from typing import Any, Callable
 
-#: Колбэк телеметрии: (тип события, payload) -> None.
 EventSink = Callable[[str, dict], None]
 
 
@@ -22,15 +13,8 @@ class InputHub:
         self._pending: dict[str, list[dict[str, Any]]] = {}
         self.history: list[dict[str, Any]] = []
 
-    # ------------------------------------------------------- поставщик
 
     def deliver(self, entry: dict[str, Any]) -> None:
-        """Раздаёт сообщение ожидающим его типа или буферизует до подписки.
-
-        Живой получатель — только НЕразрешённая футура: уже done-футура
-        (получила прошлое сообщение, но ещё не снята через ``finish_wait``)
-        принять ничего не может, и без буферизации сообщение бы терялось.
-        """
         self.history.append(entry)
         live = [fut for fut in self._waiting.get(entry["type"], []) if not fut.done()]
         if live:
@@ -39,11 +23,8 @@ class InputHub:
         else:
             self._pending.setdefault(entry["type"], []).append(entry)
 
-    # ------------------------------------------------------ потребители
 
     def start_wait(self, type_: str) -> asyncio.Future:
-        """Подписка на ввод типа ``type_``. Если сообщение уже в буфере —
-        футура возвращается сразу разрешённой."""
         loop = asyncio.get_running_loop()
         fut = loop.create_future()
         pending = self._pending.get(type_)
@@ -57,8 +38,6 @@ class InputHub:
     async def finish_wait(
         self, type_: str, fut: asyncio.Future, timeout: float | None = None
     ) -> dict[str, Any] | None:
-        """Дожидается результата подписки; по таймауту возвращает None и
-        эмитит ``input_timeout``. Подписка снимается в любом случае."""
         try:
             return await asyncio.wait_for(fut, timeout=timeout)
         except asyncio.TimeoutError:
@@ -74,7 +53,6 @@ class InputHub:
             if not waiters:
                 del self._waiting[type_]
 
-    # -------------------------------------------------------- состояние
 
     def is_waiting(self, type_: str) -> bool:
         return bool(self._waiting.get(type_))

@@ -1,4 +1,3 @@
-"""Узел ``stage`` — исполнение зарегистрированной стадии."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -17,10 +16,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @register_node("stage")
 class StageNode(Node):
-    """Порядок обработки фрейма: ``arguments`` (чтение) -> стадия ->
-    ``outputs`` (запись) -> ``consume`` (удаление) -> ``expose``
-    (копия/переименование) -> фрейм уходит дальше по ``next``."""
-
     def __init__(
         self,
         id: str,
@@ -75,12 +70,6 @@ class StageNode(Node):
         return errors
 
     def _validate_legacy_scope(self) -> list[str]:
-        """Уровень скоупа в ``outputs`` (до 0.7.0 — ``{"local": {...}}``).
-
-        Без этой проверки такой пайплайн тоже отвергается, но с бесполезным
-        текстом «стадия не возвращает поле 'local'»: ключ верхнего уровня
-        теперь и есть имя поля результата.
-        """
         return [
             f"{self.id}: уровень скоупа '{key}' в outputs убран в 0.7.0 — "
             'ключи плоские: {"поле_результата": "переменная"}'
@@ -89,21 +78,10 @@ class StageNode(Node):
         ]
 
     def _validate_output_fields(self) -> list[str]:
-        """Сверка ключей ``outputs`` с полями результата, объявленными стадией.
-
-        Ключ бакета ``outputs`` — это ИМЯ ПОЛЯ в результате стадии, и поле,
-        которого стадия не возвращает, гарантированно падает в рантайме
-        (:class:`StageOutputError` в ``apply_outputs``). Спека стадии знает
-        состав результата, поэтому ошибка ловится до запуска.
-
-        Пустая секция ``outputs`` в спеке = контракт не объявлен, проверять
-        нечего — та же конвенция, что у ``BaseStage._check_allowed`` для
-        событий и ввода; ``*`` означает «поля произвольные».
-        """
         try:
             spec = get_stage(self.stage).get_specs()
-        except Exception:  # noqa: BLE001 - незарегистрированная стадия/битая спека
-            return []      # уже отражено другими проверками
+        except Exception:  # noqa: BLE001
+            return []
 
         declared = {field["name"] for field in spec.get("outputs", [])}
         if not declared or "*" in declared:
@@ -117,20 +95,13 @@ class StageNode(Node):
         ]
 
     def _validate_variable_types(self, pipeline: "Pipeline") -> list[str]:
-        """Статическая сверка объявленных типов переменных со спекой стадии.
-
-        Объявления в ``variables`` — «провода», спека стадии (docstring) —
-        «разъёмы»: аргумент, читающий переменную, и выход, пишущий в неё,
-        обязаны быть совместимы по роду значения. Ключи с ``.$`` (CEL)
-        не проверяются — тип выражения статически не выводится.
-        """
         ts = pipeline.typesystem
         if not ts.has_declarations():
             return []
         try:
             spec = get_stage(self.stage).get_specs()
-        except Exception:  # noqa: BLE001 - незарегистрированная стадия/битая спека
-            return []      # уже отражены другими проверками
+        except Exception:  # noqa: BLE001
+            return []
 
         arg_hints = {f["name"]: f.get("type") for f in spec.get("arguments", [])}
         out_hints = {f["name"]: f.get("type") for f in spec.get("outputs", [])}

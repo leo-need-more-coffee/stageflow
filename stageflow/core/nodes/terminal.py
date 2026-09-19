@@ -1,4 +1,3 @@
-"""Узел ``terminal`` — конец исполнения: фиксирует result и артефакты."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

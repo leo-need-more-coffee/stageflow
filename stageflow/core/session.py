@@ -1,14 +1,3 @@
-"""Исполнение пайплайна.
-
-Цикл сведён к ``node, ctx = await node.execute(session, ctx)`` — ни одного
-isinstance, ни одного ``_handle_*``. Фрейм ``vars``
-ходит явным параметром, а не общим мутабельным полем сессии, иначе ветки
-``parallel`` затирали бы друг друга.
-
-Управление (stop/pause/resume) построено на ``asyncio.Event``: никаких
-опрашивающих циклов со sleep — цикл исполнения гонит шаг узла наперегонки
-с сигналом остановки через ``asyncio.wait``.
-"""
 from __future__ import annotations
 
 import asyncio
@@ -25,24 +14,16 @@ from .pipeline import Pipeline
 
 EventHandler = Callable[[Event], None]
 
-#: result сессии, прерванной командой stop.
 _STOPPED_RESULT = {"result": "stopped"}
 
 
 @dataclass(slots=True)
 class ScopeFrame:
-    """Курсор фрейма внутри области: последнее состояние, дожившее до конца
-    очередного узла. Нужен, потому что упавший узел уносит свой контекст с
-    собой, а блоку ``try`` он нужен для обработчика."""
-
     ctx: Context
 
 
 @dataclass(slots=True)
 class SessionResult:
-    """Итог прогона: артефакты, result терминального узла, история событий
-    и финальный контекст."""
-
     artifacts: dict[str, Any]
     result: dict | None
     history: list[Event]
@@ -58,12 +39,6 @@ class SessionResult:
 
 
 class Session:
-    """Выполняющийся экземпляр пайплайна.
-
-    Отвечает за цикл исполнения, телеметрию и снапшоты; ожидание
-    пользовательского ввода делегировано :class:`InputHub` (``self.inputs``).
-    """
-
     def __init__(
         self,
         id: str,
@@ -78,9 +53,6 @@ class Session:
         self.context = context or Context()
         self.cel = CelEngine()
         self._event_handler: EventHandler = event_handler or (lambda event: None)
-        # отладчик получает управление перед каждым узлом и после него:
-        # только оттуда видно точку остановки и фрейм между шагами
-        # (см. core/debug.py)
         self.debugger = debugger
 
         self.artifacts: dict[str, Any] = {}
@@ -89,12 +61,11 @@ class Session:
         self.inputs = InputHub(self._emit_input_event)
 
         self._stop_requested = asyncio.Event()
-        self._running = asyncio.Event()  # снят = пауза
+        self._running = asyncio.Event()
         self._running.set()
         self._skip_requested = False
         self._current_node_id: str | None = None
 
-    # ------------------------------------------------------------ события
 
     def emit(self, event: Event) -> None:
         self.event_history.append(event)
@@ -108,15 +79,12 @@ class Session:
     def _emit_input_event(self, type_: str, payload: dict) -> None:
         self.emit(Event(type=type_, session_id=self.id, payload=payload))
 
-    # -------------------------------------------------------------- ввод
 
     @property
     def input_history(self) -> list[dict[str, Any]]:
         return self.inputs.history
 
     async def input(self, type_: str, payload: dict[str, Any]) -> dict[str, Any]:
-        """Внешняя точка входа для пользовательского ввода и команд управления
-        (``type_="command"``, ``payload={"name": "stop"|"pause"|...}``)."""
         entry = {"type": type_, "payload": payload}
         self.emit(Event(type="user_input", session_id=self.id, payload=entry))
         if type_ == "command":
@@ -144,7 +112,6 @@ class Session:
     def is_waiting_for(self, type_: str) -> bool:
         return self.inputs.is_waiting(type_)
 
-    # --------------------------------------------------------- управление
 
     def _apply_command(self, name: str | None) -> None:
         handlers = {
@@ -184,13 +151,8 @@ class Session:
     def paused(self) -> bool:
         return not self._running.is_set()
 
-    # -------------------------------------------------------- исполнение
 
     async def execute_node(self, node: Node, ctx: Context) -> tuple["Node | None", Context]:
-        """Исполняет один узел — ЕДИНСТВЕННЫМ путём для всех циклов сессии
-        (основного, тела ``try``, ветки ``parallel``), поэтому отладчик видит
-        каждый узел, где бы он ни исполнялся, и правит тот самый фрейм,
-        который пойдёт дальше."""
         if self.debugger is None:
             return await node.execute(self, ctx)
         ctx = await self.debugger.before_node(self, node, ctx) or ctx
@@ -199,8 +161,6 @@ class Session:
         return next_node, ctx
 
     async def run_stage(self, node: StageNode, kwargs: dict) -> dict:
-        """Запускает стадию с уже резолвнутыми аргументами и возвращает то,
-        что она отдала через ``set_outputs``."""
         stage_cls = node.get_stage_class()
         stage = stage_cls(stage_id=node.id, arguments=kwargs, session=self)
         self.emit_node_event("stage_started", node, {"stage": node.stage})
@@ -209,28 +169,24 @@ class Session:
         except asyncio.TimeoutError:
             self.emit_node_event("stage_timeout", node, {"stage": node.stage})
             raise
-        except Exception as exc:  # noqa: BLE001 - телеметрия, ошибка летит дальше
+        except Exception as exc:  # noqa: BLE001
             self.emit_node_event("stage_failed", node, {"stage": node.stage, "error": str(exc)})
             raise
         self.emit_node_event("stage_completed", node, {"stage": node.stage})
         return stage.collected_outputs
 
     async def run_subpipeline(self, node, child_ctx: Context) -> SessionResult:
-        """Вложенный пайплайн исполняется отдельной сессией со своим графом
-        и своим фреймом; его события проксируются наверх с пометкой узла."""
         if node.subpipeline_id not in self.pipeline.subpipelines:
             raise PipelineDefinitionError(f"Subpipeline '{node.subpipeline_id}' not found")
 
         data = dict(self.pipeline.subpipelines[node.subpipeline_id])
         data.setdefault("subpipelines", self.pipeline.subpipelines)
-        # именованные типы родителя видны ребёнку, если он не объявил свои
         parent_types = self.pipeline.raw_json.get("types")
         if parent_types:
             data.setdefault("types", parent_types)
         child_pipeline = Pipeline.from_dict(data)
 
         def proxy_event(event: Event) -> None:
-            # копия, а не мутация: оригинал уже лежит в истории дочерней сессии
             self.emit(
                 replace(event, payload={"subpipeline_node": node.id, **(event.payload or {})})
             )
@@ -240,7 +196,7 @@ class Session:
             pipeline=child_pipeline,
             context=child_ctx,
             event_handler=proxy_event,
-            debugger=self.debugger,  # иначе шаг «проваливался» бы сквозь узел
+            debugger=self.debugger,
         )
         return await child.run()
 
@@ -251,14 +207,6 @@ class Session:
         scope: frozenset[str],
         frame: "ScopeFrame | None" = None,
     ) -> tuple["Node | None", Context]:
-        """Гоняет управление, пока оно остаётся внутри ``scope`` (тело ``try``).
-
-        Возвращает узел, на котором вышли за пределы области, или None, если
-        цепочка закончилась. Исключения не перехватывает — их ловит сам блок;
-        ``frame`` при этом хранит последний успешно применённый фрейм, чтобы
-        обработчик увидел переменные, записанные до падения (как ``except``
-        в Python видит всё, присвоенное до ошибки).
-        """
         while node is not None and node.id in scope:
             node, ctx = await self.execute_node(node, ctx)
             if frame is not None:
@@ -266,22 +214,17 @@ class Session:
         return node, ctx
 
     async def run_subgraph(self, start_id: str, ctx: Context) -> Context:
-        """Прогоняет цепочку узлов от ``start_id`` до её естественного конца.
-        Используется ветками parallel — у каждой свой фрейм."""
         node: Node | None = self.pipeline.get_node(start_id)
         while node is not None:
             node, ctx = await self.execute_node(node, ctx)
         return ctx
 
     def finish(self, node: TerminalNode, ctx: Context) -> None:
-        """Вызывается терминальной нодой: фиксирует артефакты и result."""
         self.artifacts = {name: ctx.get_var(name) for name in node.artifacts}
         self.result = node.result
         self.emit_node_event("session_terminated", node, {"artifacts": sorted(self.artifacts)})
 
     async def run(self) -> SessionResult:
-        # входной контекст (посев или восстановление из снапшота) обязан
-        # соответствовать объявленным типам ещё до первого узла
         self.pipeline.typesystem.check_context(self.context, f"session '{self.id}'")
         self.emit(Event(type="session_started", session_id=self.id))
 
@@ -321,13 +264,10 @@ class Session:
         )
 
     async def _pause_gate(self) -> None:
-        """На паузе блокируется до resume; stop снимает и паузу тоже."""
         while not self._running.is_set() and not self.stopped:
             await self._race(self._running.wait(), self._stop_requested.wait())
 
     async def _interrupted_by_stop(self, step: asyncio.Task) -> bool:
-        """Ждёт завершения шага узла наперегонки с сигналом stop.
-        True — шаг прерван (отменён), False — шаг завершился сам."""
         await self._race(step, self._stop_requested.wait())
         if step.done():
             return False
@@ -340,7 +280,6 @@ class Session:
 
     @staticmethod
     async def _race(*aws) -> None:
-        """``asyncio.wait(FIRST_COMPLETED)`` с уборкой проигравших задач."""
         tasks = [aw if isinstance(aw, asyncio.Task) else asyncio.create_task(aw) for aw in aws]
         try:
             await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
@@ -350,8 +289,6 @@ class Session:
                     task.cancel()
 
     def _try_skip(self, node: Node) -> bool:
-        """Команда skip действует только на ближайший stage-узел и только
-        если его стадия объявила себя ``skipable``."""
         if not (self._skip_requested and isinstance(node, StageNode)):
             return False
         self._skip_requested = False
@@ -361,7 +298,6 @@ class Session:
         self.emit_node_event("skip_denied", node, {"stage": node.stage})
         return False
 
-    # ---------------------------------------------------------- snapshot
 
     def snapshot(self) -> dict:
         return {

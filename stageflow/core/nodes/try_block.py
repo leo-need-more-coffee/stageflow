@@ -1,28 +1,3 @@
-"""Узел ``try`` — блочная обработка ошибок, как ``try/except`` в Python.
-
-Вместо того чтобы вешать обработчик на каждый узел, ``try`` накрывает целую
-ОБЛАСТЬ графа. Любой узел внутри области, упавший с подходящей ошибкой,
-уводит исполнение в свой ``except``::
-
-    {
-      "id": "safe",
-      "type": "try",
-      "body": "fetch",
-      "except": [
-        {"error_equals": ["TimeoutError"], "next": "on_timeout", "result_var": "error"},
-        {"error_equals": ["*"], "next": "on_any"}
-      ],
-      "next": "after"
-    }
-
-Область — узлы, достижимые из ``body`` по рёбрам управления, но НЕ достижимые
-из ``next`` (точки выхода). Тот же принцип, что у веток ``parallel``: состав
-выводится из графа, а не перечисляется руками, поэтому область не может
-разойтись со структурой.
-
-Вложенные ``try`` работают сами собой: внутренний — обычный узел внутри
-области внешнего, и ошибка всплывает к ближайшему подходящему обработчику.
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -40,9 +15,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @dataclass(slots=True)
 class ExceptHandler:
-    """Одна ветка ``except``: какие ошибки ловим, куда прыгаем и куда положить
-    объект ошибки."""
-
     error_equals: list[str]
     next: str
     result_var: str | None = None
@@ -61,7 +33,6 @@ class ExceptHandler:
         return matches_error(self.error_equals, exc)
 
     def error_payload(self, exc: BaseException, node_id: str) -> dict:
-        """Объект ошибки, который кладётся во фрейм под именем ``result_var``."""
         return {
             "type": error_name(exc),
             "full_type": error_full_name(exc),
@@ -98,10 +69,8 @@ class TryNode(Node):
             **Node._common(data),
         )
 
-    # ------------------------------------------------------------- область
 
     def scope(self, pipeline: "Pipeline") -> frozenset[str]:
-        """Узлы тела блока. Считается один раз: граф после разбора неизменен."""
         if self._scope is None:
             after = pipeline.reachable([self.next]) if self.next else frozenset()
             self._scope = pipeline.reachable([self.body], stop_at=after) - {self.id}
@@ -113,7 +82,6 @@ class TryNode(Node):
             targets.append(self.next)
         return [t for t in targets if t]
 
-    # ---------------------------------------------------------- валидация
 
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
@@ -125,8 +93,6 @@ class TryNode(Node):
             if not pipeline.has_node(handler.next):
                 errors.append(f"{self.id}: except.next '{handler.next}' не найден в графе")
             elif pipeline.has_node(self.body) and handler.next in self.scope(pipeline):
-                # обработчик внутри собственного тела: его же ошибки снова
-                # приведут сюда — молчаливая петля
                 errors.append(
                     f"{self.id}: обработчик '{handler.next}' находится внутри тела блока"
                 )
@@ -134,7 +100,6 @@ class TryNode(Node):
             errors.append(f"{self.id}: next '{self.next}' не найден в графе")
         return errors
 
-    # --------------------------------------------------------- исполнение
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
         scope = self.scope(session.pipeline)
@@ -148,11 +113,10 @@ class TryNode(Node):
             node, ctx = await session.run_scope(
                 session.pipeline.get_node(self.body), ctx, scope, frame
             )
-        except Exception as exc:  # noqa: BLE001 - это и есть граница блока
+        except Exception as exc:  # noqa: BLE001
             handler = next((h for h in self.handlers if h.matches(exc)), None)
             if handler is None:
-                raise  # не наш тип ошибки — пусть ловит объемлющий try
-            # переменные, записанные телом до падения, остаются видны
+                raise
             ctx = frame.ctx
             session.emit_node_event(
                 "try_caught",
@@ -163,8 +127,7 @@ class TryNode(Node):
                 ctx = ctx.with_var(handler.result_var, handler.error_payload(exc, self.id))
             return session.pipeline.get_node(handler.next), ctx
 
-        # тело отработало без ошибок
         if node is not None:
-            return node, ctx  # управление само ушло за пределы блока — не мешаем
+            return node, ctx
         session.emit_node_event("try_completed", self, {"body": self.body})
         return self._goto(session, self.next), ctx

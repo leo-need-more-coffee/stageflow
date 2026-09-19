@@ -1,4 +1,3 @@
-"""Генерация документации: JSON Schema, спеки стадий, HTML, визуализация графа."""
 from .graph import to_html, to_mermaid
 from .schema import (
     generate_pipeline_schema,

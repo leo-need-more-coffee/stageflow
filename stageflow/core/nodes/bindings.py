@@ -1,8 +1,3 @@
-"""Связывание данных узла с фреймом: бакеты ``arguments`` и ``outputs``.
-
-Здесь живёт весь «клей» между JSON-описанием узла и Context: чтение
-аргументов из бакетов, раскладка результата стадии обратно.
-"""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -14,12 +9,10 @@ if TYPE_CHECKING:  # pragma: no cover
     from ..cel import CelEngine
     from ..typesys import TypeSystem
 
-#: Суффикс ключа, значение которого вычисляется как CEL-выражение.
 CEL_SUFFIX = ".$"
 
 
 def _normalize_bucket(bucket: Any) -> dict[str, str]:
-    """``["creds"]`` — сахар для ``{"creds": "creds"}`` (без переименования)."""
     if bucket is None:
         return {}
     if isinstance(bucket, list):
@@ -34,11 +27,6 @@ def _normalize_bucket(bucket: Any) -> dict[str, str]:
 def resolve_arguments(
     arguments: dict, ctx: Context, cel: "CelEngine", **extra: Any
 ) -> dict[str, Any]:
-    """``arguments`` -> готовые kwargs для стадии.
-
-    Бакеты: ``const`` (литералы как есть) и ``vars`` (ссылки на фрейм).
-    Суффикс ``.$`` на ключе = значение вычислить как CEL.
-    """
     kwargs: dict[str, Any] = {}
 
     for key, value in (arguments.get("const") or {}).items():
@@ -57,7 +45,6 @@ def resolve_arguments(
 
 
 def _as_output_namespace(result: Any) -> dict[str, Any]:
-    """Сырой результат стадии -> namespace ``output`` для маппинга и CEL."""
     if result is None:
         return {}
     if isinstance(result, dict):
@@ -76,23 +63,6 @@ def apply_outputs(
     owner: str = "?",
     **extra: Any,
 ) -> Context:
-    """Раскладывает результат стадии по фрейму.
-
-    Голый ключ: ключ — имя поля в результате стадии, значение — имя назначения
-    (``{"token": "next"}`` = взять ``output.token``, положить в переменную
-    ``next``). Ключ с ``.$``: имя назначения берётся из самого ключа, а
-    значение — CEL, которому виден ``vars`` (фрейм до этой ноды) и ``output``.
-
-    Выходы узла применяются как ОДНОВРЕМЕННОЕ присваивание: сначала считаются
-    все значения — против фрейма на входе в узел, — и только потом пишутся.
-    Иначе выражение видело бы записи соседних ключей того же узла, и результат
-    зависел бы от порядка ключей в JSON-объекте, который автор пайплайна не
-    воспринимает как значимый (и который не переживает никакую пересборку
-    словаря).
-
-    Записи в объявленные переменные проверяются по ``types`` (``owner`` — id
-    узла для сообщений об ошибках).
-    """
     output_ns = _as_output_namespace(result)
     frame = ctx
 

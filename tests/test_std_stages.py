@@ -44,8 +44,6 @@ class StdStagesTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts["lst"], [1, 2, 3])
 
     async def test_list_stages_do_not_mutate_input(self):
-        """Стадии не должны менять исходный список на месте: он структурно
-        разделяется между фреймами иммутабельного Context."""
         source = [1, 2]
         nodes = [
             StageNode(id="append", stage="AppendListStage",
@@ -72,10 +70,6 @@ class StdStagesTests(unittest.IsolatedAsyncioTestCase):
             await session.run()
 
 class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
-    """Стадии, у которых литеральная настройка раньше жила в отдельном поле
-    ``config`` узла, а теперь приходит единственным каналом — бакетом
-    ``arguments.const``."""
-
     async def _run(self, nodes, variables=None, artifacts=()):
         pipeline = Pipeline.from_dict({"entry": nodes[0]["id"], "nodes": [
             *nodes,
@@ -87,9 +81,6 @@ class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
         return await session.run(), session
 
     async def test_filter_condition_stays_literal_cel_source(self):
-        """``condition`` в ``const`` не вычисляется при связывании: стадия
-        получает исходник выражения строкой и применяет его к каждому элементу.
-        Сам ``condition`` в CEL-скоуп условия не попадает."""
         result, _ = await self._run([
             {"id": "f", "type": "stage", "stage": "FilterListStage",
              "arguments": {"vars": {"items": "nums"}, "const": {"condition": "item > 2"}},
@@ -110,8 +101,6 @@ class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts["dropped"], {"b": 2})
 
     async def test_string_stages_output_declared_field(self):
-        """``output_key`` удалён: имя поля результата — то, что обещано спекой
-        (``value``), переименование делает бакет ``outputs``."""
         result, _ = await self._run([
             {"id": "concat", "type": "stage", "stage": "ConcatStage",
              "arguments": {"const": {"parts": ["a", "b"], "separator": "-"}},
@@ -124,9 +113,6 @@ class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts["t"], "hi a-b")
 
     async def test_template_placeholder_is_a_bare_name(self):
-        """``str.format`` умеет ходить по атрибутам (``{x.__class__}`` →
-        ``<class 'str'>``), и шаблон из описания пайплайна получал бы доступ
-        к внутренностям значения. Плейсхолдер — только имя аргумента."""
         for template in ("{who.__class__}", "{who[0]}", "{0}", "{}"):
             with self.subTest(template=template):
                 with self.assertRaises(StageContractError):
@@ -191,9 +177,6 @@ class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("бум", str(ctx.exception))
 
     async def test_variable_reference_wins_over_const(self):
-        """Порядок разбора бакетов заменяет прежнюю ручную склейку
-        ``args.get(x, config.get(x))``: ссылка на переменную перекрывает
-        одноимённый литерал."""
         result, _ = await self._run([
             {"id": "inc", "type": "stage", "stage": "IncrementStage",
              "arguments": {"vars": {"current": "n", "delta": "step"},

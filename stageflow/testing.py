@@ -1,8 +1,3 @@
-"""Хелпер для декларативного тестирования пайплайнов.
-
-Тест описывается данными (:class:`PipelineTestSpec`): пайплайн, скармливаемые
-входы и ожидания по result/artifacts/истории пройденных узлов.
-"""
 from __future__ import annotations
 
 import asyncio
@@ -14,7 +9,6 @@ from .core.event import Event
 from .core.pipeline import Pipeline
 from .core.session import Session, SessionResult
 
-#: Сколько ждать появления слушателя ввода, прежде чем отправить input вслепую.
 _LISTENER_TIMEOUT = 1.0
 _POLL_INTERVAL = 0.01
 
@@ -26,13 +20,10 @@ class PipelineTestSpec:
     payload: dict | None = None
     expected_result: dict | None = None
     expected_artifacts: dict | None = None
-    #: Ожидаемая последовательность УЗЛОВ по событиям (повторы подряд схлопываются).
     expected_history: list[str] | None = None
 
 
 async def run_pipeline_test(spec: PipelineTestSpec) -> tuple[SessionResult, list[Event]]:
-    """Прогоняет пайплайн, скармливая ``spec.inputs``, и сверяет результат
-    с ожиданиями; на расхождении — AssertionError."""
     pipeline = (
         spec.pipeline
         if isinstance(spec.pipeline, Pipeline)
@@ -84,8 +75,6 @@ def _check_expectations(
                 raise AssertionError(f"Expected artifact {key}={expected}, got {actual}")
 
     if spec.expected_history is not None:
-        # у одного узла несколько событий (started/completed/emit), а спека
-        # описывает последовательность УЗЛОВ — схлопываем повторы подряд
         seen: list[str] = []
         for event in events:
             node_id = event.stage_id or event.node_id

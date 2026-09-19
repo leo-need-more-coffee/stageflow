@@ -1,12 +1,3 @@
-"""Узел ``parallel`` — конкурентные ветки с независимыми фреймами.
-
-Фрейм иммутабелен, поэтому веткам отдаётся один и тот
-же объект — расходятся они сами, каждой своей записью; наружу сливается только
-diff против бейзлайна.
-
-Две ветки, записавшие одно и то же имя, — ошибка проектирования пайплайна,
-о ней сообщается явно, а не «кто последний, тот и прав».
-"""
 from __future__ import annotations
 
 import asyncio
@@ -23,13 +14,11 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 def _differs(left, right) -> bool:
-    """Сравнение для телеметрии: значение произвольное, и падать на его
-    ``__eq__`` успешный узел не должен — непонятное считаем изменённым."""
     if left is right:
         return False
     try:
         return bool(left != right)
-    except Exception:  # noqa: BLE001 - сравнение чужого объекта
+    except Exception:  # noqa: BLE001
         return True
 
 
@@ -123,10 +112,6 @@ class ParallelNode(Node):
         return await run_with_retry(self, session, ctx, body)
 
     async def _wait_branches(self, session: "Session", tasks: dict[str, asyncio.Task]) -> None:
-        """Дожидается веток. При ``cancel_on_error`` первая упавшая ветка
-        отменяет остальные (и отмена дожидается — к моменту выхода ни одна
-        ветка уже не исполняется); иначе все ветки доигрывают до конца.
-        Отмена самого узла (stop сессии) отменяет и все ветки."""
         mode = asyncio.FIRST_EXCEPTION if self.cancel_on_error else asyncio.ALL_COMPLETED
         try:
             _, pending = await asyncio.wait(tasks.values(), return_when=mode)
@@ -147,8 +132,6 @@ class ParallelNode(Node):
         baseline_keys: frozenset[str],
         branch_contexts: dict[str, Context],
     ) -> Context:
-        """Сливает в ``base`` новые ключи фрейма всех веток; на пересечении —
-        :class:`BranchError` с именами обеих виновных веток."""
         merged = base
         owner: dict[str, str] = {}
         for branch_id, branch_ctx in branch_contexts.items():
@@ -168,16 +151,6 @@ class ParallelNode(Node):
         baseline_keys: frozenset[str],
         branch_contexts: dict[str, Context],
     ) -> list[str]:
-        """Имена, которые ветка переписала, но наружу они не пошли.
-
-        Diff берётся против бейзлайна, поэтому запись ветки в имя, которое
-        существовало ДО ``parallel``, остаётся branch-local scratch (так же
-        ведёт себя AWS Step Functions). Поведение
-        намеренное, но молчаливое: ветка пишет ``n = 101``, наружу выходит
-        ``n = 1``, и по фрейму это никак не видно. Потому имена и едут в
-        ``parallel_completed`` — рядом с конфликтом двух веток, о котором
-        движок и так сообщает явно.
-        """
         dropped = []
         for branch_id, branch_ctx in branch_contexts.items():
             for key in sorted(branch_ctx.var_names() & baseline_keys):

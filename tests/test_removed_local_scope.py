@@ -1,15 +1,3 @@
-"""Слово ``local`` убрано из JSON пайплайна.
-
-Скоуп остался один ещё в 0.6.0, поэтому его имя перестало что-либо различать:
-уровень ``{"local": {...}}`` в ``outputs``/``variables`` был единственным
-возможным, а префикс ``local.`` в ``expose`` схема и так требовала с обеих
-сторон. Namespace выражений переименован в ``vars`` — он не исчез, потому что
-защищает переменную с именем функции CEL (``size``, ``type``, ``has``).
-
-Старую форму нужно отвергать ГРОМКО: принятая молча, она означала бы пайплайн,
-в котором переменная называется ``local``, а ни один объявленный тип не
-проверен.
-"""
 import asyncio
 import unittest
 
@@ -24,7 +12,7 @@ from stageflow.exceptions import (
 @register_stage("PassValueStage")
 class PassValueStage(BaseStage):
     """
-    description: "Отдаёт аргумент value обратно"
+    description: "Echo the value argument back"
     arguments:
       value:
         type: any
@@ -57,8 +45,6 @@ class RemovedLocalScopeTests(unittest.TestCase):
         self.assertIn("local", message)
 
     def test_local_level_in_outputs_rejected(self):
-        """Схема тут пропускает: ключ верхнего уровня теперь и есть имя поля
-        результата. Ловит валидация — прицельным сообщением."""
         pipeline = Pipeline.from_dict(_graph(
             _stage_node(arguments={"const": {"value": 1}},
                         outputs={"local": {"value": "total"}}), entry="p"))
@@ -87,8 +73,6 @@ class RemovedLocalScopeTests(unittest.TestCase):
         self.assertIn("result_local", message)
 
     def test_local_namespace_gone_from_expressions(self):
-        """``local.n`` в выражении — уже не «пустое значение», а ошибка:
-        namespace с таким именем в активацию не кладётся вообще."""
         pipeline = Pipeline.from_dict({
             "nodes": [
                 {"id": "start", "type": "entry", "variables": {"n": 5}, "next": "check"},
@@ -118,8 +102,6 @@ class RemovedLocalScopeTests(unittest.TestCase):
         self.assertEqual(ctx.to_dict(), {"vars": {"a": 1}})
 
     def test_old_snapshot_context_rejected(self):
-        """Снапшот до 0.7.0: восстановить его как пустой фрейм — худший из
-        вариантов, сессия упала бы позже и не там."""
         with self.assertRaises(PipelineDefinitionError):
             Context.from_dict({"local": {"a": 1}})
 

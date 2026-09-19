@@ -1,4 +1,3 @@
-"""Стадии работы со значениями и словарями контекста."""
 from ..core.stage import BaseStage, register_stage
 from ..exceptions import StageContractError
 from ._args import require_dict, require_number

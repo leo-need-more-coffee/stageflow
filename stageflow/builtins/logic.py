@@ -1,4 +1,3 @@
-"""Служебные стадии: проверки, отладочные события, задержки."""
 import asyncio
 
 from ..core.context import Context
@@ -32,8 +31,6 @@ class AssertStage(BaseStage):
         args = self.get_arguments()
         condition = require_present("AssertStage", "condition", args.pop("condition", None))
         message = args.pop("message", "assertion failed")
-        # у стадии нет доступа к фрейму сессии — она видит только свои
-        # резолвнутые аргументы, поэтому они и подставляются как vars.*
         scope = Context(vars=args)
         if not self.session.cel.eval(condition, scope):
             raise AssertionError(message)

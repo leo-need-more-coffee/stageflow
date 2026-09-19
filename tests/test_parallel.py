@@ -13,9 +13,6 @@ class WriteStage(BaseStage):
 
 @register_stage("SlowTraceStage")
 class SlowTraceStage(BaseStage):
-    """Спит и оставляет след в разделяемом списке — по нему видно,
-    доиграла ветка до конца или была отменена."""
-
     trace: list[str] = []
 
     async def run(self):
@@ -26,7 +23,6 @@ class SlowTraceStage(BaseStage):
 
 
 def _parallel_pipeline(branch_outputs: dict[str, str]) -> Pipeline:
-    """Две ветки, каждая пишет константный аргумент в свою (или общую) переменную."""
     return Pipeline.from_dict({
         "entry": "fan_out",
         "nodes": [
@@ -57,9 +53,6 @@ class ParallelTests(unittest.IsolatedAsyncioTestCase):
             await session.run()
 
     async def test_branch_write_to_existing_name_is_reported(self):
-        """Diff берётся против бейзлайна, поэтому запись ветки в имя, жившее
-        до ``parallel``, остаётся branch-local. Молча
-        терять её нельзя: имена уходят в ``parallel_completed``."""
         pipeline = _parallel_pipeline({"left": "n", "right": "fresh"})
         session = Session(id="p", pipeline=pipeline, context=Context(vars={"n": 0}))
         result = await session.run()
@@ -77,8 +70,6 @@ class ParallelTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(completed.payload["dropped"], [])
 
     async def test_cancel_on_error_cancels_siblings(self):
-        """cancel_on_error=true (default): падение ветки отменяет остальных —
-        медленная ветка не должна доиграть до конца."""
         SlowTraceStage.trace = []
         pipeline = Pipeline.from_dict({
             "entry": "fan_out",

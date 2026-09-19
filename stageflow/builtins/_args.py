@@ -1,8 +1,3 @@
-"""Общие проверки аргументов builtin-стадий.
-
-Единые сообщения об ошибках и один тип исключения
-(:class:`StageContractError`) вместо разнобоя голых ValueError.
-"""
 from __future__ import annotations
 
 from typing import Any

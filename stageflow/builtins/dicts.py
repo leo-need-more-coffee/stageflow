@@ -1,4 +1,3 @@
-"""Стадии работы со словарями."""
 from ..core.stage import BaseStage, register_stage
 from ._args import require_dict, require_list
 

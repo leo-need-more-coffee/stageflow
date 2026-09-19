@@ -52,7 +52,7 @@ class SessionControlTests(unittest.IsolatedAsyncioTestCase):
 
         task = asyncio.create_task(session.run())
         await asyncio.sleep(0.05)
-        self.assertFalse(task.done())  # на паузе не начали исполнять узлы
+        self.assertFalse(task.done())
 
         await session.input("command", {"name": "resume"})
         result = await asyncio.wait_for(task, timeout=1.0)

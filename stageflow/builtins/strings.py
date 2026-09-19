@@ -1,9 +1,3 @@
-"""Стадии работы со строками.
-
-Стадия не имеет доступа к фрейму сессии: все
-значения приходят уже резолвнутыми аргументами, никаких «путей в контексте»
-здесь нет.
-"""
 import string
 
 from ..core.stage import BaseStage, register_stage
@@ -12,14 +6,6 @@ from ._args import require_list, require_present
 
 
 class _NameOnlyFormatter(string.Formatter):
-    """Формат-строка Python умеет ходить по атрибутам и индексам
-    (``"{x.__class__}"`` → ``<class 'str'>``), то есть шаблон перестаёт быть
-    данными и получает доступ к внутренностям значения. Шаблон приходит из
-    описания пайплайна, а не снаружи, так что дыры наружу тут нет — но
-    декларативность теряется, поэтому плейсхолдер здесь — строго имя
-    аргумента: ни точек, ни скобок, ни номеров позиций.
-    """
-
     def get_field(self, field_name, args, kwargs):
         if not field_name.isidentifier():
             raise StageContractError(

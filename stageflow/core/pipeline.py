@@ -1,10 +1,3 @@
-"""Граф пайплайна: разбор JSON и статическая валидация.
-
-Валидация двухслойная: JSON Schema (форма, ``docs/schemas/pipeline.json``) +
-перекрёстные проверки графа. Вторая — чистая полиморфная раздача: каждый узел
-проверяет себя сам, здесь остаются только
-общеграфовые проверки.
-"""
 from __future__ import annotations
 
 from jsonschema import ValidationError as _SchemaError
@@ -39,7 +32,6 @@ class Pipeline:
         self.subpipelines = subpipelines or {}
         self.typesystem = typesystem or TypeSystem.empty()
 
-    # ------------------------------------------------------------ разбор
 
     @classmethod
     def from_dict(cls, data: dict) -> "Pipeline":
@@ -74,7 +66,6 @@ class Pipeline:
                 f"{what} schema validation failed: {exc.message}"
             ) from exc
 
-    # ------------------------------------------------------------ доступ
 
     def has_node(self, node_id: str) -> bool:
         return node_id in self._nodes_map
@@ -93,9 +84,6 @@ class Pipeline:
     def reachable(
         self, starts: list[str | None], stop_at: frozenset[str] = frozenset()
     ) -> frozenset[str]:
-        """Узлы, достижимые по рёбрам управления от ``starts``, не заходя в
-        ``stop_at``. На этом строятся области: тело ``try`` — то, что
-        достижимо из body, но не из точки выхода."""
         seen: set[str] = set()
         queue = [node_id for node_id in starts if node_id]
         while queue:
@@ -106,19 +94,11 @@ class Pipeline:
             queue.extend(self.get_node(node_id).order_targets())
         return frozenset(seen)
 
-    # -------------------------------------------------------- валидация
 
     def entry_nodes(self) -> list[EntryNode]:
         return [node for node in self.nodes if isinstance(node, EntryNode)]
 
     def _entry_node_errors(self) -> list[str]:
-        """Узел ``entry`` — это НАЧАЛО графа, а не обычный узел.
-
-        Отсюда три ограничения, без которых «точка входа» перестаёт что-либо
-        значить: он один, он и есть точка входа пайплайна, и вернуться в него
-        нельзя (посев с семантикой «по умолчанию» на втором проходе просто
-        ничего не сделает, зато в графе нарисуется ложный старт).
-        """
         entries = self.entry_nodes()
         if not entries:
             return []
@@ -142,9 +122,6 @@ class Pipeline:
         errors: list[str] = []
         entry_nodes = self.entry_nodes()
         if not self.entry:
-            # узлы entry есть, но точка входа не вывелась — значит их больше
-            # одного; про это скажет _entry_node_errors, и повторять здесь
-            # общее «не задан entry» только сбивало бы с толку
             if not entry_nodes:
                 errors.append("В пайплайне не задан entry")
         elif self.entry not in self._nodes_map:
@@ -162,17 +139,11 @@ class Pipeline:
         return errors
 
     def validate(self) -> None:
-        """Кидает :class:`PipelineValidationError` со всеми нарушениями разом —
-        а не по одному, чтобы автор пайплайна чинил их одним заходом."""
         errors = self.collect_errors()
         if errors:
             raise PipelineValidationError(errors)
 
 
 def _sole_entry_node(nodes: list[Node]) -> str | None:
-    """Точка входа, выведенная из графа: если есть ровно один узел ``entry``,
-    поле ``entry`` пайплайна необязательно — начало видно по самому графу.
-    Нескольких таких узлов не бывает (``_entry_node_errors``), поэтому
-    неоднозначность разрешать не нужно: вывод молчит, ошибку даёт валидация."""
     found = [node.id for node in nodes if isinstance(node, EntryNode)]
     return found[0] if len(found) == 1 else None

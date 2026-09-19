@@ -1,10 +1,3 @@
-"""События телеметрии и декларации контрактов стадии.
-
-``Event`` — единица истории исполнения: копится в ``Session.event_history``
-и уходит во внешний ``event_handler``. ``EventSpec``/``InputSpec`` — то, что
-стадия декларирует о себе: какие события она вправе эмитить и какой ввод
-принимать (со схемами payload, см. ``payload_schema``).
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -16,8 +9,6 @@ from .payload_schema import schema_to_jsonable
 
 @dataclass(frozen=True, slots=True)
 class InputSpec:
-    """Декларация типа пользовательского ввода, допустимого для стадии."""
-
     type: str | None = None
     description: str | None = None
     required: bool = True
@@ -36,8 +27,6 @@ class InputSpec:
 
 @dataclass(frozen=True, slots=True)
 class EventSpec:
-    """Декларация типа события, которое стадия вправе эмитить."""
-
     type: str
     description: str | None = None
     payload_schema: object | None = None
@@ -52,8 +41,6 @@ class EventSpec:
 
 @dataclass(slots=True)
 class Event:
-    """Запись телеметрии исполнения; сериализуется в снапшоты и наружу."""
-
     type: str
     session_id: str
     node_id: str | None = None

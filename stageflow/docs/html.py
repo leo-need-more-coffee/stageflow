@@ -1,10 +1,3 @@
-"""Генерация HTML-шпаргалки по узлам и стадиям (без записи файлов).
-
-Использование::
-
-    from stageflow.docs.html import generate_docs_assets
-    html_page, schema, stages_json = generate_docs_assets()
-"""
 from __future__ import annotations
 
 import html
@@ -14,11 +7,8 @@ from typing import Any, Callable
 from ..core.stage import get_stages, get_stages_by_category
 from .schema import generate_pipeline_schema, generate_stages_json
 
-# Типы-хинты рендерятся в примерах без кавычек — это заготовки для
-# подстановки, а не строковые значения.
 _TYPE_HINTS = {"string", "str", "number", "int", "float", "bool", "any", "object", "list"}
 
-#: Порядок секций «Node types»; ключи — $defs в pipeline.json.
 _NODE_DEF_KEYS = (
     "entry_node",
     "stage_node",
@@ -31,17 +21,7 @@ _NODE_DEF_KEYS = (
 )
 
 
-# ------------------------------------------------------------------ примитивы
-
-
 def _render_json(data: Any) -> str:
-    """JSON-подобный рендер примеров: type-хинты остаются без кавычек.
-
-    Всё остальное — настоящий JSON: раздел прямо предлагает скопировать
-    заготовку, поэтому запятые между ключами и ``null`` вместо питоновского
-    ``None`` тут не косметика (до 0.7.0 пример JSON'ом не был).
-    """
-
     def fmt(val: Any, indent: int = 0) -> str:
         pad = "  " * indent
         if isinstance(val, dict):
@@ -82,7 +62,6 @@ def _field_row(name: str, info_parts: list[str], badge: str = "") -> str:
 
 
 def _stage_fields_table(fields: list[dict[str, Any]], empty_label: str) -> str:
-    """Таблица полей стадии (спека из docstring)."""
     if not fields:
         return f"<div class='muted'>{html.escape(empty_label)}</div>"
     rows = []
@@ -99,7 +78,6 @@ def _stage_fields_table(fields: list[dict[str, Any]], empty_label: str) -> str:
 
 
 def _schema_fields_table(props: dict[str, Any], required: list[str]) -> str:
-    """Таблица свойств узла (определение из JSON Schema)."""
     required_set = set(required or [])
     rows = []
     for name, spec in props.items():
@@ -116,7 +94,6 @@ def _schema_fields_table(props: dict[str, Any], required: list[str]) -> str:
 
 
 def _placeholder_from_hint(hint: Any) -> Any:
-    """Type-хинт из спеки -> значение-заготовка для примера использования."""
     if isinstance(hint, dict):
         return {key: _placeholder_from_hint(value) for key, value in hint.items()}
     if isinstance(hint, list):
@@ -144,9 +121,6 @@ def _placeholder_map(
         for field in fields or []
         if field.get("name")
     }
-
-
-# -------------------------------------------------------------------- секции
 
 
 def build_nodes_section(schema: dict[str, Any]) -> str:
@@ -181,16 +155,11 @@ def _stage_card(stage_cls: type, category: str) -> str:
     arguments = specs.get("arguments") or []
     outputs = specs.get("outputs") or []
 
-    # ``*`` в спеке означает «любые другие аргументы» — в примере ему нечего
-    # подставить, поэтому в заготовку он не попадает
     named_args = [f for f in arguments if f.get("name") != "*"]
     example_node = {
         "id": stage_name.lower(),
         "type": "stage",
         "stage": stage_name,
-        # аргументы показываются бакетом ``const`` (литералы) — самый простой
-        # рабочий вариант; бакет ``vars`` подставляется вместо него, когда
-        # значение берётся из переменной
         **(
             {"arguments": {"const": _placeholder_map(
                 named_args, lambda f: f.get("default", _placeholder_from_hint(f.get("type")))
@@ -268,9 +237,6 @@ def build_example_block(schema: dict[str, Any]) -> str:
     example = {
         "api_version": schema.get("properties", {}).get("api_version", {}).get("default"),
         "nodes": [
-            # точка входа задана узлом, поэтому поле `entry` не нужно, а
-            # стартовые переменные лежат в самом описании: пайплайн
-            # запускается как есть, без сборки контекста в коде
             {
                 "id": "start",
                 "type": "entry",
@@ -302,8 +268,6 @@ def build_example_block(schema: dict[str, Any]) -> str:
     </section>
     """
 
-
-# ------------------------------------------------------------------ страница
 
 _CSS = """
     :root {
@@ -465,8 +429,6 @@ def build_html(schema: dict[str, Any], stages_json: str) -> str:
 
 
 def generate_docs_assets() -> tuple[str, dict, str]:
-    """Возвращает ``(html_page, pipeline_schema, stages_json)`` по
-    зарегистрированным стадиям, ничего не записывая на диск."""
     stages = get_stages()
     schema = generate_pipeline_schema(stages)
     stages_json = generate_stages_json(stages)

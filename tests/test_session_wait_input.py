@@ -32,8 +32,6 @@ class SessionWaitInputTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result2["payload"]["value"], 2)
 
     async def test_second_input_is_buffered_when_future_already_resolved(self):
-        """Уже разрешённая, но не снятая футура — не живой получатель:
-        второе сообщение обязано попасть в буфер, а не потеряться."""
         session = Session(id="s3", pipeline=_make_pipeline(), context=Context())
         waiter = session.start_wait_input("msg")
 

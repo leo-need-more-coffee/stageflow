@@ -60,9 +60,9 @@ class TypeExpressionTests(unittest.TestCase):
         _check("string", "hi")
         _check("bool", True)
         _check("number", 1.5)
-        _check("float", 3)  # int допустим там, где ждут float
+        _check("float", 3)
         with self.assertRaises(TypeCheckError):
-            _check("int", True)  # bool — не int
+            _check("int", True)
         with self.assertRaises(TypeCheckError):
             _check("string", 5)
 
@@ -197,7 +197,6 @@ class RuntimeTypeCheckTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts["untyped"], 1)
 
     async def test_expose_write_is_type_checked(self):
-        """``expose`` — тоже запись во фрейм, значит проходит ту же проверку."""
         pipeline_data = {
             "entry": "produce",
             "variables": {"copy": "int"},
@@ -218,7 +217,7 @@ class StaticTypeCheckTests(unittest.TestCase):
     def test_argument_hint_mismatch_fails_validation(self):
         pipeline_data = {
             "entry": "typed",
-            "variables": {"n": "string"},  # стадия ждёт int
+            "variables": {"n": "string"},
             "nodes": [
                 {"id": "typed", "type": "stage", "stage": "TypedIntStage",
                  "arguments": {"vars": {"count": "n"}}, "next": "end"},
@@ -233,7 +232,7 @@ class StaticTypeCheckTests(unittest.TestCase):
     def test_output_hint_mismatch_fails_validation(self):
         pipeline_data = {
             "entry": "typed",
-            "variables": {"n": "int", "out": "int"},  # выход стадии — string
+            "variables": {"n": "int", "out": "int"},
             "nodes": [
                 {"id": "typed", "type": "stage", "stage": "TypedIntStage",
                  "arguments": {"vars": {"count": "n"}},
@@ -307,7 +306,7 @@ class SubpipelineTypeTests(unittest.IsolatedAsyncioTestCase):
             "subpipelines": {
                 "make_user": {
                     "entry": "produce",
-                    "variables": {"made": "User"},  # тип из родителя
+                    "variables": {"made": "User"},
                     "nodes": [
                         {"id": "produce", "type": "stage", "stage": "ProduceStage",
                          "arguments": {"const": {"value": {"id": 7}}},
@@ -347,10 +346,6 @@ class SubpipelineTypeTests(unittest.IsolatedAsyncioTestCase):
             await session.run()
 
 class RemovedGlobalScopeTests(unittest.TestCase):
-    """Скоуп ``global`` удалён. Пайплайн, который
-    им пользовался, должен отвергаться ГРОМКО — иначе запись просто исчезала бы
-    молча, а это худший из возможных вариантов миграции."""
-
     def _rejected(self, data):
         from stageflow.exceptions import PipelineDefinitionError
         with self.assertRaises((PipelineDefinitionError, TypeDeclarationError)) as caught:
@@ -367,10 +362,6 @@ class RemovedGlobalScopeTests(unittest.TestCase):
         self.assertIn("global", message)
 
     def test_global_bucket_in_outputs_rejected(self):
-        """С 0.7.0 ключ верхнего уровня в ``outputs`` — имя поля результата, и
-        схема такую форму пропускает; ловит её валидация графа, отдельным
-        сообщением про убранный уровень скоупа (иначе текст был бы
-        «стадия не возвращает поле 'global'»)."""
         pipeline = Pipeline.from_dict({
             "entry": "p", "nodes": [
                 {"id": "p", "type": "stage", "stage": "ProduceStage",

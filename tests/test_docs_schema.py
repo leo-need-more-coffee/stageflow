@@ -21,7 +21,7 @@ class DocStage(BaseStage):
       base_url:
         type: str
         optional: true
-        description: "Кастомный endpoint для LLM"
+        description: "Custom LLM endpoint"
         default: "asdasd"
     outputs:
       baz:
@@ -91,8 +91,6 @@ class DocsSchemaTests(unittest.TestCase):
         self.assertEqual(doc_spec["color"], "#ff8800")
 
     def test_visual_hints_are_optional(self):
-        """Стадия без icon/color остаётся валидной: редактор подставит
-        монограмму и цвет категории."""
         class PlainStage(BaseStage):
             """
             description: "No visual hints"
@@ -108,8 +106,6 @@ class DocsSchemaTests(unittest.TestCase):
         self.assertIsNone(spec["color"])
 
     def test_icon_can_be_svg_reference(self):
-        """icon принимает не только глиф: ссылку, data-URI или разметку —
-        редактор сам решает, как это отрисовать."""
         class SvgIconStage(BaseStage):
             """
             description: "SVG icon"
@@ -140,14 +136,6 @@ class DocsSchemaTests(unittest.TestCase):
         self.assertIsInstance(specs["DocStage"]["arguments"], list)
 
 class NodeSchemaDispatchTests(unittest.TestCase):
-    """Схема узла выбирается по его ``type`` через ``if/then``.
-
-    До 0.6.0 здесь стоял OpenAPI-style ``discriminator`` — ключевое слово,
-    которого в JSON Schema нет; ``jsonschema`` молча его игнорировал, поэтому
-    схемы ``stage_node``/``condition_node``/… не применялись вообще, и любая
-    опечатка в имени поля узла проходила валидацию.
-    """
-
     @staticmethod
     def _errors(node):
         from stageflow import get_stages
@@ -176,9 +164,6 @@ class NodeSchemaDispatchTests(unittest.TestCase):
         self.assertTrue(any("condition" in e for e in errors), errors)
 
     def test_every_registered_node_type_has_a_branch(self):
-        """Новый тип узла легко зарегистрировать и забыть добавить в схему —
-        тогда его поля не проверяются вообще (ровно этим и был сломан
-        диспетчер до 0.6.0, только для всех типов сразу)."""
         from stageflow import get_node_types
         from stageflow.docs.schema import load_pipeline_schema
         schema = load_pipeline_schema()
@@ -189,8 +174,6 @@ class NodeSchemaDispatchTests(unittest.TestCase):
         self.assertEqual(dispatched, set(get_node_types()))
 
     def test_unregistered_stage_name_rejected(self):
-        """Ради этого `generate_pipeline_schema` и вставляет enum имён стадий —
-        до починки диспетчера вставка тоже была декоративной."""
         errors = self._errors({"id": "p", "type": "stage", "stage": "NoSuchStage",
                                "next": "end"})
         self.assertTrue(any("NoSuchStage" in e for e in errors), errors)

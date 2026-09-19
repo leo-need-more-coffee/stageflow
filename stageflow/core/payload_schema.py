@@ -1,9 +1,3 @@
-"""Валидация payload по схемам из type-хинтов и их сериализация в JSON.
-
-Схема — это обычные питоновские хинты и литералы: ``int``, ``list[str]``,
-``Optional[int]``, ``{"user": {"id": int}}``, ``[{"id": int}]``. Используется
-для ``payload_schema`` в ``EventSpec``/``InputSpec``.
-"""
 from __future__ import annotations
 
 from typing import Any, Union, get_args, get_origin
@@ -12,8 +6,6 @@ from ..exceptions import PayloadValidationError
 
 
 def validate_schema(value: Any, schema: object, path: str = "payload") -> None:
-    """Проверяет ``value`` против ``schema``; кидает
-    :class:`PayloadValidationError` с точным путём до несовпадения."""
     if schema is None or schema is Any or schema is object:
         return
 
@@ -90,8 +82,6 @@ _TYPE_NAMES = {
 
 
 def schema_to_jsonable(schema: object) -> object:
-    """Переводит схему из type-хинтов в JSON-сериализуемую структуру
-    (для ``stages.json`` и HTML-документации)."""
     if schema is None:
         return None
     if schema is Any or schema is object:

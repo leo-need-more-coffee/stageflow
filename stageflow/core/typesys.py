@@ -1,30 +1,3 @@
-"""Типизация переменных контекста.
-
-Переменные живут во фрейме и ходят между узлами сами — поэтому типы
-объявляются на уровне пайплайна, а не на узлах:
-
-- секция ``"types"`` — именованные типы: структуры с полями (возможно
-  рекурсивные) или алиасы выражений;
-- секция ``"variables"`` — типы переменных фрейма: плоский словарь
-  ``имя -> тип`` (уровня скоупа нет — его нет и в JSON пайплайна).
-
-Язык типовых выражений:
-
-- примитивы: ``string``, ``int``, ``float``, ``number`` (int|float),
-  ``bool``, ``any``, ``null``;
-- контейнеры: ``list<T>``, ``map<T>`` (строковые ключи);
-- союз: ``T|U``; сокращение ``T?`` = ``T|null``;
-- имя структуры или алиаса из ``"types"``.
-
-Структура в ``"types"``: mapping «поле -> тип» (сокращённая форма) либо
-``{"fields": {...}, "strict": true}``. Суффикс ``?`` на имени поля делает его
-необязательным; ``strict`` запрещает лишние поля.
-
-Типизация ПОСТЕПЕННАЯ: необъявленная переменная не проверяется вовсе, поэтому
-пайплайны без секций типов работают как раньше. Объявленная — проверяется
-статически (сверка с хинтами спек стадий при валидации графа) и динамически
-(на каждой записи в скоуп и на входном контексте сессии).
-"""
 from __future__ import annotations
 
 import re
@@ -37,15 +10,7 @@ from .context import Context
 _IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
-# ------------------------------------------------------------- модель типов
-
-
 class VarType:
-    """База типа. ``check`` кидает :class:`TypeCheckError` с путём до
-    несовпадения; ``kinds`` — множество «родов» значений для статической
-    сверки с хинтами стадий; ``refs`` — имена задействованных именованных
-    типов (для проверки, что все ссылки разрешимы)."""
-
     def check(self, value: Any, path: str, registry: "TypeRegistry") -> None:
         raise NotImplementedError
 
@@ -132,9 +97,6 @@ class ListType(VarType):
 
 @dataclass(frozen=True)
 class MapType(VarType):
-    """Словарь с произвольными строковыми ключами и однородными значениями —
-    в отличие от структуры, у которой набор полей фиксирован."""
-
     value: VarType
 
     def check(self, value, path, registry):
@@ -227,9 +189,6 @@ class StructType(VarType):
 
 @dataclass(frozen=True)
 class NamedRef(VarType):
-    """Ссылка на тип из секции ``"types"``. Разрешается при проверке — это
-    позволяет рекурсивные структуры (``Tree`` с ``children: list<Tree>``)."""
-
     name: str
 
     def check(self, value, path, registry):
@@ -245,8 +204,6 @@ class NamedRef(VarType):
         return self.name
 
 
-# ------------------------------------------------------------------ парсер
-
 _PRIMITIVES: dict[str, VarType] = {
     "any": AnyType(),
     "null": NullType(),
@@ -260,7 +217,6 @@ _PRIMITIVES: dict[str, VarType] = {
 
 
 def _split_top_level(expr: str, sep: str) -> list[str]:
-    """Разбивает по ``sep`` только на верхнем уровне вложенности ``<...>``."""
     parts, depth, start = [], 0, 0
     for idx, char in enumerate(expr):
         if char == "<":
@@ -275,8 +231,6 @@ def _split_top_level(expr: str, sep: str) -> list[str]:
 
 
 def parse_type(expr: str) -> VarType:
-    """Разбирает типовое выражение; на любой синтаксической ошибке —
-    :class:`TypeDeclarationError`."""
     if not isinstance(expr, str) or not expr.strip():
         raise TypeDeclarationError(f"Пустое или нестроковое типовое выражение: {expr!r}")
     expr = expr.strip()
@@ -304,7 +258,6 @@ def parse_type(expr: str) -> VarType:
 
 
 def _parse_type_value(name: str, spec: Any) -> VarType:
-    """Значение объявления: строка-выражение или dict (анонимная структура)."""
     if isinstance(spec, str):
         return parse_type(spec)
     if isinstance(spec, dict):
@@ -315,8 +268,6 @@ def _parse_type_value(name: str, spec: Any) -> VarType:
 
 
 def parse_struct(name: str, data: dict) -> StructType:
-    """Структура: ``{"fields": {...}, "strict": bool}`` либо сокращённо —
-    сам mapping «поле -> тип». Суффикс ``?`` на имени поля = optional."""
     if "fields" in data:
         fields_raw = data["fields"]
         strict = bool(data.get("strict", False))
@@ -337,12 +288,7 @@ def parse_struct(name: str, data: dict) -> StructType:
     return StructType(name=name, fields=fields, strict=strict)
 
 
-# --------------------------------------------------------- реестр и система
-
-
 class TypeRegistry:
-    """Именованные типы пайплайна (секция ``"types"``)."""
-
     def __init__(self, types: dict[str, VarType] | None = None):
         self._types = types or {}
 
@@ -373,7 +319,6 @@ class TypeRegistry:
         return errors
 
 
-#: Род значений, допустимый для каждого типа-хинта из docstring-спеки стадии.
 _HINT_KINDS: dict[str, frozenset[str]] = {
     "string": frozenset({"string"}),
     "str": frozenset({"string"}),
@@ -388,10 +333,6 @@ _HINT_KINDS: dict[str, frozenset[str]] = {
 
 
 class TypeSystem:
-    """Объявления типов одного пайплайна: реестр именованных типов + типы
-    переменных фрейма. Пустая система (нет секций) — все проверки no-op.
-    """
-
     def __init__(self, registry: TypeRegistry, variables: dict[str, VarType]):
         self._registry = registry
         self._variables = variables
@@ -406,9 +347,6 @@ class TypeSystem:
         declarations = variables_data or {}
         for legacy in ("local", "global"):
             if legacy in declarations and isinstance(declarations[legacy], dict):
-                # форма со скоупом (до 0.7.0): молча трактовать её как
-                # переменную по имени 'local' значило бы принять пайплайн и
-                # не проверить ни одного объявленного типа
                 raise TypeDeclarationError(
                     f"variables: уровень скоупа '{legacy}' убран в 0.7.0 — "
                     'объявления плоские: {"n": "int"}'
@@ -419,7 +357,6 @@ class TypeSystem:
         }
         return cls(registry, variables)
 
-    # ---------------------------------------------------------- статика
 
     def has_declarations(self) -> bool:
         return bool(self._variables)
@@ -438,30 +375,21 @@ class TypeSystem:
         return errors
 
     def hint_compatible(self, declared: VarType, hint: Any) -> bool:
-        """Совместимость объявленного типа переменной с типом-хинтом из спеки
-        стадии. Хинты — плоские метки, поэтому сверка по «роду» значения;
-        неизвестный хинт трактуется как any. Для союзов достаточно пересечения
-        (лояльно: ``int?`` совместим с ``int``, отсутствие обрабатывает
-        стадия)."""
         if not isinstance(hint, str):
             return True
         allowed = _HINT_KINDS.get(hint.lower())
-        if allowed is None:  # 'any' и неизвестные метки
+        if allowed is None:
             return True
         declared_kinds = declared.kinds(self._registry)
         return bool(declared_kinds & allowed) or "any" in declared_kinds or "null" in declared_kinds
 
     def expose_compatible(self, src: VarType, dst: VarType) -> bool:
-        """``expose`` — чистое копирование, поэтому требуется совпадение
-        типов (структурное равенство) либо ``any`` с любой стороны."""
         if isinstance(src, AnyType) or isinstance(dst, AnyType):
             return True
         return src == dst
 
-    # ---------------------------------------------------------- рантайм
 
     def check_write(self, name: str, value: Any, where: str) -> None:
-        """Проверяет запись во фрейм; необъявленная переменная — no-op."""
         declared = self.declared(name)
         if declared is None:
             return
@@ -471,8 +399,6 @@ class TypeSystem:
             raise TypeCheckError(f"{where}: {exc}") from None
 
     def check_context(self, ctx: Context, where: str) -> None:
-        """Проверяет присутствующие в контексте объявленные переменные
-        (отсутствующие появятся позже — их проверят записи)."""
         for name in self._variables:
             if ctx.has_var(name):
                 self.check_write(name, ctx.get_var(name), where)

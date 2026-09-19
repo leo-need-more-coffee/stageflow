@@ -1,4 +1,3 @@
-"""Узел ``entry`` — точка входа графа."""
 import asyncio
 import unittest
 
@@ -16,7 +15,7 @@ from stageflow.exceptions import PipelineDefinitionError, PipelineValidationErro
 @register_stage("EchoLocalStage")
 class EchoLocalStage(BaseStage):
     """
-    description: "Отдаёт полученный аргумент обратно"
+    description: "Echo the received argument back"
     arguments:
       value:
         type: any
@@ -30,8 +29,6 @@ class EchoLocalStage(BaseStage):
 
 
 def _pipeline(entry_node: dict, *rest: dict, **top) -> dict:
-    """Пайплайн из узла entry и хвоста; ``entry`` намеренно не задан — его
-    выводит сам граф."""
     return {"nodes": [entry_node, *rest], **top}
 
 
@@ -42,9 +39,6 @@ def _run(data: dict, context: Context | None = None):
 
 
 class EntryNodeSeedTests(unittest.TestCase):
-    """Посев переменных: пайплайн описывает свой стартовый фрейм сам, поэтому
-    запускается как есть, без сборки ``Context`` вызывающим кодом."""
-
     def test_literals_land_in_frame(self):
         result = _run(_pipeline(
             {"id": "start", "type": "entry",
@@ -100,9 +94,6 @@ class EntryNodeSeedTests(unittest.TestCase):
 
 
 class EntryDefaultsTests(unittest.TestCase):
-    """Посев — это ЗНАЧЕНИЯ ПО УМОЛЧАНИЮ: пришедшее снаружи побеждает, иначе
-    один и тот же пайплайн нельзя было бы параметризовать, не правя JSON."""
-
     def test_incoming_value_wins(self):
         result = _run(_pipeline(
             {"id": "start", "type": "entry", "variables": {"n": 5}, "next": "done"},
@@ -118,8 +109,6 @@ class EntryDefaultsTests(unittest.TestCase):
         self.assertEqual(result.artifacts, {"n": 42, "m": 1})
 
     def test_occupied_name_skips_expression(self):
-        """Занятое имя не вычисляется вовсе: выражение, которое упало бы на
-        пустом фрейме, не должно ронять прогон, если значение уже пришло."""
         result = _run(_pipeline(
             {"id": "start", "type": "entry", "variables": {"n.$": "vars.missing + 1"},
              "next": "done"},
@@ -128,8 +117,6 @@ class EntryDefaultsTests(unittest.TestCase):
         self.assertEqual(result.artifacts, {"n": 9})
 
     def test_defaults_fill_subpipeline_inputs(self):
-        """У субпайплайна тот же приём: родитель передаёт что хочет, остальное
-        ребёнок берёт из своего entry."""
         result = _run({
             "entry": "call",
             "nodes": [
@@ -151,9 +138,6 @@ class EntryDefaultsTests(unittest.TestCase):
 
 
 class EntrySeedOrderTests(unittest.TestCase):
-    """Переменные связываются по зависимостям: выражение видит соседнюю
-    переменную того же узла, но результат не зависит от порядка ключей."""
-
     def _run_pair(self, variables: dict):
         return _run(_pipeline(
             {"id": "start", "type": "entry", "variables": variables, "next": "done"},
@@ -167,8 +151,6 @@ class EntrySeedOrderTests(unittest.TestCase):
         )
 
     def test_key_order_does_not_matter(self):
-        """Тот же набор, порядок ключей обратный — результат обязан совпасть
-        (ровно на этом горели выходы узла в старой модели памяти)."""
         self.assertEqual(
             self._run_pair({"total.$": "vars.n * 2", "n": 5}),
             self._run_pair({"n": 5, "total.$": "vars.n * 2"}),
@@ -184,8 +166,6 @@ class EntrySeedOrderTests(unittest.TestCase):
         self.assertEqual(result.artifacts, {"a": 1, "b": 2, "c": 3})
 
     def test_incoming_value_wins_over_dependency_chain(self):
-        """Значение снаружи перекрывает default, и производные считаются уже
-        от него — иначе параметризация не имела бы смысла."""
         result = _run(_pipeline(
             {"id": "start", "type": "entry",
              "variables": {"n": 5, "total.$": "vars.n * 2"}, "next": "done"},
@@ -195,10 +175,6 @@ class EntrySeedOrderTests(unittest.TestCase):
 
 
 class EntryNonAsciiNameTests(unittest.TestCase):
-    """Имя переменной может быть не-ASCII (``итог``), и это полноценное имя:
-    точечную форму доступа CEL допускает только для ASCII-идентификаторов,
-    поэтому такое имя адресуется индексом — ``vars['итог']``."""
-
     def test_name_is_usable_through_index_access(self):
         result = _run(_pipeline(
             {"id": "start", "type": "entry", "variables": {
@@ -211,8 +187,6 @@ class EntryNonAsciiNameTests(unittest.TestCase):
         self.assertEqual(result.artifacts, {"итог": 10, "вывод": "итог = 10"})
 
     def test_index_access_counts_as_dependency(self):
-        """Порядок связывания считается по ОБЕИМ формам доступа: пропущенная
-        индексная ссылка дала бы вычисление до записи зависимости."""
         node = Pipeline.from_dict(_pipeline(
             {"id": "start", "type": "entry", "variables": {
                 "вывод.$": "string(vars['итог'])", "итог.$": "vars.n * 2", "n": 5,
@@ -233,8 +207,6 @@ class EntryNonAsciiNameTests(unittest.TestCase):
 
 
 class EntryPointDerivationTests(unittest.TestCase):
-    """Поле ``entry`` пайплайна выводится из графа: начало видно по узлу."""
-
     def test_entry_field_optional(self):
         pipeline = Pipeline.from_dict(_pipeline(
             {"id": "start", "type": "entry", "next": "done"},
@@ -273,8 +245,6 @@ class EntryPointDerivationTests(unittest.TestCase):
         self.assertIn("больше одного", errors)
 
     def test_two_entry_nodes_without_field_report_only_the_cause(self):
-        """Точка входа не вывелась именно потому, что узлов entry два, —
-        общее «не задан entry» тут только сбивало бы с толку."""
         pipeline = Pipeline.from_dict(_pipeline(
             {"id": "a", "type": "entry", "next": "done"},
             {"id": "b", "type": "entry", "next": "done"},
@@ -322,8 +292,6 @@ class EntryValidationTests(unittest.TestCase):
         self.assertIn("пустое выражение", " ".join(pipeline.collect_errors()))
 
     def test_bad_variable_name_rejected_by_schema(self):
-        """Имя переменной — идентификатор (кириллица легальна, пробел нет).
-        Форму ловит схема, смысл — ``EntryNode._validate_names``."""
         with self.assertRaises(PipelineDefinitionError):
             Pipeline.from_dict(_pipeline(
                 {"id": "start", "type": "entry", "variables": {"не имя": 1},
@@ -337,8 +305,6 @@ class EntryValidationTests(unittest.TestCase):
         self.assertEqual(ok.collect_errors(), [])
 
     def test_declared_type_checked_statically(self):
-        """Значение посева известно в описании пайплайна, поэтому расхождение с
-        объявленным типом — ошибка валидации, а не рантайма."""
         pipeline = Pipeline.from_dict(_pipeline(
             {"id": "start", "type": "entry", "variables": {"n": "пять"}, "next": "done"},
             {"id": "done", "type": "terminal"},

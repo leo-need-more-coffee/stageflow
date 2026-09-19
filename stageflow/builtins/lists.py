@@ -1,9 +1,3 @@
-"""Стадии работы со списками.
-
-Все стадии возвращают НОВЫЙ список, не мутируя входной: значения фрейма
-структурно разделяются между фреймами, и мутация
-на месте меняла бы данные задним числом во всех фреймах, где список виден.
-"""
 from ..core.context import Context
 from ..core.stage import BaseStage, register_stage
 from ..exceptions import StageContractError
@@ -103,7 +97,6 @@ class FilterListStage(BaseStage):
         if condition is None:
             raise StageContractError("FilterListStage: требуется аргумент 'condition'")
         items = require_list("FilterListStage", "items", args.pop("items", []))
-        # остальные аргументы стадии видны условию как vars.*, элемент — как item
         scope = Context(vars=args)
         result = [item for item in items if self.session.cel.eval(condition, scope, item=item)]
         self.set_outputs({"list": result})

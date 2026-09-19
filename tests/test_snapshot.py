@@ -22,19 +22,16 @@ class SessionSnapshotTests(unittest.IsolatedAsyncioTestCase):
         pipeline = Pipeline.from_dict(pipeline_json)
         session = Session(id="snap", pipeline=pipeline, context=Context())
 
-        # Run until waiting for input, then snapshot state.
         task = asyncio.create_task(session.run())
         while not session.is_waiting_for("go"):
             await asyncio.sleep(0.01)
         snap = session.snapshot()
-        # Finish original session to avoid leak.
         await session.input("go", {"v": 1})
         await task
 
         self.assertEqual(snap["current_node_id"], "wait")
         self.assertEqual(snap.get("context", {}).get("vars", {}), {})
 
-        # Restore from snapshot and resume.
         restored = Session.from_snapshot(snap)
         resume_task = asyncio.create_task(restored.run())
         while not restored.is_waiting_for("go"):

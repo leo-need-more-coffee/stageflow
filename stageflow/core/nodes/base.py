@@ -1,14 +1,3 @@
-"""Базовый узел графа и реестр типов узлов.
-
-Никаких isinstance-цепочек: тип узла разрешается ровно один раз, при разборе
-JSON, через реестр типов; дальше работают методы самого узла — ``execute()``
-и ``validate()``. Добавить новый тип = новый класс с декоратором
-``@register_node``; session.py и pipeline.py не трогаются.
-
-Контекст ходит явным параметром: ``execute(session, ctx) -> (next_node, ctx)``.
-Общего мутабельного ``session.context`` нет специально — иначе конкурентные
-ветки ``parallel`` затирали бы друг другу фрейм.
-"""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,8 +15,6 @@ _node_types: Registry[type["Node"]] = Registry("node type")
 
 
 def register_node(type_str: str):
-    """Декоратор регистрации типа узла под значением поля ``type`` в JSON."""
-
     def decorator(cls: type["Node"]) -> type["Node"]:
         cls.type = type_str
         _node_types.add(type_str, cls)
@@ -37,13 +24,10 @@ def register_node(type_str: str):
 
 
 def get_node_types() -> dict[str, type["Node"]]:
-    """Снимок реестра типов узлов."""
     return _node_types.as_dict()
 
 
 class Node:
-    """База для всех узлов. Поля, общие для любого типа, живут здесь."""
-
     type: str = "node"
 
     def __init__(
@@ -58,7 +42,6 @@ class Node:
         self.retry = retry or []
         self.expose = expose or {}
 
-    # ---------------------------------------------------------- разбор
 
     @staticmethod
     def from_dict(data: dict) -> "Node":
@@ -68,12 +51,11 @@ class Node:
         return _node_types.get(node_type)._parse(data)
 
     @classmethod
-    def _parse(cls, data: dict) -> "Node":  # pragma: no cover - абстрактный
+    def _parse(cls, data: dict) -> "Node":  # pragma: no cover
         raise NotImplementedError
 
     @staticmethod
     def _common(data: dict) -> dict:
-        """Поля, общие для всех типов узлов, — kwargs для ``Node.__init__``."""
         return dict(
             id=data["id"],
             metadata=data.get("metadata", {}),
@@ -81,17 +63,13 @@ class Node:
             expose=data.get("expose", {}),
         )
 
-    # ------------------------------------------------------- исполнение
 
     async def execute(
         self, session: "Session", ctx: Context
-    ) -> tuple["Node | None", Context]:  # pragma: no cover - абстрактный
+    ) -> tuple["Node | None", Context]:  # pragma: no cover
         raise NotImplementedError
 
     def order_targets(self) -> list[str]:
-        """Куда узел может передать управление. Переопределяется теми, у кого
-        переходов больше одного; на этом держится обход графа (области try,
-        достижимость)."""
         return [self.next] if getattr(self, "next", None) else []
 
     def validate(self, pipeline: "Pipeline") -> list[str]:
@@ -109,8 +87,6 @@ class Node:
                     malformed = True
             if malformed:
                 continue
-            # expose — чистая копия, поэтому объявленные типы источника и
-            # назначения обязаны совпадать
             ts = pipeline.typesystem
             src_type = ts.declared(src)
             dst_type = ts.declared(dst)
@@ -122,8 +98,6 @@ class Node:
         return errors
 
     def apply_expose(self, session: "Session", ctx: Context) -> Context:
-        """Чистое переименование/копирование во фрейме, без стадии.
-        По умолчанию копия: старое имя остаётся (убирается через ``consume``)."""
         types = session.pipeline.typesystem
         for src, dst in self.expose.items():
             value = ctx.get_var(src)

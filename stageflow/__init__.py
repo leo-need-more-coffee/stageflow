@@ -1,10 +1,4 @@
-"""StageFlow — фреймворк описания и исполнения JSON-пайплайнов.
-
-Публичный API пакета: всё, что нужно пользователю фреймворка, импортируется
-отсюда — ``from stageflow import Pipeline, Session, BaseStage, ...``.
-Импорт ``stageflow.builtins`` регистрирует встроенные стадии.
-"""
-from . import builtins  # noqa: F401 - регистрирует встроенные стадии
+from . import builtins  # noqa: F401
 from .core import (
     BaseStage,
     CelEngine,
@@ -55,7 +49,6 @@ from .exceptions import (
 )
 
 __all__ = [
-    # ядро
     "Pipeline",
     "Session",
     "SessionResult",
@@ -84,14 +77,11 @@ __all__ = [
     "InputSpec",
     "CelEngine",
     "CelError",
-    # типизация переменных
     "TypeSystem",
     "TypeRegistry",
     "parse_type",
-    # документация
     "generate_stages_yaml",
     "generate_stages_json",
-    # исключения
     "StageFlowError",
     "RegistryError",
     "PipelineDefinitionError",

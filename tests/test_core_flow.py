@@ -42,7 +42,6 @@ class SessionFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.result, {"status": "ok"})
 
     async def test_try_catches_failure_in_body(self):
-        """Блок `try` ловит ошибку любого узла своего тела."""
         nodes = [
             TryNode(
                 id="guard",
@@ -98,8 +97,6 @@ class SessionFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(attempts["n"], 3)
 
 
-# сценарий падений для RetryBudgetTests: реестр стадий не допускает повторной
-# регистрации имени, поэтому стадия одна, а сценарий перезаряжается
 _SCRIPT: dict = {"errors": [], "runs": 0}
 
 
@@ -113,9 +110,6 @@ class ScriptedBoomStage(BaseStage):
 
 
 class RetryBudgetTests(unittest.IsolatedAsyncioTestCase):
-    """``max_attempts`` читается буквально: это все запуски узла, включая
-    первый, а не «сколько раз повторить сверху»."""
-
     @staticmethod
     def _pipeline(retry: list[Retrier]) -> Pipeline:
         return Pipeline(entry="boom", nodes=[
@@ -125,7 +119,6 @@ class RetryBudgetTests(unittest.IsolatedAsyncioTestCase):
 
     @staticmethod
     def _scripted(errors: list[Exception]) -> dict:
-        """Заряжает сценарий падений; в ``runs`` — счётчик запусков стадии."""
         _SCRIPT["errors"] = errors
         _SCRIPT["runs"] = 0
         return _SCRIPT
@@ -145,9 +138,6 @@ class RetryBudgetTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(state["runs"], 1)
 
     async def test_each_retrier_spends_its_own_budget(self):
-        """Общий счётчик на узел обнулял бы лимит соседней политики: два
-        ``TimeoutError`` подряд — и первый же ``ValueError`` улетал наверх,
-        хотя не повторялся ещё ни разу."""
         state = self._scripted([
             TimeoutError("раз"), TimeoutError("два"),
             ValueError("три"), ValueError("четыре"),
@@ -162,10 +152,6 @@ class RetryBudgetTests(unittest.IsolatedAsyncioTestCase):
 
 
 class ErrorMessageTests(unittest.TestCase):
-    """Часть исключений смешана с ``KeyError`` — у него ``__str__`` это
-    ``repr`` аргумента, и сообщение приезжало в кавычках всюду, где берётся
-    ``str(exc)``: события ``try_caught``, ``error_payload.message``, логи."""
-
     def test_message_is_not_wrapped_in_quotes(self):
         for cls in (StageOutputError, ArtifactNotFoundError):
             with self.subTest(cls=cls.__name__):
@@ -193,8 +179,6 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(dropped.get_var("keep"), 1)
 
     def test_same_frame_can_be_shared_by_concurrent_branches(self):
-        """Фрейм иммутабелен, поэтому ветки ``parallel`` получают ОДИН объект и
-        расходятся сами — без fork/deepcopy и без разделяемого состояния."""
         base = Context(vars={"shared": 0})
         left = base.with_var("only_left", "L")
         right = base.with_var("only_right", "R")
@@ -219,17 +203,13 @@ class WaitInputBroadcastTests(unittest.IsolatedAsyncioTestCase):
 
         task1 = asyncio.create_task(waiter())
         task2 = asyncio.create_task(waiter())
-        await asyncio.sleep(0)  # allow waiters to register
+        await asyncio.sleep(0)
         await session.input("ping", {"msg": "hello"})
         res1, res2 = await asyncio.wait_for(asyncio.gather(task1, task2), timeout=1.0)
         self.assertEqual(res1["payload"]["msg"], "hello")
         self.assertEqual(res2["payload"]["msg"], "hello")
 
 class OutputFieldValidationTests(unittest.TestCase):
-    """Ключ ``outputs`` — имя поля в результате стадии. Поле, которого стадия
-    не возвращает, гарантированно падает ``StageOutputError`` при исполнении,
-    поэтому ловится статически по спеке стадии."""
-
     @staticmethod
     def _errors(outputs, stage="SetValueStage"):
         return Pipeline.from_dict({
@@ -252,17 +232,12 @@ class OutputFieldValidationTests(unittest.TestCase):
         self.assertEqual(self._errors({"list": "l"}, stage="PopListStage"), [])
 
     def test_computed_output_is_not_a_result_field(self):
-        """У ключа с ``.$`` значение — выражение, а само имя относится к
-        переменной назначения, так что сверять его со спекой нечего."""
         self.assertEqual(self._errors({"value": "n", "rep.$": "vars.n + 1"}), [])
 
     def test_stage_without_declared_outputs_is_not_checked(self):
-        """Пустая секция ``outputs`` в спеке = контракт не объявлен: та же
-        конвенция, что у ``allowed_events``/``allowed_inputs``."""
         self.assertEqual(self._errors({"whatever": "x"}, stage="EchoStage"), [])
 
     def test_runtime_error_matches_the_static_one(self):
-        """Проверка существует ровно затем, чтобы не доводить до этой ошибки."""
         pipeline = Pipeline(entry="s", nodes=[
             StageNode(id="s", stage="EchoStage", arguments={"const": {"value": 1}},
                       outputs={"nope": "x"}, next="end"),
@@ -274,13 +249,6 @@ class OutputFieldValidationTests(unittest.TestCase):
         self.assertIn("nope", str(caught.exception))
 
 class OutputsAreSimultaneousTests(unittest.TestCase):
-    """Выходы узла применяются как одновременное присваивание.
-
-    Выражение в ``outputs`` видит фрейм на входе в узел, а не записи соседних
-    ключей того же узла — иначе результат зависел бы от порядка ключей в
-    JSON-объекте, которого автор пайплайна не выбирал осознанно.
-    """
-
     @staticmethod
     def _run(outputs):
         pipeline = Pipeline.from_dict({
@@ -305,8 +273,6 @@ class OutputsAreSimultaneousTests(unittest.TestCase):
                          self._run({"echo.$": "vars.n", "value": "n"}))
 
     def test_expression_still_sees_the_stage_result(self):
-        """``output.*`` — это результат стадии, он доступен независимо от того,
-        замаплено ли то же поле обычным ключом."""
         self.assertEqual(self._run({"value": "n", "echo.$": "output.value"}),
                          {"n": 5, "echo": 5})
 

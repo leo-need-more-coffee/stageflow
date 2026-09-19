@@ -1,4 +1,3 @@
-"""Генерация машиночитаемых описаний: pipeline JSON Schema и спеки стадий."""
 from __future__ import annotations
 
 import json
@@ -27,14 +26,10 @@ def _read_pipeline_schema() -> str:
 
 
 def load_pipeline_schema() -> dict:
-    """Схема пайплайна из пакета. Файл читается один раз; каждый вызов отдаёт
-    независимую копию — её можно безопасно дорабатывать (см. enum ниже)."""
     return json.loads(_read_pipeline_schema())
 
 
 def generate_pipeline_schema(stage_registry: dict) -> dict:
-    """Схема пайплайна с enum'ом имён зарегистрированных стадий: пайплайн,
-    ссылающийся на несуществующую стадию, не пройдёт уже схемную проверку."""
     schema = load_pipeline_schema()
     schema["$defs"]["stage_node"]["properties"]["stage"]["enum"] = list(stage_registry)
     return schema

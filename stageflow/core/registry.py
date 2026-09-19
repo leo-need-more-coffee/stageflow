@@ -1,9 +1,3 @@
-"""Именованный реестр — общий механизм для стадий и типов узлов.
-
-Один класс вместо двух копий паттерна «модульный dict + декоратор + get»:
-реестр владеет словарём и не отдаёт его наружу, снаружи доступны только
-копии и точечные операции.
-"""
 from __future__ import annotations
 
 from typing import Generic, Iterator, TypeVar
@@ -14,12 +8,6 @@ T = TypeVar("T")
 
 
 class Registry(Generic[T]):
-    """Отображение «имя -> объект» с защитой от дублей и внятными ошибками.
-
-    ``kind`` — человекочитаемое имя рода объектов («stage», «node type»),
-    подставляется в сообщения об ошибках.
-    """
-
     def __init__(self, kind: str):
         self._kind = kind
         self._items: dict[str, T] = {}
@@ -45,5 +33,4 @@ class Registry(Generic[T]):
         return len(self._items)
 
     def as_dict(self) -> dict[str, T]:
-        """Снимок содержимого; изменения снимка реестр не затрагивают."""
         return dict(self._items)

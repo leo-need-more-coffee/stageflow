@@ -1,4 +1,3 @@
-"""Ядро StageFlow: пайплайн, сессия, узлы, контекст, стадии."""
 from .cel import CelEngine, CelError
 from .context import Context
 from .debug import RUN, STEP, StepDebugger

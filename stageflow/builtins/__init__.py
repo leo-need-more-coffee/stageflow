@@ -1,8 +1,3 @@
-"""Встроенные стадии.
-
-Импорт модулей здесь — не только реэкспорт: он же регистрирует стадии
-в реестре (декоратор ``@register_stage`` срабатывает при импорте класса).
-"""
 from .dicts import DropKeysStage, PickKeysStage
 from .lists import (
     AppendListStage,

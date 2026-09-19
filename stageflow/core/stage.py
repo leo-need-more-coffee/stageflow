@@ -1,11 +1,3 @@
-"""Пользовательские стадии: базовый класс и реестр.
-
-Стадия — единица бизнес-логики, исполняемая узлом ``stage``. Единственный её
-канал входов — уже РЕЗОЛВНУТЫЕ аргументы (бакеты ``vars``/``const``
-разбирает узел); выходы она отдаёт через
-``set_outputs()``, раскладывает их по скоупам снова узел. Про пути к данным
-стадия не знает ничего.
-"""
 from __future__ import annotations
 
 import asyncio
@@ -24,9 +16,6 @@ _stages: Registry[type["BaseStage"]] = Registry("stage")
 
 
 def register_stage(name: str):
-    """Декоратор регистрации стадии под именем ``name`` (им она адресуется
-    из JSON-описания пайплайна)."""
-
     def decorator(cls: type["BaseStage"]) -> type["BaseStage"]:
         cls.stage_name = name
         _stages.add(name, cls)
@@ -40,7 +29,6 @@ def get_stage(name: str) -> type["BaseStage"]:
 
 
 def get_stages() -> dict[str, type["BaseStage"]]:
-    """Снимок реестра стадий; изменения снимка на реестр не влияют."""
     return _stages.as_dict()
 
 
@@ -52,19 +40,6 @@ def get_stages_by_category() -> dict[str, list[type["BaseStage"]]]:
 
 
 class BaseStage:
-    """База пользовательской стадии.
-
-    Класс декларирует свой контракт атрибутами: ``allowed_events`` /
-    ``allowed_inputs`` (какие события эмитит и какой ввод ждёт, со схемами
-    payload), ``skipable``, ``timeout``, ``category``. Спецификация
-    arguments/outputs описывается YAML'ом в docstring — см.
-    ``stageflow.core.spec``.
-
-    Отдельного бакета «настроек узла» нет: литеральные значения приходят тем
-    же каналом ``arguments`` (бакет ``const`` в JSON узла), поэтому у стадии
-    ровно один источник входов и одна спецификация для него.
-    """
-
     stage_name: str = "BaseStage"
     category: str | None = None
     skipable: bool = False
@@ -78,7 +53,6 @@ class BaseStage:
         self.session = session
         self.collected_outputs: dict[str, Any] = {}
 
-    # ------------------------------------------------------- входы/выходы
 
     def get_arguments(self) -> dict[str, Any]:
         return dict(self.arguments)
@@ -89,11 +63,8 @@ class BaseStage:
     async def run(self) -> None:
         raise NotImplementedError
 
-    # ----------------------------------------------------------- события
 
     def emit(self, event_type: str, payload: dict | None = None) -> None:
-        """Эмитит событие от имени стадии, предварительно проверив его по
-        контракту ``allowed_events`` (тип и схему payload)."""
         spec = self._check_allowed(event_type, self.allowed_events, "Event")
         if spec is not None and spec.payload_schema is not None:
             validate_schema(payload or {}, spec.payload_schema, "Event payload")
@@ -106,7 +77,6 @@ class BaseStage:
             )
         )
 
-    # -------------------------------------------------------------- ввод
 
     def start_wait_input(self, type_: str) -> asyncio.Future:
         self._check_allowed(type_, self.allowed_inputs, "Input")
@@ -134,8 +104,6 @@ class BaseStage:
     def _check_allowed(
         self, type_: str, specs: list[EventSpec] | list[InputSpec], kind: str
     ) -> EventSpec | InputSpec | None:
-        """Пустой список спецификаций = контракт не объявлен, разрешено всё.
-        Непустой — тип обязан быть в списке; возвращается его спецификация."""
         if not specs:
             return None
         declared = {spec.type for spec in specs if spec.type}
@@ -145,9 +113,7 @@ class BaseStage:
             )
         return next((spec for spec in specs if spec.type == type_), None)
 
-    # ------------------------------------------------------ спецификация
 
     @classmethod
     def get_specs(cls) -> dict[str, Any]:
-        """JSON-сериализуемая спецификация стадии для документации."""
         return build_stage_spec(cls)
