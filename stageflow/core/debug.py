@@ -33,7 +33,6 @@ class StepDebugger:
         self.vars: dict[str, Any] = {}
         self.waiting = False
 
-
     @property
     def state(self) -> dict:
         return {
@@ -43,7 +42,6 @@ class StepDebugger:
             "vars": dict(self.vars),
             "waiting": self.waiting,
         }
-
 
     async def before_node(self, session, node, ctx: Context) -> Context:
         self._loop = asyncio.get_running_loop()
@@ -64,7 +62,6 @@ class StepDebugger:
         self.vars = dict(ctx.vars)
         self._emit("node_exit", node=node.id, node_type=node.type, vars=self.vars)
         return ctx
-
 
     def step(self, count: int = 1) -> None:
         with self._lock:
@@ -94,7 +91,6 @@ class StepDebugger:
                 self._pending_drop.discard(name)
             for name in drop or ():
                 self._pending_set.pop(name, None)
-
 
     async def _wait_step(self) -> None:
         while True:

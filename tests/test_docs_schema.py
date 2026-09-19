@@ -135,6 +135,7 @@ class DocsSchemaTests(unittest.TestCase):
         self.assertEqual(specs["DocStage"]["description"], "Demo stage")
         self.assertIsInstance(specs["DocStage"]["arguments"], list)
 
+
 class NodeSchemaDispatchTests(unittest.TestCase):
     @staticmethod
     def _errors(node):

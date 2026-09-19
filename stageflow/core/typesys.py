@@ -357,7 +357,6 @@ class TypeSystem:
         }
         return cls(registry, variables)
 
-
     def has_declarations(self) -> bool:
         return bool(self._variables)
 
@@ -387,7 +386,6 @@ class TypeSystem:
         if isinstance(src, AnyType) or isinstance(dst, AnyType):
             return True
         return src == dst
-
 
     def check_write(self, name: str, value: Any, where: str) -> None:
         declared = self.declared(name)

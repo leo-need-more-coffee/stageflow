@@ -32,7 +32,6 @@ class Pipeline:
         self.subpipelines = subpipelines or {}
         self.typesystem = typesystem or TypeSystem.empty()
 
-
     @classmethod
     def from_dict(cls, data: dict) -> "Pipeline":
         schema = load_pipeline_schema()
@@ -66,7 +65,6 @@ class Pipeline:
                 f"{what} schema validation failed: {exc.message}"
             ) from exc
 
-
     def has_node(self, node_id: str) -> bool:
         return node_id in self._nodes_map
 
@@ -93,7 +91,6 @@ class Pipeline:
             seen.add(node_id)
             queue.extend(self.get_node(node_id).order_targets())
         return frozenset(seen)
-
 
     def entry_nodes(self) -> list[EntryNode]:
         return [node for node in self.nodes if isinstance(node, EntryNode)]

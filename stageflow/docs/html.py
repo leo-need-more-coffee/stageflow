@@ -280,7 +280,10 @@ _CSS = """
       --chip: #1f252d;
     }
     * { box-sizing: border-box; }
-    body { margin:0; font-family: "Segoe UI", sans-serif; background: var(--bg); color: var(--text); padding: 40px 56px; min-height: 100vh; }
+    body {
+      margin:0; font-family: "Segoe UI", sans-serif; background: var(--bg); color: var(--text); padding: 40px
+      56px; min-height: 100vh;
+    }
     .content { max-width: 1280px; margin: 0 auto; }
     h1, h2, h3 { margin: 0 0 12px; }
     p { margin: 0 0 12px; color: var(--muted); }
@@ -289,27 +292,50 @@ _CSS = """
     summary { cursor: pointer; color: var(--accent); font-weight: 600; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
     .fields { width: 100%; border-collapse: collapse; margin-top: 8px; table-layout: fixed; }
-    .fields th, .fields td { border-bottom: 1px solid var(--border); padding: 8px; text-align: left; vertical-align: top; }
+    .fields th, .fields td {
+      border-bottom: 1px solid var(--border); padding: 8px; text-align: left; vertical-align: top;
+    }
     .fields th { color: var(--muted); font-weight: 600; }
     .fields td:first-child { width: 32%; }
-    pre { background: #0a0c10; border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
-    .label { color: var(--muted); font-size: 12px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+    pre {
+      background: #0a0c10; border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x:
+      auto; white-space: pre-wrap; word-break: break-word;
+    }
+    .label {
+      color: var(--muted); font-size: 12px; margin-bottom: 4px; text-transform: uppercase; letter-spacing:
+      0.04em;
+    }
     .example { margin-top: 12px; }
     .stage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 24px; }
-    .stage-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .stage-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; display:
+      flex; flex-direction: column; gap: 12px;
+    }
     .stage-title { font-weight: 700; font-size: 17px; }
     .muted { color: var(--muted); line-height: 1.5; }
     .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .chip { background: var(--chip); padding: 4px 8px; border-radius: 999px; color: var(--muted); font-size: 12px; border: 1px solid var(--border); }
+    .chip {
+      background: var(--chip); padding: 4px 8px; border-radius: 999px; color: var(--muted); font-size: 12px;
+      border: 1px solid var(--border);
+    }
     .badge.req { background: #2f3; color: #0a0; padding: 2px 6px; border-radius: 6px; font-size: 12px; }
     .badge.opt { background: #f8c146; color: #4b3200; padding: 2px 6px; border-radius: 6px; font-size: 12px; }
     .block { display: flex; flex-direction: column; gap: 4px; }
     .two-cols { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px;
+      flex-wrap: wrap;
+    }
     .topbar-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .search { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 10px; min-width: 260px; }
+    .search {
+      background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px;
+      border-radius: 10px; min-width: 260px;
+    }
     .search:focus { outline: 1px solid var(--accent); }
-    .cta { background: var(--accent); color: #0b0f16; padding: 10px 14px; border-radius: 10px; text-decoration: none; font-weight: 700; border: 1px solid transparent; cursor: pointer; }
+    .cta {
+      background: var(--accent); color: #0b0f16; padding: 10px 14px; border-radius: 10px; text-decoration:
+      none; font-weight: 700; border: 1px solid transparent; cursor: pointer;
+    }
     .cta.secondary { background: transparent; color: var(--text); border-color: var(--border); }
     .category summary { font-size: 16px; margin-bottom: 8px; }
     .category[hidden], .node-block[hidden] { display: none; }

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, replace
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from ..exceptions import PipelineDefinitionError
 from .cel import CelEngine
@@ -11,6 +11,9 @@ from .event import Event
 from .inputs import InputHub
 from .nodes import Node, StageNode, TerminalNode
 from .pipeline import Pipeline
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .debug import StepDebugger
 
 EventHandler = Callable[[Event], None]
 
@@ -45,7 +48,7 @@ class Session:
         pipeline: Pipeline,
         context: Context | None = None,
         event_handler: EventHandler | None = None,
-        debugger: "Debugger | None" = None,
+        debugger: "StepDebugger | None" = None,
     ):
         pipeline.validate()
         self.id = id
@@ -66,7 +69,6 @@ class Session:
         self._skip_requested = False
         self._current_node_id: str | None = None
 
-
     def emit(self, event: Event) -> None:
         self.event_history.append(event)
         self._event_handler(event)
@@ -78,7 +80,6 @@ class Session:
 
     def _emit_input_event(self, type_: str, payload: dict) -> None:
         self.emit(Event(type=type_, session_id=self.id, payload=payload))
-
 
     @property
     def input_history(self) -> list[dict[str, Any]]:
@@ -111,7 +112,6 @@ class Session:
 
     def is_waiting_for(self, type_: str) -> bool:
         return self.inputs.is_waiting(type_)
-
 
     def _apply_command(self, name: str | None) -> None:
         handlers = {
@@ -150,7 +150,6 @@ class Session:
     @property
     def paused(self) -> bool:
         return not self._running.is_set()
-
 
     async def execute_node(self, node: Node, ctx: Context) -> tuple["Node | None", Context]:
         if self.debugger is None:
@@ -297,7 +296,6 @@ class Session:
             return True
         self.emit_node_event("skip_denied", node, {"stage": node.stage})
         return False
-
 
     def snapshot(self) -> dict:
         return {

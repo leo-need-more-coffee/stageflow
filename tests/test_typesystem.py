@@ -345,6 +345,7 @@ class SubpipelineTypeTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(TypeCheckError):
             await session.run()
 
+
 class RemovedGlobalScopeTests(unittest.TestCase):
     def _rejected(self, data):
         from stageflow.exceptions import PipelineDefinitionError

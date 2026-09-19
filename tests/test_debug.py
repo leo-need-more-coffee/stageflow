@@ -2,7 +2,7 @@ import asyncio
 import time
 import unittest
 
-from stageflow import Context, Pipeline, Session, StepDebugger
+from stageflow import Pipeline, Session, StepDebugger
 from stageflow.exceptions import StageFlowError
 
 

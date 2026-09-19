@@ -53,7 +53,6 @@ class BaseStage:
         self.session = session
         self.collected_outputs: dict[str, Any] = {}
 
-
     def get_arguments(self) -> dict[str, Any]:
         return dict(self.arguments)
 
@@ -62,7 +61,6 @@ class BaseStage:
 
     async def run(self) -> None:
         raise NotImplementedError
-
 
     def emit(self, event_type: str, payload: dict | None = None) -> None:
         spec = self._check_allowed(event_type, self.allowed_events, "Event")
@@ -76,7 +74,6 @@ class BaseStage:
                 payload=payload or {},
             )
         )
-
 
     def start_wait_input(self, type_: str) -> asyncio.Future:
         self._check_allowed(type_, self.allowed_inputs, "Input")
@@ -112,7 +109,6 @@ class BaseStage:
                 f"{kind} type '{type_}' is not allowed for stage '{self.stage_name}'"
             )
         return next((spec for spec in specs if spec.type == type_), None)
-
 
     @classmethod
     def get_specs(cls) -> dict[str, Any]:

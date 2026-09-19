@@ -13,7 +13,6 @@ class InputHub:
         self._pending: dict[str, list[dict[str, Any]]] = {}
         self.history: list[dict[str, Any]] = []
 
-
     def deliver(self, entry: dict[str, Any]) -> None:
         self.history.append(entry)
         live = [fut for fut in self._waiting.get(entry["type"], []) if not fut.done()]
@@ -22,7 +21,6 @@ class InputHub:
                 fut.set_result(entry)
         else:
             self._pending.setdefault(entry["type"], []).append(entry)
-
 
     def start_wait(self, type_: str) -> asyncio.Future:
         loop = asyncio.get_running_loop()
@@ -52,7 +50,6 @@ class InputHub:
             waiters.remove(fut)
             if not waiters:
                 del self._waiting[type_]
-
 
     def is_waiting(self, type_: str) -> bool:
         return bool(self._waiting.get(type_))

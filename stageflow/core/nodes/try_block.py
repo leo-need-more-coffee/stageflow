@@ -69,7 +69,6 @@ class TryNode(Node):
             **Node._common(data),
         )
 
-
     def scope(self, pipeline: "Pipeline") -> frozenset[str]:
         if self._scope is None:
             after = pipeline.reachable([self.next]) if self.next else frozenset()
@@ -81,7 +80,6 @@ class TryNode(Node):
         if self.next:
             targets.append(self.next)
         return [t for t in targets if t]
-
 
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
@@ -99,7 +97,6 @@ class TryNode(Node):
         if self.next and not pipeline.has_node(self.next):
             errors.append(f"{self.id}: next '{self.next}' не найден в графе")
         return errors
-
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
         scope = self.scope(session.pipeline)

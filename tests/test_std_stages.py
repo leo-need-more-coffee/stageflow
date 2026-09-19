@@ -69,6 +69,7 @@ class StdStagesTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(StageContractError):
             await session.run()
 
+
 class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
     async def _run(self, nodes, variables=None, artifacts=()):
         pipeline = Pipeline.from_dict({"entry": nodes[0]["id"], "nodes": [

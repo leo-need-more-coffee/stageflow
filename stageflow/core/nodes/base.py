@@ -42,7 +42,6 @@ class Node:
         self.retry = retry or []
         self.expose = expose or {}
 
-
     @staticmethod
     def from_dict(data: dict) -> "Node":
         node_type = data.get("type")
@@ -62,7 +61,6 @@ class Node:
             retry=[Retrier.from_dict(r) for r in data.get("retry", [])],
             expose=data.get("expose", {}),
         )
-
 
     async def execute(
         self, session: "Session", ctx: Context

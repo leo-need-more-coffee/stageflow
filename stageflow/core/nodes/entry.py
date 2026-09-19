@@ -14,6 +14,7 @@ _VAR_REF = re.compile(r"""\bvars(?:\.([^\W\d]\w*)|\[\s*['"]([^'"]+)['"]\s*\])"""
 def _refs_in(expr: str) -> list[str]:
     return [dot or indexed for dot, indexed in _VAR_REF.findall(expr)]
 
+
 if TYPE_CHECKING:  # pragma: no cover
     from ..cel import CelEngine
     from ..pipeline import Pipeline
@@ -42,7 +43,6 @@ class EntryNode(Node):
                 f"Node '{data.get('id')}': 'variables' должен быть объектом"
             )
         return cls(variables=variables, next=data.get("next"), **Node._common(data))
-
 
     def seed(
         self,
@@ -85,7 +85,6 @@ class EntryNode(Node):
         if not (is_cel and isinstance(spec, str)):
             return []
         return [ref for ref in dict.fromkeys(_refs_in(spec)) if ref in own]
-
 
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
@@ -145,7 +144,6 @@ class EntryNode(Node):
             except TypeCheckError as exc:
                 errors.append(str(exc))
         return errors
-
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
         ctx = self.seed(ctx, session.cel, session.pipeline.typesystem)

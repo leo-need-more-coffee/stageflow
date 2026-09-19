@@ -1,0 +1,4 @@
+pyyaml
+jsonschema>=4.0.0
+immutables>=0.20
+common-expression-language>=0.9

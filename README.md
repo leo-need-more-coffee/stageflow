@@ -1,10 +1,12 @@
 # StageFlow
 
+[![tests](https://github.com/leo-need-more-coffee/stageflow/actions/workflows/tests.yml/badge.svg)](https://github.com/leo-need-more-coffee/stageflow/actions/workflows/tests.yml)
+
 Фреймворк описания и исполнения пайплайнов, заданных JSON: граф узлов,
 пользовательские стадии, иммутабельный фрейм данных, CEL-выражения, retry и
 блочный `try/except`, параллельные ветки, вложенные пайплайны.
 
-Требуется Python 3.10+.
+Требуется Python 3.11+ (его требует CEL-байндинг `common-expression-language`).
 
 ## Установка
 

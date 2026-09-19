@@ -57,7 +57,7 @@ class TemplateStage(BaseStage):
     arguments:
       template:
         type: string
-        description: "Template string; a placeholder is the bare name of another argument ({name}) — attributes and indexes are rejected"
+        description: "Template string; a placeholder is a bare argument name ({name})"
       "*":
         type: any
         description: "Any other argument becomes a template placeholder value"

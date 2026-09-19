@@ -209,6 +209,7 @@ class WaitInputBroadcastTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(res1["payload"]["msg"], "hello")
         self.assertEqual(res2["payload"]["msg"], "hello")
 
+
 class OutputFieldValidationTests(unittest.TestCase):
     @staticmethod
     def _errors(outputs, stage="SetValueStage"):
@@ -247,6 +248,7 @@ class OutputFieldValidationTests(unittest.TestCase):
         with self.assertRaises(StageOutputError) as caught:
             asyncio.run(Session(id="t", pipeline=pipeline, context=Context()).run())
         self.assertIn("nope", str(caught.exception))
+
 
 class OutputsAreSimultaneousTests(unittest.TestCase):
     @staticmethod
