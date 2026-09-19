@@ -41,6 +41,9 @@ dev = [
     "build",
     "twine",
 ]
+docs = [
+    "mkdocs-material",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]

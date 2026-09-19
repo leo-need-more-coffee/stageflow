@@ -3,6 +3,7 @@
 [![tests](https://github.com/leo-need-more-coffee/stageflow/actions/workflows/tests.yml/badge.svg)](https://github.com/leo-need-more-coffee/stageflow/actions/workflows/tests.yml)
 [![PyPI](https://img.shields.io/pypi/v/stageflow-framework)](https://pypi.org/project/stageflow-framework/)
 [![Python](https://img.shields.io/pypi/pyversions/stageflow-framework)](https://pypi.org/project/stageflow-framework/)
+[![docs](https://img.shields.io/badge/docs-mkdocs--material-blue)](https://leo-need-more-coffee.github.io/stageflow/)
 
 A framework for describing and running JSON-defined pipelines: a graph of
 nodes, user-defined stages, an immutable data frame, CEL expressions, retry
@@ -52,23 +53,26 @@ print(result.artifacts)  # {'greeting': 'Hello, Alice!'}
 
 ## Documentation
 
-The full guide lives in the
-[wiki](https://github.com/leo-need-more-coffee/stageflow/wiki):
+The full guide lives at
+**[leo-need-more-coffee.github.io/stageflow](https://leo-need-more-coffee.github.io/stageflow/)**:
 
-- [Quick start](https://github.com/leo-need-more-coffee/stageflow/wiki/Quick-Start)
+- [Quick start](https://leo-need-more-coffee.github.io/stageflow/quick-start/)
   — installing, writing a stage, running a pipeline
-- [Node types](https://github.com/leo-need-more-coffee/stageflow/wiki/Node-Types)
+- [Node types](https://leo-need-more-coffee.github.io/stageflow/node-types/)
   — `entry`, `stage`, `condition`, `switch`, `parallel`, `try`, `subpipeline`, `terminal`
-- [Data model](https://github.com/leo-need-more-coffee/stageflow/wiki/Data-Model)
+- [Data model](https://leo-need-more-coffee.github.io/stageflow/data-model/)
   — the frame, argument buckets, outputs
-- [Expressions](https://github.com/leo-need-more-coffee/stageflow/wiki/Expressions)
+- [Expressions](https://leo-need-more-coffee.github.io/stageflow/expressions/)
   — CEL, the `.$` suffix, the `vars` namespace
-- [Errors](https://github.com/leo-need-more-coffee/stageflow/wiki/Errors)
+- [Errors](https://leo-need-more-coffee.github.io/stageflow/errors/)
   — `retry` per node, `try`/`except` per graph region
-- [Variable typing](https://github.com/leo-need-more-coffee/stageflow/wiki/Variable-Typing)
+- [Variable typing](https://leo-need-more-coffee.github.io/stageflow/variable-typing/)
   — gradual typing, static and runtime checks
-- [Step debugging](https://github.com/leo-need-more-coffee/stageflow/wiki/Step-Debugging)
+- [Step debugging](https://leo-need-more-coffee.github.io/stageflow/step-debugging/)
   — stopping between nodes, inspecting and editing the frame
+
+The sources live in [`docs/`](docs); the site is built with MkDocs Material and
+published by [`.github/workflows/docs.yml`](.github/workflows/docs.yml).
 
 ## Tests
 
@@ -85,6 +89,7 @@ from stageflow.testing import PipelineTestSpec, run_pipeline_test
 ## Package layout
 
 ```
+docs/             documentation sources (MkDocs Material)
 stageflow/
   core/          the engine: pipeline, session, nodes/, context, cel, stage, typesys, inputs, debug
   builtins/      built-in stages
