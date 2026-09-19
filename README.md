@@ -2,13 +2,13 @@
 
 [![tests](https://github.com/leo-need-more-coffee/stageflow/actions/workflows/tests.yml/badge.svg)](https://github.com/leo-need-more-coffee/stageflow/actions/workflows/tests.yml)
 
-Фреймворк описания и исполнения пайплайнов, заданных JSON: граф узлов,
-пользовательские стадии, иммутабельный фрейм данных, CEL-выражения, retry и
-блочный `try/except`, параллельные ветки, вложенные пайплайны.
+A framework for describing and running JSON-defined pipelines: a graph of
+nodes, user-defined stages, an immutable data frame, CEL expressions, retry
+and block-scoped `try/except`, parallel branches, nested pipelines.
 
-Требуется Python 3.11+ (его требует CEL-байндинг `common-expression-language`).
+Requires Python 3.11+ (the `common-expression-language` CEL binding does).
 
-## Установка
+## Installation
 
 ```bash
 python -m venv .venv
@@ -16,9 +16,9 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-## Быстрый старт
+## Quick start
 
-Регистрация стадии:
+Register a stage:
 
 ```python
 from stageflow import BaseStage, register_stage
@@ -38,7 +38,7 @@ class HelloStage(BaseStage):
         self.set_outputs({"greeting": f"Hello, {name}!"})
 ```
 
-Описание пайплайна:
+Describe a pipeline:
 
 ```python
 pipeline_dict = {
@@ -67,7 +67,7 @@ pipeline_dict = {
 }
 ```
 
-Запуск:
+Run it:
 
 ```python
 import asyncio
@@ -82,42 +82,43 @@ async def main():
 asyncio.run(main())
 ```
 
-Значения узла `entry` — значения по умолчанию: пришедшее снаружи их
-перекрывает, поэтому один пайплайн параметризуется без правки JSON.
+Values declared by the `entry` node are defaults: anything supplied from the
+outside overrides them, so the same pipeline can be parameterised without
+editing its JSON.
 
 ```python
 from stageflow import Context
-session = Session(id="demo", pipeline=pipeline, context=Context({"user_name": "Боб"}))
+session = Session(id="demo", pipeline=pipeline, context=Context({"user_name": "Bob"}))
 ```
 
-## Типы узлов
+## Node types
 
-| `type` | Назначение | Ключевые поля |
+| `type` | Purpose | Key fields |
 |---|---|---|
-| `entry` | начало графа и переменные старта | `variables`, `next` |
-| `stage` | исполнение зарегистрированной стадии | `stage`, `arguments`, `outputs`, `consume`, `next` |
-| `condition` | бинарное ветвление по CEL | `condition`, `then`, `else` |
-| `switch` | n-way ветвление, первый истинный case | `cases: [{when, next}]`, `default` |
-| `parallel` | конкурентные ветки с независимыми фреймами | `branches`, `cancel_on_error`, `next` |
-| `try` | блочная обработка ошибок области графа | `body`, `except`, `next` |
-| `subpipeline` | вложенный пайплайн со свежим фреймом | `subpipeline_id`, `inputs`, `artifact_outputs`, `result_output`, `next` |
-| `terminal` | конец исполнения | `result`, `artifacts` |
+| `entry` | graph start and the variables it begins with | `variables`, `next` |
+| `stage` | run a registered stage | `stage`, `arguments`, `outputs`, `consume`, `next` |
+| `condition` | binary branch on a CEL expression | `condition`, `then`, `else` |
+| `switch` | n-way branch, first matching case wins | `cases: [{when, next}]`, `default` |
+| `parallel` | concurrent branches with independent frames | `branches`, `cancel_on_error`, `next` |
+| `try` | block-scoped error handling over a graph region | `body`, `except`, `next` |
+| `subpipeline` | nested pipeline with a fresh frame | `subpipeline_id`, `inputs`, `artifact_outputs`, `result_output`, `next` |
+| `terminal` | end of execution | `result`, `artifacts` |
 
-Любому узлу дополнительно доступны `retry`, `consume` (убрать имена из фрейма
-после шага) и `expose` (копирование или переименование переменной без стадии).
+Every node additionally accepts `retry`, `consume` (drop names from the frame
+after the step) and `expose` (copy or rename a variable without a stage).
 
-## Модель данных
+## Data model
 
-Данные пайплайна — один фрейм `vars`, текущий вдоль пути исполнения.
-Фрейм иммутабелен: каждая запись порождает новый, поэтому ветки `parallel`
-расходятся независимо и один объект безопасно отдать нескольким конкурентным
-потребителям. Единственная граница видимости — `subpipeline`: дочерний
-пайплайн стартует со свежим фреймом, получая данные через `inputs`.
+Pipeline data is a single frame, `vars`, carried along the execution path.
+The frame is immutable: every write produces a new one, so `parallel` branches
+diverge independently and the same object can safely be handed to several
+concurrent consumers. The only visibility boundary is `subpipeline`: a child
+starts with a fresh frame and receives data through `inputs`.
 
-`arguments` узла делится на бакеты: `vars` — ссылки на переменные фрейма,
-`const` — литералы. Бакеты смешиваются в одном узле; при совпадении имён
-ссылка на переменную перекрывает литерал. Отдельного поля настроек у узла
-`stage` нет: литеральная настройка — это `const`-аргумент.
+A node's `arguments` are split into buckets: `vars` holds references to frame
+variables, `const` holds literals. Buckets can be mixed in one node; on a name
+collision the variable reference wins over the literal. A `stage` node has no
+separate settings field — a literal setting is a `const` argument.
 
 ```json
 {
@@ -131,41 +132,43 @@ session = Session(id="demo", pipeline=pipeline, context=Context({"user_name": "�
 }
 ```
 
-В `outputs` ключ — имя поля результата стадии, значение — переменная, куда его
-записать. Поле, которого стадия не возвращает, отвергается
-`Pipeline.validate()` по спецификации стадии. Если стадия не объявила выходов,
-контракт считается необъявленным и проверка не применяется.
+In `outputs` the key is the name of a field in the stage result and the value
+is the variable to store it in. A field the stage does not return is rejected
+by `Pipeline.validate()` against the stage specification. If a stage declares
+no outputs at all, the contract is considered undeclared and the check is
+skipped.
 
-Выходы узла применяются как одновременное присваивание: значения вычисляются
-против фрейма на входе в узел и только потом записываются, поэтому порядок
-ключей на результат не влияет.
+A node's outputs are applied as a simultaneous assignment: values are computed
+against the frame as it was on entry and only then written, so key order does
+not affect the result.
 
-## Выражения
+## Expressions
 
-Язык выражений — [CEL](https://github.com/google/cel-spec). Выражение
-допускается в `condition` узла `condition`, в `when` узла `switch` и в любом
-значении с суффиксом `.$` в `arguments`, `outputs` и `variables`.
+The expression language is [CEL](https://github.com/google/cel-spec). An
+expression is allowed in `condition` of a `condition` node, in `when` of a
+`switch` node, and in any value whose key carries the `.$` suffix in
+`arguments`, `outputs` and `variables`.
 
 ```json
 "outputs": {
   "value": "n",
   "attempts.$": "0",
-  "greeting.$": "'привет ' + string(vars.user_name)"
+  "greeting.$": "'hello ' + string(vars.user_name)"
 }
 ```
 
-Переменные фрейма адресуются через namespace `vars` (`vars.n`). Имя, не
-являющееся ASCII-идентификатором, адресуется индексом: `vars['итог']`.
+Frame variables are addressed through the `vars` namespace (`vars.n`). A name
+that is not an ASCII identifier is addressed by index: `vars['итог']`.
 
-Ключ с суффиксом `.$` в `outputs` — это имя переменной, а не поля стадии, так
-что один узел заводит произвольное число переменных пайплайна.
+A key with the `.$` suffix in `outputs` names a variable rather than a stage
+field, so a single node can introduce any number of pipeline variables.
 
-Реализация: `common-expression-language` (нативная), с `cel-python` как
-запасным вариантом.
+Backend: `common-expression-language` (native), falling back to `cel-python`.
 
-## Узел `entry`
+## The `entry` node
 
-Начало графа — узел, а не поле в шапке JSON; он же объявляет переменные старта.
+The graph starts at a node, not at a field in the JSON header, and that node
+declares the pipeline's initial variables.
 
 ```json
 {
@@ -180,16 +183,17 @@ session = Session(id="demo", pipeline=pipeline, context=Context({"user_name": "�
 }
 ```
 
-- Имя, уже пришедшее во фрейме (посев сессии, `inputs` родителя), узел не
-  перезаписывает и не вычисляет.
-- Переменные связываются в порядке зависимостей: выражение может сослаться на
-  соседнюю переменную того же узла, порядок ключей в JSON значения не имеет,
-  цикл — ошибка `validate()`.
-- Узел `entry` в графе один, и переход в него запрещён; поле `entry` пайплайна
-  при его наличии необязательно, а если задано — обязано указывать на него.
-- Типы значений проверяются статически, при валидации.
+- A name already present in the frame (session seed, a parent's `inputs`) is
+  neither overwritten nor evaluated.
+- Variables are bound in dependency order: an expression may reference a
+  sibling variable of the same node, key order in the JSON is irrelevant, and
+  a cycle is a `validate()` error.
+- There is exactly one `entry` node per graph and jumping back into it is
+  forbidden. The pipeline-level `entry` field is optional when such a node
+  exists, and must point at it when given.
+- Value types are checked statically, during validation.
 
-## Параллельные ветки
+## Parallel branches
 
 ```json
 {
@@ -201,30 +205,30 @@ session = Session(id="demo", pipeline=pipeline, context=Context({"user_name": "�
 }
 ```
 
-Наружу из ветки выходят только имена, которых во фрейме не было до `parallel`;
-запись в имя, жившее до входа, остаётся branch-local. Такие имена
-перечисляются в событии `parallel_completed`:
-`{"merged": ["fresh"], "dropped": ["left.n"]}`. Две ветки, записавшие одно
-имя, — `BranchError` с именами обеих.
+Only names that were not in the frame before `parallel` leave a branch; a
+write to a name that existed on entry stays branch-local. Such names are
+listed in the `parallel_completed` event:
+`{"merged": ["fresh"], "dropped": ["left.n"]}`. Two branches writing the same
+name raise `BranchError` naming both.
 
-`cancel_on_error` (по умолчанию `true`) определяет судьбу соседних веток при
-падении одной: `true` — отменяются немедленно (событие `parallel_cancelled`),
-`false` — доигрывают до конца. В обоих случаях узел завершается ошибкой первой
-упавшей ветки.
+`cancel_on_error` (default `true`) decides the fate of sibling branches when
+one fails: `true` cancels them immediately (the `parallel_cancelled` event),
+`false` lets them finish. Either way the node fails with the error of the
+first branch that failed.
 
-## Ошибки: `retry` на узле, `try`/`except` на области
+## Errors: `retry` per node, `try`/`except` per region
 
-Повторы — свойство операции, поэтому `retry` является полем узла:
+Retrying is a property of an operation, so `retry` is a node field:
 
 ```json
 { "retry": [{ "error_equals": ["TimeoutError"], "max_attempts": 3, "backoff_rate": 2.0 }] }
 ```
 
-`max_attempts` — все запуски узла вместе с первым: `3` означает один запуск и
-два повтора. Счётчик у каждой политики в списке свой.
+`max_attempts` counts every run of the node including the first: `3` means one
+run and two retries. Each policy in the list keeps its own counter.
 
-Обработка ошибок — блочная: узел `try` накрывает область графа, ошибка любого
-узла внутри уходит в подходящий `except`.
+Error handling is block-scoped: a `try` node covers a region of the graph, and
+an error raised by any node inside it goes to the matching `except`.
 
 ```json
 {
@@ -239,21 +243,24 @@ session = Session(id="demo", pipeline=pipeline, context=Context({"user_name": "�
 }
 ```
 
-- Область блока — узлы, достижимые из `body`, но не достижимые из `next`;
-  состав выводится из графа и не перечисляется вручную.
-- Сначала исчерпываются `retry` упавшего узла, затем ошибка всплывает к
-  ближайшему объемлющему `try`; не подошедшая по типу идёт дальше наружу.
-- Вложенные `try` поддерживаются: внутренний лежит в области внешнего.
-- Обработчик видит фрейм таким, каким его оставил последний успешно
-  отработавший узел тела.
-- `result_var` кладёт во фрейм объект ошибки с полями `type`, `full_type`,
-  `message`, `node`.
-- `error_equals` принимает короткое имя класса исключения, полный путь или `*`.
+- The region is every node reachable from `body` but not reachable from
+  `next`; it is derived from the graph rather than listed by hand.
+- The failing node's `retry` policies are exhausted first, then the error
+  propagates to the nearest enclosing `try`; an error no handler matches keeps
+  propagating outwards.
+- Nested `try` nodes work as expected: the inner one simply lies inside the
+  outer one's region.
+- A handler sees the frame as the last successfully completed node of the body
+  left it.
+- `result_var` puts the error object into the frame with the fields `type`,
+  `full_type`, `message` and `node`.
+- `error_equals` accepts a bare exception class name, a fully qualified path,
+  or `*`.
 
-## Типизация переменных
+## Variable typing
 
-Типизация постепенная: необъявленная переменная не проверяется, секции типов
-необязательны.
+Typing is gradual: an undeclared variable is not checked, and the type
+sections are optional.
 
 ```json
 {
@@ -272,71 +279,73 @@ session = Session(id="demo", pipeline=pipeline, context=Context({"user_name": "�
 }
 ```
 
-Язык типов: примитивы `string`, `int`, `float`, `number` (int|float), `bool`,
-`any`, `null`; контейнеры `list<T>` и `map<T>` (ключи строковые); объединения
-`T|U`; сокращение `T?` = `T|null`; имена из секции `types`. Структуры
-поддерживают опциональные поля (суффикс `?` у имени), вложенные анонимные
-структуры, рекурсию и строгий режим (`strict` запрещает лишние поля).
+The type language: primitives `string`, `int`, `float`, `number` (int|float),
+`bool`, `any`, `null`; containers `list<T>` and `map<T>` (string keys); unions
+`T|U`; the shorthand `T?` for `T|null`; names from the `types` section.
+Structures support optional fields (a `?` suffix on the name), nested
+anonymous structures, recursion, and a strict mode (`strict` forbids extra
+fields).
 
-Проверки двухслойные:
+Checks come in two layers:
 
-- статически, при валидации графа: объявленный тип переменной сверяется с
-  хинтами из спецификации стадии, `expose` требует совместимости источника и
-  назначения; несовместимость — ошибка `Pipeline.validate()` до запуска;
-- динамически, при исполнении: каждая запись в объявленную переменную
-  (`entry`, `outputs`, `expose`, `except.result_var`, артефакты субпайплайна) и
-  входной контекст сессии проверяются по полной структуре значения; ошибка —
-  `TypeCheckError` с узлом и путём до несовпадения.
+- statically, during graph validation: a variable's declared type is matched
+  against the type hints in the stage specification, and `expose` requires the
+  source and destination to be compatible; a mismatch is a
+  `Pipeline.validate()` error raised before the run starts;
+- dynamically, during execution: every write to a declared variable (`entry`,
+  `outputs`, `expose`, `except.result_var`, subpipeline artifacts) and the
+  session's input context are checked against the full structure of the value;
+  a mismatch raises `TypeCheckError` carrying the node and the path to it.
 
-Субпайплайн наследует именованные типы родителя и может объявить свои; типы
-переменных у него собственные.
+A subpipeline inherits its parent's named types and may declare its own;
+variable types are its own.
 
-## Управление сессией
+## Session control
 
 ```python
 session.stop(); session.pause(); session.resume()
 await session.input("command", {"name": "skip"})
 ```
 
-Пользовательский ввод: стадия объявляет `allowed_inputs` и ждёт
-`await self.wait_input("user_input", timeout=...)`; снаружи ввод подаётся через
-`await session.input("user_input", {...})`. Payload проверяется по
-`payload_schema` из объявления.
+User input: a stage declares `allowed_inputs` and awaits
+`await self.wait_input("user_input", timeout=...)`; input is delivered from
+outside with `await session.input("user_input", {...})`. The payload is
+validated against the `payload_schema` from the declaration.
 
-Снапшоты: `session.snapshot()` возвращает dict, `Session.from_snapshot(snap)`
-восстанавливает сессию, `run()` продолжает с сохранённого узла.
+Snapshots: `session.snapshot()` returns a dict, `Session.from_snapshot(snap)`
+restores the session, and `run()` resumes from the saved node.
 
-## Пошаговая отладка
+## Step debugging
 
-`Session` принимает отладчик, получающий управление перед каждым узлом и после
-него. Реализация в ядре — `StepDebugger`.
+`Session` accepts a debugger that is given control before and after every
+node. The in-core implementation is `StepDebugger`.
 
 ```python
 from stageflow import Pipeline, Session, StepDebugger
 
 debugger = StepDebugger(mode="step", delay=0.0, on_event=print)
 session = Session("s1", Pipeline.from_dict(data), debugger=debugger)
-task = asyncio.create_task(session.run())   # остановка перед первым узлом
+task = asyncio.create_task(session.run())   # stops before the first node
 
-debugger.step()                  # пустить один узел и снова встать
-debugger.set_vars({"n": 42})     # применится перед следующим узлом
-debugger.set_delay(0.5)          # идти самостоятельно с паузой между узлами
-debugger.resume()                # дальше без остановок
+debugger.step()                  # let one node run, then stop again
+debugger.set_vars({"n": 42})     # applied before the next node
+debugger.set_delay(0.5)          # run on its own, pausing between nodes
+debugger.resume()                # continue without stopping
 result = await task
 ```
 
-Снаружи доступны точка остановки (`debugger.node`), фрейм в ней
-(`debugger.vars`) и поток событий `on_event`: `node_enter`, `node_exit`,
-`paused`, `var_set`, `var_rejected`. Правка фрейма проверяется объявленными
-типами — расхождение отвергается событием, а не падением сессии.
+Available from outside: the stop point (`debugger.node`), the frame at that
+point (`debugger.vars`), and the `on_event` stream: `node_enter`, `node_exit`,
+`paused`, `var_set`, `var_rejected`. Frame edits are checked against declared
+types — a mismatch is rejected with an event rather than crashing the session.
 
-Отладчик работает и в теле `try`, и в ветках `parallel`, и в субпайплайне:
-все узлы проходят через `Session.execute_node`, дочерняя сессия наследует
-отладчик. Команды потокобезопасны.
+The debugger also applies inside a `try` body, inside `parallel` branches and
+inside a subpipeline: every node goes through `Session.execute_node`, and a
+child session inherits the debugger. Commands are thread-safe.
 
-## Встроенные стадии
+## Built-in stages
 
-| Категория | Стадии |
+| Category | Stages |
 |---|---|
 | vars | `SetValueStage`, `CopyValueStage`, `IncrementStage`, `MergeDictStage` |
 | lists | `AppendListStage`, `ExtendListStage`, `FilterListStage`, `UniqueListStage`, `PopListStage` |
@@ -344,74 +353,75 @@ result = await task
 | strings | `ConcatStage`, `TemplateStage` |
 | logic | `AssertStage`, `FailStage`, `LogStage`, `SleepStage` |
 
-Все возвращают новые значения и не мутируют входные данные.
+All of them return new values and never mutate their input.
 
-## Спецификация стадии
+## Stage specification
 
-Спецификация стадии — YAML в её docstring: `description`, `arguments`,
-`outputs` и визуальные подсказки для редактора.
+A stage is specified by YAML in its docstring: `description`, `arguments`,
+`outputs`, plus visual hints for the editor.
 
 ```yaml
 description: "Increment numeric value by delta"
-icon: "＋"          # глиф, ссылка на SVG, data-URI или <svg>-разметка
-icon_mono: false    # перекрасить SVG в цвет узла (монохромные наборы)
-color: "#ff8800"    # акцент карточки (по умолчанию — цвет категории)
+icon: "＋"          # glyph, SVG link, data URI or inline <svg> markup
+icon_mono: false    # recolour the SVG to the node colour (monochrome sets)
+color: "#ff8800"    # card accent (defaults to the category colour)
 ```
 
-`icon` принимает четыре формы:
+`icon` accepts four forms:
 
-| Значение | Что рисуется |
+| Value | What gets drawn |
 |---|---|
-| `"＋"`, `"👋"` | глиф или эмодзи |
-| `"/icons/globe.svg"`, `"https://…/x.svg"` | SVG по ссылке |
-| `"data:image/svg+xml;utf8,…"` | data-URI |
-| `"<svg …>…</svg>"` | разметка из docstring |
+| `"＋"`, `"👋"` | the glyph or emoji itself |
+| `"/icons/globe.svg"`, `"https://…/x.svg"` | an SVG by link |
+| `"data:image/svg+xml;utf8,…"` | a data URI |
+| `"<svg …>…</svg>"` | markup straight from the docstring |
 
-`icon_mono: true` рисует SVG маской в цвет узла — для монохромных наборов
-(lucide, feather, tabler), использующих `currentColor`. Без `icon` редактор
-рисует монограмму из имени стадии (`IncrementStage` → `IS`), без `color` —
-детерминированный цвет категории.
+`icon_mono: true` draws the SVG as a mask in the node colour, which suits
+monochrome sets (lucide, feather, tabler) that paint via `currentColor`.
+Without `icon` the editor draws a monogram of the stage name
+(`IncrementStage` → `IS`); without `color` it picks a deterministic colour for
+the category.
 
-Стадия может объявить `allowed_events` и `allowed_inputs` (`EventSpec` /
-`InputSpec` с `payload_schema`), `category` и `timeout`. Всё это попадает в
-`get_specs()`.
+A stage may also declare `allowed_events` and `allowed_inputs` (`EventSpec` /
+`InputSpec` with a `payload_schema`), a `category` and a `timeout`. All of it
+ends up in `get_specs()`.
 
-## Схема и спецификации стадий
+## Schema and stage specifications
 
-JSON Schema пайплайна и спецификации зарегистрированных стадий:
+The pipeline JSON Schema and the specifications of registered stages:
 
 ```python
 from stageflow.docs import generate_pipeline_schema, generate_stages_json, load_pipeline_schema
 from stageflow import get_stages
 
-schema = generate_pipeline_schema(get_stages())   # схема с enum имён стадий
-stages = generate_stages_json(get_stages())       # спеки стадий для редактора
+schema = generate_pipeline_schema(get_stages())   # schema with the stage-name enum
+stages = generate_stages_json(get_stages())       # stage specs for an editor
 ```
 
-`load_pipeline_schema()` отдаёт схему без подстановки enum — её же использует
-`Pipeline.validate()`. Из этих двух функций и собирается всё, что нужно
-внешнему инструменту: редактору, валидатору в CI, генератору документации.
+`load_pipeline_schema()` returns the schema without the injected enum; it is
+the one `Pipeline.validate()` uses. These two functions supply everything an
+external tool needs: an editor, a CI validator, a documentation generator.
 
-## Тесты
+## Tests
 
 ```bash
 python -m unittest discover -s tests
 ```
 
-Для декларативного тестирования пайплайнов есть `stageflow.testing`:
+For declarative pipeline testing there is `stageflow.testing`:
 
 ```python
 from stageflow.testing import PipelineTestSpec, run_pipeline_test
 ```
 
-## Структура пакета
+## Package layout
 
 ```
 stageflow/
-  core/          ядро: pipeline, session, nodes/, context, cel, stage, typesys, inputs, debug
-  builtins/      встроенные стадии
-  docs/          JSON Schema пайплайна и спецификации стадий
-  exceptions.py  иерархия исключений
-  testing.py     хелпер тестирования пайплайнов
-tests/           unit-тесты
+  core/          the engine: pipeline, session, nodes/, context, cel, stage, typesys, inputs, debug
+  builtins/      built-in stages
+  docs/          pipeline JSON Schema and stage specifications
+  exceptions.py  exception hierarchy
+  testing.py     pipeline testing helper
+tests/           unit tests
 ```
