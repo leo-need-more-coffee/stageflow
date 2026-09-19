@@ -74,7 +74,7 @@ class StdStagesTests(unittest.IsolatedAsyncioTestCase):
 class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
     """Стадии, у которых литеральная настройка раньше жила в отдельном поле
     ``config`` узла, а теперь приходит единственным каналом — бакетом
-    ``arguments.const`` (см. REFACTORING.md §9)."""
+    ``arguments.const``."""
 
     async def _run(self, nodes, variables=None, artifacts=()):
         pipeline = Pipeline.from_dict({"entry": nodes[0]["id"], "nodes": [

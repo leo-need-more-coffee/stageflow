@@ -1,9 +1,8 @@
 """
 Простой визуализатор пайплайна: JSON -> Mermaid -> самодостаточный HTML.
 
-Временная затычка до полноценного UI-редактора. Считает формат нод из
-MEMORY_MODEL.md (bucket arguments/outputs, consume, expose, retry,
-try/except, switch, parallel.branches, subpipeline).
+Читает текущий формат узлов: бакеты arguments/outputs, consume, expose,
+retry, try/except, switch, parallel.branches, subpipeline.
 
     python -m stageflow.docs.graph pipeline.json -o graph.html
     python -m stageflow.docs.graph pipeline.json --mermaid   # только текст диаграммы

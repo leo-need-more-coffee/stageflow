@@ -1,7 +1,7 @@
 """Исполнение пайплайна.
 
 Цикл сведён к ``node, ctx = await node.execute(session, ctx)`` — ни одного
-isinstance, ни одного ``_handle_*`` (см. MEMORY_MODEL.md §7). Фрейм ``vars``
+isinstance, ни одного ``_handle_*``. Фрейм ``vars``
 ходит явным параметром, а не общим мутабельным полем сессии, иначе ветки
 ``parallel`` затирали бы друг друга.
 
@@ -80,7 +80,7 @@ class Session:
         self._event_handler: EventHandler = event_handler or (lambda event: None)
         # отладчик получает управление перед каждым узлом и после него:
         # только оттуда видно точку остановки и фрейм между шагами
-        # (см. core/debug.py, REFACTORING.md §14)
+        # (см. core/debug.py)
         self.debugger = debugger
 
         self.artifacts: dict[str, Any] = {}

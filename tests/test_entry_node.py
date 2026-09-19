@@ -1,4 +1,4 @@
-"""Узел ``entry`` — точка входа графа (REFACTORING.md §11)."""
+"""Узел ``entry`` — точка входа графа."""
 import asyncio
 import unittest
 
@@ -168,7 +168,7 @@ class EntrySeedOrderTests(unittest.TestCase):
 
     def test_key_order_does_not_matter(self):
         """Тот же набор, порядок ключей обратный — результат обязан совпасть
-        (до 0.6.0 ровно на этом горели выходы узла, REFACTORING.md §10.3)."""
+        (ровно на этом горели выходы узла в старой модели памяти)."""
         self.assertEqual(
             self._run_pair({"total.$": "vars.n * 2", "n": 5}),
             self._run_pair({"n": 5, "total.$": "vars.n * 2"}),

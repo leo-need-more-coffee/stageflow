@@ -58,7 +58,7 @@ class ParallelTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_branch_write_to_existing_name_is_reported(self):
         """Diff берётся против бейзлайна, поэтому запись ветки в имя, жившее
-        до ``parallel``, остаётся branch-local (MEMORY_MODEL.md §5). Молча
+        до ``parallel``, остаётся branch-local. Молча
         терять её нельзя: имена уходят в ``parallel_completed``."""
         pipeline = _parallel_pipeline({"left": "n", "right": "fresh"})
         session = Session(id="p", pipeline=pipeline, context=Context(vars={"n": 0}))

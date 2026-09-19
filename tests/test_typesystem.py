@@ -347,7 +347,7 @@ class SubpipelineTypeTests(unittest.IsolatedAsyncioTestCase):
             await session.run()
 
 class RemovedGlobalScopeTests(unittest.TestCase):
-    """Скоуп ``global`` удалён в 0.6.0 (REFACTORING.md §10). Пайплайн, который
+    """Скоуп ``global`` удалён. Пайплайн, который
     им пользовался, должен отвергаться ГРОМКО — иначе запись просто исчезала бы
     молча, а это худший из возможных вариантов миграции."""
 
