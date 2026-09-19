@@ -1,63 +1,213 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/built-in-stages/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/built-in-stages/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/built-in-stages/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/built-in-stages/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/data-model/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/data-model/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/data-model/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/data-model/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/entry-node/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/entry-node/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/entry-node/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/entry-node/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/errors/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/errors/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/errors/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/errors/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/expressions/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/expressions/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/expressions/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/expressions/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/node-types/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/node-types/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/node-types/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/node-types/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/parallel-branches/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/parallel-branches/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/parallel-branches/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/parallel-branches/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/quick-start/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/quick-start/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/quick-start/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/releasing/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/releasing/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/releasing/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/releasing/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/schema-and-stage-specs/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/schema-and-stage-specs/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/schema-and-stage-specs/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/schema-and-stage-specs/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/session-control/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/session-control/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/session-control/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/session-control/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/stage-specification/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/stage-specification/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/stage-specification/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/stage-specification/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/step-debugging/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/step-debugging/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/step-debugging/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/step-debugging/"/>
     </url>
     <url>
-         <loc>https://leo-need-more-coffee.github.io/stageflow/variable-typing/</loc>
-         <lastmod>2026-09-19</lastmod>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/variable-typing/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/variable-typing/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/variable-typing/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/built-in-stages/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/built-in-stages/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/built-in-stages/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/data-model/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/data-model/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/data-model/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/entry-node/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/entry-node/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/entry-node/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/errors/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/errors/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/errors/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/expressions/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/expressions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/expressions/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/node-types/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/node-types/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/node-types/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/parallel-branches/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/parallel-branches/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/parallel-branches/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/quick-start/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/releasing/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/releasing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/releasing/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/schema-and-stage-specs/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/schema-and-stage-specs/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/schema-and-stage-specs/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/session-control/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/session-control/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/session-control/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/stage-specification/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/stage-specification/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/stage-specification/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/step-debugging/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/step-debugging/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/step-debugging/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/variable-typing/</loc>
+        <lastmod>2026-09-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/variable-typing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/variable-typing/"/>
     </url>
 </urlset>
