@@ -43,6 +43,7 @@ dev = [
 ]
 docs = [
     "mkdocs-material",
+    "mkdocs-static-i18n",
 ]
 
 [tool.setuptools.packages.find]

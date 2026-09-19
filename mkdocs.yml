@@ -11,7 +11,6 @@ theme:
   icon:
     repo: fontawesome/brands/github
   features:
-    - navigation.instant
     - navigation.tracking
     - navigation.sections
     - navigation.top
@@ -71,6 +70,39 @@ markdown_extensions:
 
 plugins:
   - search
+  - i18n:
+      docs_structure: suffix
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: ru
+          name: Русский
+          build: true
+          site_name: StageFlow
+          site_description: Фреймворк описания и исполнения JSON-пайплайнов
+          nav_translations:
+            Home: Главная
+            Getting started: Начало работы
+            Quick start: Быстрый старт
+            Node types: Типы узлов
+            Data model: Модель данных
+            Expressions: Выражения
+            Reference: Справочник
+            The entry node: Узел entry
+            Parallel branches: Параллельные ветки
+            Errors: Ошибки
+            Variable typing: Типизация переменных
+            Session control: Управление сессией
+            Step debugging: Пошаговая отладка
+            Built-in stages: Встроенные стадии
+            Stage specification: Спецификация стадии
+            Schema and stage specs: Схема и спецификации
+            Development: Разработка
+            Releasing: Релизы
 
 validation:
   omitted_files: warn

@@ -71,8 +71,13 @@ The full guide lives at
 - [Step debugging](https://leo-need-more-coffee.github.io/stageflow/step-debugging/)
   — stopping between nodes, inspecting and editing the frame
 
-The sources live in [`docs/`](docs); the site is built with MkDocs Material and
-published by [`.github/workflows/docs.yml`](.github/workflows/docs.yml).
+The same guide in Russian:
+**[leo-need-more-coffee.github.io/stageflow/ru](https://leo-need-more-coffee.github.io/stageflow/ru/)**
+(документация на русском).
+
+The sources live in [`docs/`](docs) — `*.md` for English, `*.ru.md` for Russian;
+the site is built with MkDocs Material and published by
+[`.github/workflows/docs.yml`](.github/workflows/docs.yml).
 
 ## Tests
 
