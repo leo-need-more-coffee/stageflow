@@ -378,13 +378,18 @@ color: "#ff8800"    # акцент карточки (по умолчанию —
 
 ## Схема и визуализация
 
-JSON Schema пайплайна и спецификации стадий:
+JSON Schema пайплайна и спецификации зарегистрированных стадий:
 
 ```python
-from stageflow.docs.html import generate_docs_assets
+from stageflow.docs import generate_pipeline_schema, generate_stages_json, load_pipeline_schema
+from stageflow import get_stages
 
-html_page, pipeline_schema, stages_json = generate_docs_assets()
+schema = generate_pipeline_schema(get_stages())   # схема с enum имён стадий
+stages = generate_stages_json(get_stages())       # спеки стадий для редактора
 ```
+
+`load_pipeline_schema()` отдаёт схему без подстановки enum — её же использует
+`Pipeline.validate()`.
 
 Диаграмма пайплайна (Mermaid и таблица потока данных):
 
@@ -411,7 +416,7 @@ from stageflow.testing import PipelineTestSpec, run_pipeline_test
 stageflow/
   core/          ядро: pipeline, session, nodes/, context, cel, stage, typesys, inputs, debug
   builtins/      встроенные стадии
-  docs/          JSON Schema, спецификации стадий, HTML-справка, визуализатор графа
+  docs/          JSON Schema пайплайна, спецификации стадий, визуализатор графа
   exceptions.py  иерархия исключений
   testing.py     хелпер тестирования пайплайнов
 tests/           unit-тесты

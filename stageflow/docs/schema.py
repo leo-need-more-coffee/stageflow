@@ -16,7 +16,7 @@ def generate_stages_yaml(stage_registry: dict) -> str:
 
 
 def generate_stages_json(stage_registry: dict) -> str:
-    return json.dumps(_collect_specs(stage_registry), indent=2)
+    return json.dumps(_collect_specs(stage_registry), indent=2, ensure_ascii=False)
 
 
 @cache
