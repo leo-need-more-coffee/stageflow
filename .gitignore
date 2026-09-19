@@ -33,3 +33,6 @@ htmlcov/
 # Misc
 .DS_Store
 *.log
+
+# Вывод визуализатора (python -m stageflow.docs.graph)
+pipeline_graph.html

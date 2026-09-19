@@ -1,14 +1,14 @@
 import unittest
 
+from stageflow import BaseStage, register_stage
 from stageflow.testing import PipelineTestSpec, run_pipeline_test
-from stageflow.core.stage import BaseStage, register_stage
 
 
 @register_stage("EmitStage")
 class EmitStage(BaseStage):
     async def run(self):
         self.emit("stage_done", {"id": self.stage_id})
-        self.set_outputs({"value": self.config.get("value", 0)})
+        self.set_outputs({"value": self.get_arguments().get("value", 0)})
 
 
 @register_stage("WaitAndEmitStage")
@@ -25,9 +25,12 @@ class PipelineTesterTests(unittest.IsolatedAsyncioTestCase):
         pipeline = {
             "entry": "start",
             "nodes": [
-                {"id": "start", "type": "stage", "stage": "EmitStage", "config": {"value": 1}, "outputs": {"value": "value"}, "next": "wait"},
-                {"id": "wait", "type": "stage", "stage": "WaitAndEmitStage", "outputs": {"payload_value": "payload_value"}, "next": "end"},
-                {"id": "end", "type": "terminal", "result": {"status": "ok"}, "artifacts": ["value", "payload_value"]},
+                {"id": "start", "type": "stage", "stage": "EmitStage", "arguments": {"const": {"value": 1}},
+                 "outputs": {"value": "value"}, "next": "wait"},
+                {"id": "wait", "type": "stage", "stage": "WaitAndEmitStage",
+                 "outputs": {"payload_value": "payload_value"}, "next": "end"},
+                {"id": "end", "type": "terminal", "result": {"status": "ok"},
+                 "artifacts": ["value", "payload_value"]},
             ],
         }
         spec = PipelineTestSpec(

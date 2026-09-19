@@ -1,38 +1,40 @@
-import yaml
+"""Генерация машиночитаемых описаний: pipeline JSON Schema и спеки стадий."""
+from __future__ import annotations
+
 import json
+from functools import cache
 from importlib import resources
+
+import yaml
+
+
+def _collect_specs(stage_registry: dict) -> dict:
+    return {name: cls.get_specs() for name, cls in stage_registry.items()}
 
 
 def generate_stages_yaml(stage_registry: dict) -> str:
-    stages_doc = {}
-    for name, cls in stage_registry.items():
-        specs = cls.get_specs()
-        stages_doc[name] = specs
-    return yaml.dump(stages_doc, allow_unicode=True, sort_keys=False, indent=2)
+    return yaml.dump(_collect_specs(stage_registry), allow_unicode=True, sort_keys=False, indent=2)
 
 
 def generate_stages_json(stage_registry: dict) -> str:
-    import json
+    return json.dumps(_collect_specs(stage_registry), indent=2)
 
-    stages_doc = {}
-    for name, cls in stage_registry.items():
-        specs = cls.get_specs()
-        stages_doc[name] = specs
-    return json.dumps(stages_doc, indent=2)
+
+@cache
+def _read_pipeline_schema() -> str:
+    schema_file = resources.files("stageflow.docs.schemas").joinpath("pipeline.json")
+    return schema_file.read_text(encoding="utf-8")
 
 
 def load_pipeline_schema() -> dict:
-    with resources.files("stageflow.docs.schemas").joinpath("pipeline.json").open("r", encoding="utf-8") as f:
-        return json.load(f)
+    """Схема пайплайна из пакета. Файл читается один раз; каждый вызов отдаёт
+    независимую копию — её можно безопасно дорабатывать (см. enum ниже)."""
+    return json.loads(_read_pipeline_schema())
 
 
 def generate_pipeline_schema(stage_registry: dict) -> dict:
-    """Return pipeline JSON Schema with stage names enum-injected."""
+    """Схема пайплайна с enum'ом имён зарегистрированных стадий: пайплайн,
+    ссылающийся на несуществующую стадию, не пройдёт уже схемную проверку."""
     schema = load_pipeline_schema()
-    stage_names = list(stage_registry.keys())
-    # Inject enum into stage node definition.
-    try:
-        schema["$defs"]["stage_node"]["properties"]["stage"]["enum"] = stage_names
-    except Exception:
-        pass
+    schema["$defs"]["stage_node"]["properties"]["stage"]["enum"] = list(stage_registry)
     return schema

@@ -2,131 +2,695 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "StageFlow Pipeline",
   "type": "object",
-  "required": ["entry", "nodes"],
+  "required": [
+    "nodes"
+  ],
   "properties": {
-    "api_version": { "type": ["string", "null"] },
-    "entry": { "type": "string" },
-    "metadata": { "type": "object" },
+    "api_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "entry": {
+      "description": "id узла, с которого начинается исполнение. Можно не задавать, если в графе есть узел типа 'entry' — он и есть точка входа.",
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    },
     "nodes": {
       "type": "array",
-      "items": { "$ref": "#/$defs/node" },
+      "items": {
+        "$ref": "#/$defs/node"
+      },
       "minItems": 1
     },
     "subpipelines": {
       "type": "object",
-      "additionalProperties": { "$ref": "#/$defs/pipeline" },
+      "additionalProperties": {
+        "$ref": "#/$defs/pipeline"
+      },
       "default": {}
+    },
+    "types": {
+      "description": "Именованные типы: структура (mapping поле->тип, суффикс ? = optional; либо {fields, strict}) или алиас-выражение. Выражения: string|int|float|number|bool|any|null, list<T>, map<T>, T|U, T?.",
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "default": {}
+    },
+    "variables": {
+      "description": "Объявленные типы переменных фрейма: {имя: тип}. Необъявленные переменные не проверяются (постепенная типизация).",
+      "$ref": "#/$defs/variable_declarations"
     }
   },
   "additionalProperties": false,
   "$defs": {
-    "pipeline": { "$ref": "#" },
-    "node": {
+    "pipeline": {
+      "$ref": "#"
+    },
+    "variable_declarations": {
       "type": "object",
-      "required": ["id", "type"],
-      "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string" },
-        "metadata": { "type": "object" }
-      },
-      "discriminator": {
-        "propertyName": "type",
-        "mapping": {
-          "stage": { "$ref": "#/$defs/stage_node" },
-          "condition": { "$ref": "#/$defs/condition_node" },
-          "parallel": { "$ref": "#/$defs/parallel_node" },
-          "terminal": { "$ref": "#/$defs/terminal_node" },
-          "subpipeline": { "$ref": "#/$defs/subpipeline_node" }
-        }
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object"
+          }
+        ]
       }
     },
-    "stage_node": {
+    "argument_bucket": {
+      "description": "Ссылки на фрейм: {имя_аргумента: имя_переменной}. Список — сахар для одноимённого копирования. Суффикс .$ на ключе = значение вычислить как CEL.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "arguments": {
       "type": "object",
-      "required": ["id", "type", "stage"],
       "properties": {
-        "id": { "type": "string" },
-        "type": { "const": "stage" },
-        "stage": { "type": "string" },
-        "config": { "type": "object" },
-        "arguments": { "type": "object" },
-        "outputs": { "type": "object" },
-        "next": { "type": ["string", "null"] },
-        "fallback": { "type": ["string", "null"] },
-        "metadata": { "type": "object" }
+        "vars": {
+          "$ref": "#/$defs/argument_bucket"
+        },
+        "const": {
+          "type": "object",
+          "additionalProperties": true
+        }
       },
       "additionalProperties": false
     },
-    "condition": {
+    "outputs": {
+      "description": "Раскладка результата стадии по переменным. Голый ключ: имя поля результата -> имя переменной. Ключ с .$: имя переменной в самом ключе, значение — CEL (виден `vars` до узла и `output`). До 0.7.0 тут был лишний уровень {'local': {...}} — единственный возможный, см. REFACTORING.md §12.",
       "type": "object",
-      "required": ["if", "then"],
+      "propertyNames": {
+        "pattern": "^[^\\W\\d]\\w*(\\.\\$)?$"
+      },
+      "additionalProperties": true
+    },
+    "expose": {
+      "description": "Переименование/копирование во фрейме без стадии: {'из_переменной': 'в_переменную'}.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[^\\W\\d]\\w*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[^\\W\\d]\\w*$"
+      }
+    },
+    "consume": {
+      "description": "Имена переменных, которые физически убираются из фрейма после этой ноды.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "retry": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "error_equals"
+        ],
+        "properties": {
+          "error_equals": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "max_attempts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "interval_seconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "backoff_rate": {
+            "type": "number",
+            "minimum": 1
+          },
+          "max_delay_seconds": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "entry_variables": {
+      "description": "Переменные, с которыми стартует пайплайн: {имя: значение}. Суффикс .$ на ключе = значение вычислить как CEL. Это ЗНАЧЕНИЯ ПО УМОЛЧАНИЮ: имя, пришедшее во фрейме снаружи, узел не перезаписывает. Связывание идёт по зависимостям, поэтому выражение может сослаться на соседнюю переменную.",
+      "type": "object",
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[^\\W\\d]\\w*(\\.\\$)?$"
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
       "properties": {
-        "if": { "type": "object" },
-        "then": { "type": "string" }
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "description": "Узел графа. Тип выбирает конкретную схему: 'if/then' по значению 'type' (OpenAPI-style 'discriminator' здесь не годится — JSON Schema его не исполняет, и схемы типов узлов просто не применялись бы).",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "entry"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/entry_node"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "stage"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/stage_node"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "condition"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/condition_node"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "switch"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/switch_node"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "parallel"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/parallel_node"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "terminal"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/terminal_node"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "subpipeline"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/subpipeline_node"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "try"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/try_node"
+          }
+        }
+      ]
+    },
+    "entry_node": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "entry"
+        },
+        "variables": {
+          "$ref": "#/$defs/entry_variables"
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "stage_node": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "stage"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "stage"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "arguments": {
+          "$ref": "#/$defs/arguments"
+        },
+        "outputs": {
+          "$ref": "#/$defs/outputs"
+        },
+        "consume": {
+          "$ref": "#/$defs/consume"
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "retry": {
+          "$ref": "#/$defs/retry"
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadata": {
+          "type": "object"
+        }
       },
       "additionalProperties": false
     },
     "condition_node": {
       "type": "object",
-      "required": ["id", "type", "conditions"],
+      "required": [
+        "id",
+        "type",
+        "condition",
+        "then"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "type": { "const": "condition" },
-        "conditions": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/condition" },
-          "minItems": 1
+        "id": {
+          "type": "string"
         },
-        "else": { "type": ["string", "null"] },
-        "metadata": { "type": "object" }
+        "type": {
+          "const": "condition"
+        },
+        "condition": {
+          "type": "string",
+          "description": "CEL-выражение"
+        },
+        "then": {
+          "type": "string"
+        },
+        "else": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "switch_node": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "cases"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "switch"
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "when",
+              "next"
+            ],
+            "properties": {
+              "when": {
+                "type": "string",
+                "description": "CEL-выражение"
+              },
+              "next": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "default": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "metadata": {
+          "type": "object"
+        }
       },
       "additionalProperties": false
     },
     "parallel_node": {
       "type": "object",
-      "required": ["id", "type", "children"],
+      "required": [
+        "id",
+        "type",
+        "branches"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "type": { "const": "parallel" },
-        "children": {
-          "type": "array",
-          "items": { "type": "string" },
-          "minItems": 1
+        "id": {
+          "type": "string"
         },
-        "policy": { "type": "string", "enum": ["all", "any"], "default": "all" },
-        "cancel_on_error": { "type": "boolean", "default": true },
-        "next": { "type": ["string", "null"] },
-        "metadata": { "type": "object" }
+        "type": {
+          "const": "parallel"
+        },
+        "branches": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "entry"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "entry": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "cancel_on_error": {
+          "type": "boolean",
+          "default": true
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "retry": {
+          "$ref": "#/$defs/retry"
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadata": {
+          "type": "object"
+        }
       },
       "additionalProperties": false
     },
     "terminal_node": {
       "type": "object",
-      "required": ["id", "type"],
+      "required": [
+        "id",
+        "type"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "type": { "const": "terminal" },
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "terminal"
+        },
         "artifacts": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": []
         },
-        "result": { "type": ["object", "null"] },
-        "metadata": { "type": "object" }
+        "result": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "metadata": {
+          "type": "object"
+        }
       },
       "additionalProperties": false
     },
     "subpipeline_node": {
       "type": "object",
-      "required": ["id", "type", "subpipeline_id"],
+      "required": [
+        "id",
+        "type",
+        "subpipeline_id"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "type": { "const": "subpipeline" },
-        "subpipeline_id": { "type": "string" },
-        "inputs": { "type": "object" },
-        "artifact_outputs": { "type": "object" },
-        "result_output": { "type": ["string", "null"] },
-        "next": { "type": ["string", "null"] },
-        "metadata": { "type": "object" }
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "subpipeline"
+        },
+        "subpipeline_id": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "artifact_outputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "result_output": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "retry": {
+          "$ref": "#/$defs/retry"
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "except_handler": {
+      "type": "object",
+      "required": [
+        "error_equals",
+        "next"
+      ],
+      "properties": {
+        "error_equals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "next": {
+          "type": "string"
+        },
+        "result_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "try_node": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "body",
+        "except"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "try"
+        },
+        "body": {
+          "type": "string",
+          "description": "Вход в тело блока; область — всё достижимое отсюда, но не из next"
+        },
+        "except": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/except_handler"
+          }
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "retry": {
+          "$ref": "#/$defs/retry"
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadata": {
+          "type": "object"
+        }
       },
       "additionalProperties": false
     }

@@ -1,35 +1,40 @@
 import asyncio
 import unittest
 
-from stageflow.core.stage import BaseStage, register_stage
-from stageflow.core.node import StageNode, ConditionNode, Condition, TerminalNode
-from stageflow.core.pipeline import Pipeline
-from stageflow.core.context import Context
-from stageflow.core.session import Session
-from stageflow.core.event import EventSpec, InputSpec
-from stageflow.core.jsonlogic import JsonLogic
+from stageflow import (
+    BaseStage,
+    ExceptHandler,
+    ConditionNode,
+    Context,
+    EventSpec,
+    InputSpec,
+    Pipeline,
+    Session,
+    StageNode,
+    TerminalNode,
+    TryNode,
+    register_stage,
+)
 
 
 @register_stage("InitStage")
 class InitStage(BaseStage):
     async def run(self):
-        # Seed payload with initial values
+        args = self.get_arguments()
         self.set_outputs({
             "flag": True,
-            "need_wait": self.config.get("need_wait", False),
-            "value": self.config.get("value", 0),
+            "need_wait": args.get("need_wait", False),
+            "value": args.get("value", 0),
         })
 
 
 @register_stage("MaybeFailStage")
 class MaybeFailStage(BaseStage):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fail_first = True
+    _failed_once = False
 
     async def run(self):
-        if self.fail_first:
-            self.fail_first = False
+        if not type(self)._failed_once:
+            type(self)._failed_once = True
             raise RuntimeError("first attempt fails")
         self.set_outputs({"recovered": False})
 
@@ -46,9 +51,8 @@ class WaitStage(BaseStage):
 
     async def run(self):
         res = await self.wait_input("user_input", timeout=1.0)
-        if res:
-            payload = res.get("payload", {})
-            self.set_outputs({"waited_value": payload.get("value")})
+        payload = (res or {}).get("payload", {})
+        self.set_outputs({"waited_value": payload.get("value")})
 
 
 @register_stage("WorkerStage")
@@ -57,70 +61,70 @@ class WorkerStage(BaseStage):
 
     async def run(self):
         args = self.get_arguments()
-        total = args.get("value", 0) + (args.get("waited_value") or 0)
+        total = (args.get("value") or 0) + (args.get("waited_value") or 0)
         self.emit("progress", {"current": total})
         self.set_outputs({"result": total})
 
 
 class FullPipelineTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        MaybeFailStage._failed_once = False
+
     async def test_full_pipeline_flow(self):
         nodes = [
             StageNode(
                 id="init",
-                type="stage",
                 stage="InitStage",
-                config={"need_wait": True, "value": 5},
+                arguments={"const": {"need_wait": True, "value": 5}},
                 outputs={"flag": "flag", "need_wait": "need_wait", "value": "value"},
-                next="maybe_fail",
+                next="guard",
+            ),
+            TryNode(
+                id="guard",
+                body="maybe_fail",
+                handlers=[ExceptHandler(error_equals=["RuntimeError"], next="recover")],
+                next="decide",
             ),
             StageNode(
                 id="maybe_fail",
-                type="stage",
                 stage="MaybeFailStage",
-                next="decide",
-                fallback="recover",
             ),
             StageNode(
                 id="recover",
-                type="stage",
                 stage="RecoverStage",
                 outputs={"recovered": "recovered"},
                 next="decide",
             ),
             ConditionNode(
                 id="decide",
-                type="condition",
-                conditions=[Condition(if_condition=JsonLogic({"var": "need_wait"}), then_goto="wait")],
-                else_goto="worker",
+                condition="vars.need_wait",
+                then="wait",
+                else_="worker",
             ),
             StageNode(
                 id="wait",
-                type="stage",
                 stage="WaitStage",
                 outputs={"waited_value": "waited_value"},
                 next="worker",
             ),
             StageNode(
                 id="worker",
-                type="stage",
                 stage="WorkerStage",
-                arguments={"value": "value", "waited_value": "waited_value"},
+                arguments={"vars": ["value", "waited_value"]},
                 outputs={"result": "result"},
                 next="finish",
             ),
             TerminalNode(
                 id="finish",
-                type="terminal",
                 result={"status": "ok"},
-                artifact_paths=["result", "recovered", "waited_value"],
+                artifacts=["result", "recovered", "waited_value"],
             ),
         ]
         pipeline = Pipeline(entry="init", nodes=nodes)
-        ctx = Context(payload={})
-        session = Session(id="full", pipeline=pipeline, context=ctx)
+        session = Session(id="full", pipeline=pipeline, context=Context())
 
         async def feed_input():
-            while "user_input" not in session._waiting:
+            while not session.is_waiting_for("user_input"):
                 await asyncio.sleep(0.01)
             await session.input("user_input", {"value": 3})
 
@@ -132,34 +136,37 @@ class FullPipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts["result"], 8)
         self.assertTrue(result.artifacts["recovered"])
         self.assertEqual(result.artifacts["waited_value"], 3)
-        # Ensure progress event emitted
         self.assertTrue(any(e.type == "progress" for e in result.history))
 
     async def test_full_pipeline_from_json(self):
         pipeline_json = {
             "entry": "init",
             "nodes": [
-                {"id": "init", "type": "stage", "stage": "InitStage", "config": {"need_wait": True, "value": 2},
-                 "outputs": {"flag": "flag", "need_wait": "need_wait", "value": "value"}, "next": "maybe_fail"},
-                {"id": "maybe_fail", "type": "stage", "stage": "MaybeFailStage", "next": "decide", "fallback": "recover"},
-                {"id": "recover", "type": "stage", "stage": "RecoverStage", "outputs": {"recovered": "recovered"}, "next": "decide"},
-                {"id": "decide", "type": "condition",
-                 "conditions": [{"if": {"var": "need_wait"}, "then": "wait"}],
-                 "else": "worker"},
-                {"id": "wait", "type": "stage", "stage": "WaitStage", "outputs": {"waited_value": "waited_value"}, "next": "worker"},
+                {"id": "init", "type": "stage", "stage": "InitStage",
+                 "arguments": {"const": {"need_wait": True, "value": 2}},
+                 "outputs": {"flag": "flag", "need_wait": "need_wait", "value": "value"},
+                 "next": "guard"},
+                {"id": "guard", "type": "try", "body": "maybe_fail", "next": "decide",
+                 "except": [{"error_equals": ["RuntimeError"], "next": "recover"}]},
+                {"id": "maybe_fail", "type": "stage", "stage": "MaybeFailStage"},
+                {"id": "recover", "type": "stage", "stage": "RecoverStage",
+                 "outputs": {"recovered": "recovered"}, "next": "decide"},
+                {"id": "decide", "type": "condition", "condition": "vars.need_wait",
+                 "then": "wait", "else": "worker"},
+                {"id": "wait", "type": "stage", "stage": "WaitStage",
+                 "outputs": {"waited_value": "waited_value"}, "next": "worker"},
                 {"id": "worker", "type": "stage", "stage": "WorkerStage",
-                 "arguments": {"value": "value", "waited_value": "waited_value"},
+                 "arguments": {"vars": ["value", "waited_value"]},
                  "outputs": {"result": "result"}, "next": "finish"},
                 {"id": "finish", "type": "terminal", "result": {"status": "ok"},
                  "artifacts": ["result", "recovered", "waited_value"]},
             ],
         }
         pipeline = Pipeline.from_dict(pipeline_json)
-        ctx = Context(payload={})
-        session = Session(id="full-json", pipeline=pipeline, context=ctx)
+        session = Session(id="full-json", pipeline=pipeline, context=Context())
 
         async def feed_input():
-            while "user_input" not in session._waiting:
+            while not session.is_waiting_for("user_input"):
                 await asyncio.sleep(0.01)
             await session.input("user_input", {"value": 4})
 

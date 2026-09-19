@@ -1,10 +1,7 @@
 import asyncio
 import unittest
 
-from stageflow.core.stage import BaseStage, register_stage
-from stageflow.core.pipeline import Pipeline
-from stageflow.core.context import Context
-from stageflow.core.session import Session
+from stageflow import BaseStage, Context, Pipeline, Session, register_stage
 
 
 @register_stage("SnapshotWaitStage")
@@ -27,7 +24,7 @@ class SessionSnapshotTests(unittest.IsolatedAsyncioTestCase):
 
         # Run until waiting for input, then snapshot state.
         task = asyncio.create_task(session.run())
-        while "go" not in session._waiting:
+        while not session.is_waiting_for("go"):
             await asyncio.sleep(0.01)
         snap = session.snapshot()
         # Finish original session to avoid leak.
@@ -35,12 +32,12 @@ class SessionSnapshotTests(unittest.IsolatedAsyncioTestCase):
         await task
 
         self.assertEqual(snap["current_node_id"], "wait")
-        self.assertEqual(snap.get("context", {}).get("payload", {}), {})
+        self.assertEqual(snap.get("context", {}).get("vars", {}), {})
 
         # Restore from snapshot and resume.
         restored = Session.from_snapshot(snap)
         resume_task = asyncio.create_task(restored.run())
-        while "go" not in restored._waiting:
+        while not restored.is_waiting_for("go"):
             await asyncio.sleep(0.01)
         await restored.input("go", {"v": 2})
         result = await resume_task

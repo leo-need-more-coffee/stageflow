@@ -1,10 +1,23 @@
-from dataclasses import dataclass
-from datetime import datetime, UTC
-from .utils import schema_to_jsonable
+"""События телеметрии и декларации контрактов стадии.
+
+``Event`` — единица истории исполнения: копится в ``Session.event_history``
+и уходит во внешний ``event_handler``. ``EventSpec``/``InputSpec`` — то, что
+стадия декларирует о себе: какие события она вправе эмитить и какой ввод
+принимать (со схемами payload, см. ``payload_schema``).
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from typing import Any
+
+from .payload_schema import schema_to_jsonable
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class InputSpec:
+    """Декларация типа пользовательского ввода, допустимого для стадии."""
+
     type: str | None = None
     description: str | None = None
     required: bool = True
@@ -21,8 +34,10 @@ class InputSpec:
         }
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class EventSpec:
+    """Декларация типа события, которое стадия вправе эмитить."""
+
     type: str
     description: str | None = None
     payload_schema: object | None = None
@@ -35,31 +50,17 @@ class EventSpec:
         }
 
 
+@dataclass(slots=True)
 class Event:
+    """Запись телеметрии исполнения; сериализуется в снапшоты и наружу."""
+
     type: str
     session_id: str
-    node_id: str | None
-    stage_id: str | None
-    action_id: str | None
-    payload: dict
-    timestamp: datetime
-
-    def __init__(
-        self,
-        type: str,
-        session_id: str,
-        node_id: str | None = None,
-        stage_id: str | None = None,
-        action_id: str | None = None,
-        payload: dict = None,
-    ):
-        self.type = type
-        self.session_id = session_id
-        self.node_id = node_id
-        self.stage_id = stage_id
-        self.action_id = action_id
-        self.payload = payload or {}
-        self.timestamp = datetime.now(UTC)
+    node_id: str | None = None
+    stage_id: str | None = None
+    action_id: str | None = None
+    payload: dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def to_dict(self) -> dict:
         return {
@@ -74,15 +75,13 @@ class Event:
 
     @classmethod
     def from_dict(cls, data: dict) -> "Event":
-        ts_raw = data.get("timestamp")
-        timestamp = datetime.fromisoformat(ts_raw) if ts_raw else datetime.now(UTC)
-        ev = cls(
+        raw_ts = data.get("timestamp")
+        return cls(
             type=data.get("type"),
             session_id=data.get("session_id"),
             node_id=data.get("node_id"),
             stage_id=data.get("stage_id"),
             action_id=data.get("action_id"),
-            payload=data.get("payload"),
+            payload=data.get("payload") or {},
+            timestamp=datetime.fromisoformat(raw_ts) if raw_ts else datetime.now(UTC),
         )
-        ev.timestamp = timestamp
-        return ev

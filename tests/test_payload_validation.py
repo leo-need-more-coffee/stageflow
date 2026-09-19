@@ -1,9 +1,8 @@
 import unittest
-from typing import Optional, Any
+from typing import Any, Optional
 
-from stageflow.core.utils import validate_schema
-from stageflow.core.stage import BaseStage
-from stageflow.core.event import EventSpec, InputSpec
+from stageflow import BaseStage, EventSpec, InputSpec
+from stageflow.core.payload_schema import validate_schema
 
 
 class DummySession:
@@ -67,7 +66,7 @@ class StageValidationTests(unittest.IsolatedAsyncioTestCase):
             async def run(self):
                 return None
 
-        stage = MyStage(stage_id="s1", config={}, arguments={}, outputs={}, session=session)
+        stage = MyStage(stage_id="s1", arguments={}, session=session)
         stage.emit("progress", {"step": 1, "tags": ["a", "b"]})
         self.assertEqual(len(session.emitted), 1)
         with self.assertRaises(ValueError):
@@ -82,12 +81,12 @@ class StageValidationTests(unittest.IsolatedAsyncioTestCase):
             async def run(self):
                 return None
 
-        stage = MyStage(stage_id="s1", config={}, arguments={}, outputs={}, session=session)
+        stage = MyStage(stage_id="s1", arguments={}, session=session)
         res = await stage.wait_input("user")
         self.assertEqual(res["payload"]["user"]["id"], 42)
 
         session_bad = DummySession(input_payload={"user": {"id": "oops"}})
-        stage_bad = MyStage(stage_id="s1", config={}, arguments={}, outputs={}, session=session_bad)
+        stage_bad = MyStage(stage_id="s1", arguments={}, session=session_bad)
         with self.assertRaises(ValueError):
             await stage_bad.wait_input("user")
 
@@ -101,7 +100,7 @@ class StageValidationTests(unittest.IsolatedAsyncioTestCase):
             async def run(self):
                 return None
 
-        stage = LimitedStage(stage_id="s1", config={}, arguments={}, outputs={}, session=session)
+        stage = LimitedStage(stage_id="s1", arguments={}, session=session)
         stage.emit("ping", {})
         with self.assertRaises(ValueError):
             stage.emit("other", {})

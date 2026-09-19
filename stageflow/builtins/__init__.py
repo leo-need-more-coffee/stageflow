@@ -1,17 +1,19 @@
-from .vars import (
-    SetValueStage,
-    CopyValueStage,
-    IncrementStage,
-    MergeDictStage,
-)
+"""Встроенные стадии.
+
+Импорт модулей здесь — не только реэкспорт: он же регистрирует стадии
+в реестре (декоратор ``@register_stage`` срабатывает при импорте класса).
+"""
+from .dicts import DropKeysStage, PickKeysStage
 from .lists import (
     AppendListStage,
     ExtendListStage,
+    FilterListStage,
+    PopListStage,
+    UniqueListStage,
 )
 from .logic import AssertStage, FailStage, LogStage, SleepStage
 from .strings import ConcatStage, TemplateStage
-from .dicts import PickKeysStage, DropKeysStage
-from .lists_extra import FilterListStage, UniqueListStage, PopListStage
+from .vars import CopyValueStage, IncrementStage, MergeDictStage, SetValueStage
 
 __all__ = [
     "SetValueStage",
@@ -20,15 +22,15 @@ __all__ = [
     "MergeDictStage",
     "AppendListStage",
     "ExtendListStage",
+    "FilterListStage",
+    "UniqueListStage",
+    "PopListStage",
+    "PickKeysStage",
+    "DropKeysStage",
+    "ConcatStage",
+    "TemplateStage",
     "AssertStage",
     "FailStage",
     "LogStage",
     "SleepStage",
-    "ConcatStage",
-    "TemplateStage",
-    "PickKeysStage",
-    "DropKeysStage",
-    "FilterListStage",
-    "UniqueListStage",
-    "PopListStage",
 ]

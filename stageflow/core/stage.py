@@ -1,168 +1,153 @@
+"""Пользовательские стадии: базовый класс и реестр.
+
+Стадия — единица бизнес-логики, исполняемая узлом ``stage``. Единственный её
+канал входов — уже РЕЗОЛВНУТЫЕ аргументы (бакеты ``vars``/``const``
+разбирает узел, см. MEMORY_MODEL.md §2); выходы она отдаёт через
+``set_outputs()``, раскладывает их по скоупам снова узел. Про пути к данным
+стадия не знает ничего.
+"""
+from __future__ import annotations
+
 import asyncio
-import copy
-from typing import Any, TYPE_CHECKING
-import yaml
-from stageflow.core import EventSpec, InputSpec
-from .utils import validate_schema
+from typing import TYPE_CHECKING, Any
 
+from ..exceptions import StageContractError
+from .event import Event, EventSpec, InputSpec
+from .payload_schema import validate_schema
+from .registry import Registry
+from .spec import build_stage_spec
 
-STAGE_REGISTRY: dict[str, type["BaseStage"]] = {}
-
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .session import Session
+
+_stages: Registry[type["BaseStage"]] = Registry("stage")
 
 
 def register_stage(name: str):
-    def decorator(cls: type["BaseStage"]):
-        if name in STAGE_REGISTRY:
-            raise ValueError(f"Stage '{name}' already registered")
+    """Декоратор регистрации стадии под именем ``name`` (им она адресуется
+    из JSON-описания пайплайна)."""
+
+    def decorator(cls: type["BaseStage"]) -> type["BaseStage"]:
         cls.stage_name = name
-        STAGE_REGISTRY[name] = cls
+        _stages.add(name, cls)
         return cls
+
     return decorator
 
 
 def get_stage(name: str) -> type["BaseStage"]:
-    if name not in STAGE_REGISTRY:
-        raise ValueError(f"Stage '{name}' not found in registry")
-    return STAGE_REGISTRY[name]
+    return _stages.get(name)
 
 
-def get_stages() -> dict[str, Any]:
-    return STAGE_REGISTRY
+def get_stages() -> dict[str, type["BaseStage"]]:
+    """Снимок реестра стадий; изменения снимка на реестр не влияют."""
+    return _stages.as_dict()
 
 
 def get_stages_by_category() -> dict[str, list[type["BaseStage"]]]:
     categories: dict[str, list[type["BaseStage"]]] = {}
-    for stage in STAGE_REGISTRY.values():
-        category = stage.category or "default"
-        categories.setdefault(category, []).append(stage)
+    for stage_cls in _stages.as_dict().values():
+        categories.setdefault(stage_cls.category or "default", []).append(stage_cls)
     return categories
 
 
-def _normalize_field_entry(name: str | None, spec: Any) -> dict[str, Any]:
-    if isinstance(spec, dict):
-        entry = {"name": name, **spec} if name else dict(spec)
-    else:
-        entry = {"name": name, "type": spec}
-    entry.setdefault("type", "any")
-    entry.setdefault("optional", False)
-    entry.setdefault("description", "")
-    return entry
-
-
-def _normalize_fields(raw: Any) -> list[dict[str, Any]]:
-    if not raw:
-        return []
-    normalized: list[dict[str, Any]] = []
-    if isinstance(raw, dict):
-        for name, spec in raw.items():
-            normalized.append(_normalize_field_entry(name, spec))
-        return normalized
-
-    if isinstance(raw, list):
-        for item in raw:
-            if isinstance(item, dict):
-                if "name" in item:
-                    normalized.append(_normalize_field_entry(item.get("name"), {k: v for k, v in item.items() if k != "name"}))
-                elif len(item) == 1:
-                    name, spec = next(iter(item.items()))
-                    normalized.append(_normalize_field_entry(name, spec))
-            else:
-                normalized.append(_normalize_field_entry(str(item), {"type": "any"}))
-        return normalized
-
-    return normalized
-
-
 class BaseStage:
-    skipable: bool = False
+    """База пользовательской стадии.
+
+    Класс декларирует свой контракт атрибутами: ``allowed_events`` /
+    ``allowed_inputs`` (какие события эмитит и какой ввод ждёт, со схемами
+    payload), ``skipable``, ``timeout``, ``category``. Спецификация
+    arguments/outputs описывается YAML'ом в docstring — см.
+    ``stageflow.core.spec``.
+
+    Отдельного бакета «настроек узла» нет: литеральные значения приходят тем
+    же каналом ``arguments`` (бакет ``const`` в JSON узла), поэтому у стадии
+    ровно один источник входов и одна спецификация для него.
+    """
+
     stage_name: str = "BaseStage"
     category: str | None = None
+    skipable: bool = False
     allowed_events: list[EventSpec] = []
     allowed_inputs: list[InputSpec] = []
     timeout: float | None = 30
-    retries: int = 0
 
-    def __init__(self, stage_id: str, config: dict, arguments: dict, outputs: dict, session: "Session"):
+    def __init__(self, stage_id: str, arguments: dict, session: "Session"):
         self.stage_id = stage_id
-        self.config = config or {}
-        self.arguments_paths = arguments or {}
-        self.outputs_paths = outputs or {}
+        self.arguments = arguments or {}
         self.session = session
+        self.collected_outputs: dict[str, Any] = {}
 
-    def get_arguments(self) -> dict:
-        arguments = dict()
-        for key, path in self.arguments_paths.items():
-            arguments[key] = copy.deepcopy(self.session.context.get(path))
-        return arguments
+    # ------------------------------------------------------- входы/выходы
 
-    def set_outputs(self, outputs: dict):
-        for key, value in outputs.items():
-            if key in self.outputs_paths:
-                path = self.outputs_paths[key]
-                self.session.context.set(path, value)
+    def get_arguments(self) -> dict[str, Any]:
+        return dict(self.arguments)
 
-    async def run(self):
+    def set_outputs(self, outputs: dict[str, Any]) -> None:
+        self.collected_outputs.update(outputs)
+
+    async def run(self) -> None:
         raise NotImplementedError
 
-    def emit(self, event_type: str, payload: object | None = None):
-        from .event import Event
-        if self.allowed_events:
-            allowed = {spec.type for spec in self.allowed_events if spec.type}
-            if allowed and event_type not in allowed:
-                raise ValueError(f"Event type '{event_type}' is not allowed for stage '{self.stage_name}'")
-            matching = next((spec for spec in self.allowed_events if spec.type == event_type), None)
-            if matching and matching.payload_schema is not None:
-                validate_schema(payload or {}, matching.payload_schema, "Event payload")
-        self.session.emit(Event(
-            type=event_type,
-            session_id=self.session.id,
-            stage_id=self.stage_id,
-            payload=payload or {},
-        ))
+    # ----------------------------------------------------------- события
 
-    def _get_allowed_input(self, type_: str) -> InputSpec | None:
-        if self.allowed_inputs:
-            allowed = {spec.type for spec in self.allowed_inputs if spec.type}
-            if allowed and type_ not in allowed:
-                raise ValueError(f"Input type '{type_}' is not allowed for stage '{self.stage_name}'")
-            return next((spec for spec in self.allowed_inputs if spec.type == type_), None)
-        return None
+    def emit(self, event_type: str, payload: dict | None = None) -> None:
+        """Эмитит событие от имени стадии, предварительно проверив его по
+        контракту ``allowed_events`` (тип и схему payload)."""
+        spec = self._check_allowed(event_type, self.allowed_events, "Event")
+        if spec is not None and spec.payload_schema is not None:
+            validate_schema(payload or {}, spec.payload_schema, "Event payload")
+        self.session.emit(
+            Event(
+                type=event_type,
+                session_id=self.session.id,
+                stage_id=self.stage_id,
+                payload=payload or {},
+            )
+        )
+
+    # -------------------------------------------------------------- ввод
 
     def start_wait_input(self, type_: str) -> asyncio.Future:
-        self._get_allowed_input(type_)
+        self._check_allowed(type_, self.allowed_inputs, "Input")
         return self.session.start_wait_input(type_)
 
-    async def finish_wait_input(self, type_: str, fut: asyncio.Future, timeout: float | None = None):
-        matching = self._get_allowed_input(type_)
+    async def finish_wait_input(
+        self, type_: str, fut: asyncio.Future, timeout: float | None = None
+    ) -> dict | None:
         result = await self.session.finish_wait_input(type_, fut, timeout=timeout)
+        return self._validated_input(type_, result)
+
+    async def wait_input(self, type_: str, timeout: float | None = None) -> dict | None:
+        self._check_allowed(type_, self.allowed_inputs, "Input")
+        result = await self.session.wait_input(type_, timeout=timeout)
+        return self._validated_input(type_, result)
+
+    def _validated_input(self, type_: str, result: dict | None) -> dict | None:
         if result is None:
             return None
-        if matching and matching.payload_schema is not None:
-            validate_schema(result.get("payload", {}), matching.payload_schema, "Input payload")
+        spec = self._check_allowed(type_, self.allowed_inputs, "Input")
+        if spec is not None and spec.payload_schema is not None:
+            validate_schema(result.get("payload", {}), spec.payload_schema, "Input payload")
         return result
 
-    async def wait_input(self, type_: str, timeout: float | None = None):
-        matching = self._get_allowed_input(type_)
-        result = await self.session.wait_input(type_, timeout=timeout)
-        if result is None:
+    def _check_allowed(
+        self, type_: str, specs: list[EventSpec] | list[InputSpec], kind: str
+    ) -> EventSpec | InputSpec | None:
+        """Пустой список спецификаций = контракт не объявлен, разрешено всё.
+        Непустой — тип обязан быть в списке; возвращается его спецификация."""
+        if not specs:
             return None
-        if matching and matching.payload_schema is not None:
-            validate_schema(result.get("payload", {}), matching.payload_schema, "Input payload")
-        return result
+        declared = {spec.type for spec in specs if spec.type}
+        if declared and type_ not in declared:
+            raise StageContractError(
+                f"{kind} type '{type_}' is not allowed for stage '{self.stage_name}'"
+            )
+        return next((spec for spec in specs if spec.type == type_), None)
+
+    # ------------------------------------------------------ спецификация
 
     @classmethod
     def get_specs(cls) -> dict[str, Any]:
-        parsed_description = yaml.safe_load(cls.__doc__) if cls.__doc__ else {}
-        return {
-            "stage_name": cls.stage_name,
-            "skipable": cls.skipable,
-            "allowed_events": [e.to_dict() for e in cls.allowed_events],
-            "allowed_inputs": [i.to_dict() for i in cls.allowed_inputs],
-            "category": cls.category,
-            "description": parsed_description.get("description", "") if isinstance(parsed_description, dict) else "",
-            "arguments": _normalize_fields(parsed_description.get("arguments", [])) if isinstance(parsed_description, dict) else [],
-            "config": _normalize_fields(parsed_description.get("config", [])) if isinstance(parsed_description, dict) else [],
-            "outputs": _normalize_fields(parsed_description.get("outputs", [])) if isinstance(parsed_description, dict) else [],
-        }
+        """JSON-сериализуемая спецификация стадии для документации."""
+        return build_stage_spec(cls)

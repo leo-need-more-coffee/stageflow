@@ -1,149 +1,379 @@
-import asyncio
-import copy
-from typing import Callable, Any
+"""Исполнение пайплайна.
 
+Цикл сведён к ``node, ctx = await node.execute(session, ctx)`` — ни одного
+isinstance, ни одного ``_handle_*`` (см. MEMORY_MODEL.md §7). Фрейм ``vars``
+ходит явным параметром, а не общим мутабельным полем сессии, иначе ветки
+``parallel`` затирали бы друг друга.
+
+Управление (stop/pause/resume) построено на ``asyncio.Event``: никаких
+опрашивающих циклов со sleep — цикл исполнения гонит шаг узла наперегонки
+с сигналом остановки через ``asyncio.wait``.
+"""
+from __future__ import annotations
+
+import asyncio
+from dataclasses import dataclass, replace
+from typing import Any, Callable
+
+from ..exceptions import PipelineDefinitionError
+from .cel import CelEngine
 from .context import Context
 from .event import Event
+from .inputs import InputHub
+from .nodes import Node, StageNode, TerminalNode
 from .pipeline import Pipeline
-from .node import StageNode, ConditionNode, ParallelNode, TerminalNode, SubPipelineNode
+
+EventHandler = Callable[[Event], None]
+
+#: result сессии, прерванной командой stop.
+_STOPPED_RESULT = {"result": "stopped"}
 
 
+@dataclass(slots=True)
+class ScopeFrame:
+    """Курсор фрейма внутри области: последнее состояние, дожившее до конца
+    очередного узла. Нужен, потому что упавший узел уносит свой контекст с
+    собой, а блоку ``try`` он нужен для обработчика."""
+
+    ctx: Context
+
+
+@dataclass(slots=True)
 class SessionResult:
-    artifacts: dict[str, dict | None]
+    """Итог прогона: артефакты, result терминального узла, история событий
+    и финальный контекст."""
+
+    artifacts: dict[str, Any]
     result: dict | None
     history: list[Event]
     context: Context
-
-    def __init__(self, artifacts: dict, result: dict | None, history: list[Event], context: Context):
-        self.artifacts = artifacts
-        self.result = result
-        self.history = history
-        self.context = context
 
     def to_dict(self) -> dict:
         return {
             "artifacts": self.artifacts,
             "result": self.result,
-            "history": [e.to_dict() for e in self.history],
+            "history": [event.to_dict() for event in self.history],
             "context": self.context.to_dict(),
         }
 
 
 class Session:
+    """Выполняющийся экземпляр пайплайна.
+
+    Отвечает за цикл исполнения, телеметрию и снапшоты; ожидание
+    пользовательского ввода делегировано :class:`InputHub` (``self.inputs``).
+    """
+
     def __init__(
         self,
         id: str,
         pipeline: Pipeline,
-        context: Context = None,
-        event_handler: Callable[[Event], None] = None,
+        context: Context | None = None,
+        event_handler: EventHandler | None = None,
+        debugger: "Debugger | None" = None,
     ):
         pipeline.validate()
         self.id = id
         self.pipeline = pipeline
         self.context = context or Context()
-        self.event_handler = event_handler or (lambda event: None)
+        self.cel = CelEngine()
+        self._event_handler: EventHandler = event_handler or (lambda event: None)
+        # отладчик получает управление перед каждым узлом и после него:
+        # только оттуда видно точку остановки и фрейм между шагами
+        # (см. core/debug.py, REFACTORING.md §14)
+        self.debugger = debugger
 
-        self.artifact_paths: list[str] = []
+        self.artifacts: dict[str, Any] = {}
         self.result: dict | None = None
         self.event_history: list[Event] = []
+        self.inputs = InputHub(self._emit_input_event)
 
-        self.input_history: list[dict[str, Any]] = []
-        self._waiting: dict[str, list[asyncio.Future]] = {}
-        self._pending_inputs: dict[str, list[dict[str, Any]]] = {}
-
-        self._stopped = False
-        self._paused = False
+        self._stop_requested = asyncio.Event()
+        self._running = asyncio.Event()  # снят = пауза
+        self._running.set()
         self._skip_requested = False
         self._current_node_id: str | None = None
 
-    def emit(self, event: Event):
+    # ------------------------------------------------------------ события
+
+    def emit(self, event: Event) -> None:
         self.event_history.append(event)
-        self.event_handler(event)
+        self._event_handler(event)
 
-    async def input(self, type_: str, payload: dict[str, Any]):
+    def emit_node_event(self, type_: str, node: Node, payload: dict | None = None) -> None:
+        self.emit(
+            Event(type=type_, session_id=self.id, stage_id=node.id, payload=payload or {})
+        )
+
+    def _emit_input_event(self, type_: str, payload: dict) -> None:
+        self.emit(Event(type=type_, session_id=self.id, payload=payload))
+
+    # -------------------------------------------------------------- ввод
+
+    @property
+    def input_history(self) -> list[dict[str, Any]]:
+        return self.inputs.history
+
+    async def input(self, type_: str, payload: dict[str, Any]) -> dict[str, Any]:
+        """Внешняя точка входа для пользовательского ввода и команд управления
+        (``type_="command"``, ``payload={"name": "stop"|"pause"|...}``)."""
         entry = {"type": type_, "payload": payload}
-        self.input_history.append(entry)
         self.emit(Event(type="user_input", session_id=self.id, payload=entry))
-
         if type_ == "command":
-            cmd = payload.get("name")
-            if cmd == "stop":
-                self._stopped = True
-                self.emit(Event(type="session_stopped", session_id=self.id))
-            elif cmd == "skip":
-                self._skip_requested = True
-            elif cmd == "pause":
-                self._paused = True
-                self.emit(Event(type="session_paused", session_id=self.id))
-            elif cmd == "resume":
-                self._paused = False
-                self.emit(Event(type="session_resumed", session_id=self.id))
-
-        if type_ in self._waiting:
-            for fut in list(self._waiting[type_]):
-                if not fut.done():
-                    fut.set_result(entry)
-        else:
-            self._pending_inputs.setdefault(type_, []).append(entry)
+            self._apply_command(payload.get("name"))
+        self.inputs.deliver(entry)
         return entry
 
     def start_wait_input(self, type_: str) -> asyncio.Future:
-        pending = self._pending_inputs.get(type_)
-        if pending:
-            loop = asyncio.get_running_loop()
-            fut = loop.create_future()
-            fut.set_result(pending.pop(0))
-            return fut
-        loop = asyncio.get_running_loop()
-        fut = loop.create_future()
-        self._waiting.setdefault(type_, []).append(fut)
-        self.emit(Event(type="waiting_for_input", session_id=self.id, payload={"type": type_}))
-        return fut
+        return self.inputs.start_wait(type_)
 
-    async def finish_wait_input(self, type_: str, fut: asyncio.Future, timeout: float | None = None):
-        try:
-            return await asyncio.wait_for(fut, timeout=timeout)
-        except asyncio.TimeoutError:
-            self.emit(Event(type="input_timeout", session_id=self.id, payload={"type": type_}))
-            return None
-        finally:
-            waiters = self._waiting.get(type_)
-            if waiters and fut in waiters:
-                waiters.remove(fut)
-                if not waiters:
-                    del self._waiting[type_]
+    async def finish_wait_input(
+        self, type_: str, fut: asyncio.Future, timeout: float | None = None
+    ) -> dict[str, Any] | None:
+        return await self.inputs.finish_wait(type_, fut, timeout=timeout)
 
-    async def wait_input(self, type_: str, timeout: float | None = None):
+    async def wait_input(
+        self, type_: str, timeout: float | None = None
+    ) -> dict[str, Any] | None:
         fut = self.start_wait_input(type_)
         return await self.finish_wait_input(type_, fut, timeout=timeout)
 
-    def last_input(self, type_: str | None = None):
-        if not self.input_history:
-            return None
-        if type_ is None:
-            return self.input_history[-1]
-        for entry in reversed(self.input_history):
-            if entry["type"] == type_:
-                return entry
-        return None
+    def last_input(self, type_: str | None = None) -> dict[str, Any] | None:
+        return self.inputs.last(type_)
 
-    def _merge_artifacts(self, buffer: dict, new_values: dict):
-        for path, value in new_values.items():
-            if path in buffer and buffer[path] != value:
-                raise RuntimeError(f"Artifact merge conflict at '{path}'")
-            buffer[path] = value
+    def is_waiting_for(self, type_: str) -> bool:
+        return self.inputs.is_waiting(type_)
+
+    # --------------------------------------------------------- управление
+
+    def _apply_command(self, name: str | None) -> None:
+        handlers = {
+            "stop": self.stop,
+            "pause": self.pause,
+            "resume": self.resume,
+            "skip": self.request_skip,
+        }
+        handler = handlers.get(name)
+        if handler is not None:
+            handler()
+
+    def stop(self) -> None:
+        if self._stop_requested.is_set():
+            return
+        self._stop_requested.set()
+        self.emit(Event(type="session_stopped", session_id=self.id))
+
+    def pause(self) -> None:
+        if self._running.is_set():
+            self._running.clear()
+            self.emit(Event(type="session_paused", session_id=self.id))
+
+    def resume(self) -> None:
+        if not self._running.is_set():
+            self._running.set()
+            self.emit(Event(type="session_resumed", session_id=self.id))
+
+    def request_skip(self) -> None:
+        self._skip_requested = True
+
+    @property
+    def stopped(self) -> bool:
+        return self._stop_requested.is_set()
+
+    @property
+    def paused(self) -> bool:
+        return not self._running.is_set()
+
+    # -------------------------------------------------------- исполнение
+
+    async def execute_node(self, node: Node, ctx: Context) -> tuple["Node | None", Context]:
+        """Исполняет один узел — ЕДИНСТВЕННЫМ путём для всех циклов сессии
+        (основного, тела ``try``, ветки ``parallel``), поэтому отладчик видит
+        каждый узел, где бы он ни исполнялся, и правит тот самый фрейм,
+        который пойдёт дальше."""
+        if self.debugger is None:
+            return await node.execute(self, ctx)
+        ctx = await self.debugger.before_node(self, node, ctx) or ctx
+        next_node, ctx = await node.execute(self, ctx)
+        ctx = await self.debugger.after_node(self, node, ctx) or ctx
+        return next_node, ctx
+
+    async def run_stage(self, node: StageNode, kwargs: dict) -> dict:
+        """Запускает стадию с уже резолвнутыми аргументами и возвращает то,
+        что она отдала через ``set_outputs``."""
+        stage_cls = node.get_stage_class()
+        stage = stage_cls(stage_id=node.id, arguments=kwargs, session=self)
+        self.emit_node_event("stage_started", node, {"stage": node.stage})
+        try:
+            await asyncio.wait_for(stage.run(), timeout=stage.timeout)
+        except asyncio.TimeoutError:
+            self.emit_node_event("stage_timeout", node, {"stage": node.stage})
+            raise
+        except Exception as exc:  # noqa: BLE001 - телеметрия, ошибка летит дальше
+            self.emit_node_event("stage_failed", node, {"stage": node.stage, "error": str(exc)})
+            raise
+        self.emit_node_event("stage_completed", node, {"stage": node.stage})
+        return stage.collected_outputs
+
+    async def run_subpipeline(self, node, child_ctx: Context) -> SessionResult:
+        """Вложенный пайплайн исполняется отдельной сессией со своим графом
+        и своим фреймом; его события проксируются наверх с пометкой узла."""
+        if node.subpipeline_id not in self.pipeline.subpipelines:
+            raise PipelineDefinitionError(f"Subpipeline '{node.subpipeline_id}' not found")
+
+        data = dict(self.pipeline.subpipelines[node.subpipeline_id])
+        data.setdefault("subpipelines", self.pipeline.subpipelines)
+        # именованные типы родителя видны ребёнку, если он не объявил свои
+        parent_types = self.pipeline.raw_json.get("types")
+        if parent_types:
+            data.setdefault("types", parent_types)
+        child_pipeline = Pipeline.from_dict(data)
+
+        def proxy_event(event: Event) -> None:
+            # копия, а не мутация: оригинал уже лежит в истории дочерней сессии
+            self.emit(
+                replace(event, payload={"subpipeline_node": node.id, **(event.payload or {})})
+            )
+
+        child = Session(
+            id=f"{self.id}:{node.id}",
+            pipeline=child_pipeline,
+            context=child_ctx,
+            event_handler=proxy_event,
+            debugger=self.debugger,  # иначе шаг «проваливался» бы сквозь узел
+        )
+        return await child.run()
+
+    async def run_scope(
+        self,
+        node: "Node | None",
+        ctx: Context,
+        scope: frozenset[str],
+        frame: "ScopeFrame | None" = None,
+    ) -> tuple["Node | None", Context]:
+        """Гоняет управление, пока оно остаётся внутри ``scope`` (тело ``try``).
+
+        Возвращает узел, на котором вышли за пределы области, или None, если
+        цепочка закончилась. Исключения не перехватывает — их ловит сам блок;
+        ``frame`` при этом хранит последний успешно применённый фрейм, чтобы
+        обработчик увидел переменные, записанные до падения (как ``except``
+        в Python видит всё, присвоенное до ошибки).
+        """
+        while node is not None and node.id in scope:
+            node, ctx = await self.execute_node(node, ctx)
+            if frame is not None:
+                frame.ctx = ctx
+        return node, ctx
+
+    async def run_subgraph(self, start_id: str, ctx: Context) -> Context:
+        """Прогоняет цепочку узлов от ``start_id`` до её естественного конца.
+        Используется ветками parallel — у каждой свой фрейм."""
+        node: Node | None = self.pipeline.get_node(start_id)
+        while node is not None:
+            node, ctx = await self.execute_node(node, ctx)
+        return ctx
+
+    def finish(self, node: TerminalNode, ctx: Context) -> None:
+        """Вызывается терминальной нодой: фиксирует артефакты и result."""
+        self.artifacts = {name: ctx.get_var(name) for name in node.artifacts}
+        self.result = node.result
+        self.emit_node_event("session_terminated", node, {"artifacts": sorted(self.artifacts)})
+
+    async def run(self) -> SessionResult:
+        # входной контекст (посев или восстановление из снапшота) обязан
+        # соответствовать объявленным типам ещё до первого узла
+        self.pipeline.typesystem.check_context(self.context, f"session '{self.id}'")
+        self.emit(Event(type="session_started", session_id=self.id))
+
+        node: Node | None = (
+            self.pipeline.get_node(self._current_node_id)
+            if self._current_node_id
+            else self.pipeline.get_entry_node()
+        )
+        ctx = self.context
+
+        while node is not None:
+            self._current_node_id = node.id
+
+            await self._pause_gate()
+            if self.stopped:
+                self.result = dict(_STOPPED_RESULT)
+                break
+
+            if self._try_skip(node):
+                node = self.pipeline.get_node(node.next) if node.next else None
+                continue
+
+            step = asyncio.create_task(self.execute_node(node, ctx))
+            if await self._interrupted_by_stop(step):
+                self.result = dict(_STOPPED_RESULT)
+                break
+            node, ctx = step.result()
+
+        self.context = ctx
+        self._current_node_id = None
+        self.emit(Event(type="session_completed", session_id=self.id))
+        return SessionResult(
+            artifacts=self.artifacts,
+            result=self.result,
+            history=self.event_history,
+            context=ctx,
+        )
+
+    async def _pause_gate(self) -> None:
+        """На паузе блокируется до resume; stop снимает и паузу тоже."""
+        while not self._running.is_set() and not self.stopped:
+            await self._race(self._running.wait(), self._stop_requested.wait())
+
+    async def _interrupted_by_stop(self, step: asyncio.Task) -> bool:
+        """Ждёт завершения шага узла наперегонки с сигналом stop.
+        True — шаг прерван (отменён), False — шаг завершился сам."""
+        await self._race(step, self._stop_requested.wait())
+        if step.done():
+            return False
+        step.cancel()
+        try:
+            await step
+        except asyncio.CancelledError:
+            pass
+        return True
+
+    @staticmethod
+    async def _race(*aws) -> None:
+        """``asyncio.wait(FIRST_COMPLETED)`` с уборкой проигравших задач."""
+        tasks = [aw if isinstance(aw, asyncio.Task) else asyncio.create_task(aw) for aw in aws]
+        try:
+            await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+        finally:
+            for task in tasks:
+                if not task.done():
+                    task.cancel()
+
+    def _try_skip(self, node: Node) -> bool:
+        """Команда skip действует только на ближайший stage-узел и только
+        если его стадия объявила себя ``skipable``."""
+        if not (self._skip_requested and isinstance(node, StageNode)):
+            return False
+        self._skip_requested = False
+        if getattr(node.get_stage_class(), "skipable", False):
+            self.emit_node_event("stage_skipped", node, {"stage": node.stage})
+            return True
+        self.emit_node_event("skip_denied", node, {"stage": node.stage})
+        return False
+
+    # ---------------------------------------------------------- snapshot
 
     def snapshot(self) -> dict:
         return {
             "session_id": self.id,
             "current_node_id": self._current_node_id,
             "result": self.result,
-            "artifact_paths": list(self.artifact_paths),
+            "artifacts": dict(self.artifacts),
             "context": self.context.to_dict(),
-            "event_history": [e.to_dict() for e in self.event_history],
-            "input_history": list(self.input_history),
-            "stopped": self._stopped,
-            "paused": self._paused,
+            "event_history": [event.to_dict() for event in self.event_history],
+            "input_history": list(self.inputs.history),
+            "stopped": self.stopped,
+            "paused": self.paused,
             "skip_requested": self._skip_requested,
             "pipeline": self.pipeline.raw_json,
         }
@@ -153,255 +383,28 @@ class Session:
         cls,
         snapshot: dict,
         pipeline: Pipeline | None = None,
-        event_handler: Callable[[Event], None] | None = None,
+        event_handler: EventHandler | None = None,
     ) -> "Session":
-        pipe = pipeline
-        if pipe is None:
+        if pipeline is None:
             raw = snapshot.get("pipeline")
-            if raw:
-                pipe = Pipeline.from_dict(raw)
-        if pipe is None:
-            raise ValueError("Pipeline is required to restore session")
-        ctx = Context.from_dict(snapshot.get("context", {}))
-        sess = cls(
+            if not raw:
+                raise PipelineDefinitionError("Pipeline is required to restore session")
+            pipeline = Pipeline.from_dict(raw)
+
+        session = cls(
             id=snapshot.get("session_id"),
-            pipeline=pipe,
-            context=ctx,
+            pipeline=pipeline,
+            context=Context.from_dict(snapshot.get("context", {})),
             event_handler=event_handler,
         )
-        sess._current_node_id = snapshot.get("current_node_id")
-        sess.result = snapshot.get("result")
-        sess.artifact_paths = snapshot.get("artifact_paths", [])
-        sess.input_history = snapshot.get("input_history", [])
-        sess._stopped = snapshot.get("stopped", False)
-        sess._paused = snapshot.get("paused", False)
-        sess._skip_requested = snapshot.get("skip_requested", False)
-        sess.event_history = [Event.from_dict(e) for e in snapshot.get("event_history", [])]
-        return sess
-
-    async def run(self) -> SessionResult:
-        self.emit(Event(type="session_started", session_id=self.id))
-        node = self.pipeline.get_node(self._current_node_id) if self._current_node_id else self.pipeline.get_entry_node()
-
-        while node:
-            self._current_node_id = node.id
-            while self._paused and not self._stopped:
-                await asyncio.sleep(0.1)
-
-            if self._stopped:
-                self.result = {"result": "stopped"}
-                break
-
-            if self._skip_requested and isinstance(node, StageNode):
-                stage_class = node.get_stage_class()
-                if getattr(stage_class, "skipable", True):
-                    self.emit(Event(type="stage_skipped", session_id=self.id, stage_id=node.id))
-                    node = self.pipeline.get_node(node.next) if node.next else None
-                    self._skip_requested = False
-                    continue
-                else:
-                    self.emit(Event(type="skip_denied", session_id=self.id, stage_id=node.id))
-                    self._skip_requested = False
-
-            handler = self._get_handler(node)
-            handler_task = asyncio.create_task(handler(node))
-            try:
-                while not handler_task.done():
-                    if self._stopped:
-                        handler_task.cancel()
-                        self.result = {"result": "stopped"}
-                        try:
-                            await handler_task
-                        except asyncio.CancelledError:
-                            pass
-                        break
-                    await asyncio.sleep(0.05)
-                if handler_task.cancelled():
-                    break
-                next_node = await handler_task
-            except asyncio.CancelledError:
-                self.result = {"result": "stopped"}
-                break
-            except Exception as e:
-                raise e
-
-            if next_node is None and not isinstance(node, TerminalNode):
-                raise RuntimeError(f"No next node for {node.id} in session {self.id}")
-
-            node = next_node
-
-        self._current_node_id = None
-        self.emit(Event(type="session_completed", session_id=self.id))
-        artifacts = {
-            a: self.context.get(a, None)
-            for a in self.artifact_paths
-        }
-        return SessionResult(
-            artifacts=artifacts,
-            result=self.result,
-            history=self.event_history,
-            context=self.context,
-        )
-
-    def _get_handler(self, node):
-        if isinstance(node, TerminalNode):
-            return self._handle_terminal
-        if isinstance(node, StageNode):
-            return self._handle_stage
-        if isinstance(node, ConditionNode):
-            return self._handle_condition
-        if isinstance(node, ParallelNode):
-            return self._handle_parallel
-        if isinstance(node, SubPipelineNode):
-            return self._handle_subpipeline
-        raise ValueError(f"Unknown node type: {type(node)}")
-
-    async def _handle_terminal(self, node: TerminalNode):
-        self.artifact_paths = node.artifact_paths
-        self.result = node.result
-        self.emit(Event(type="session_terminated", session_id=self.id, stage_id=node.id))
-        return None
-
-    async def _handle_stage(self, node: StageNode):
-        stage_class = node.get_stage_class()
-        if stage_class is None:
-            raise ValueError(f"Stage class for node {node.id} not found")
-        stage_instance = stage_class(stage_id=node.id, config=node.config,
-                                     arguments=node.arguments, outputs=node.outputs, session=self)
-        errors = []
-        for retry in range(stage_instance.retries + 1):
-            try:
-                await asyncio.wait_for(stage_instance.run(), timeout=stage_instance.timeout)
-            except asyncio.TimeoutError as e:
-                self.emit(Event(type="stage_timeout", session_id=self.id, stage_id=node.id))
-                errors.append("timeout: " + str(e))
-                continue
-            except Exception as e:
-                self.emit(Event(type="stage_failed", session_id=self.id, stage_id=node.id, payload={"error": str(e)}))
-                errors.append(str(e))
-                continue
-            return self.pipeline.get_node(node.next) if node.next else None
-        if node.fallback:
-            return self.pipeline.get_node(node.fallback)
-        raise RuntimeError(f"Stage {node.id} failed after retries: {errors}")
-
-    async def _handle_condition(self, node: ConditionNode):
-        next_node = None
-        for condition in node.conditions:
-            if condition.if_condition.evaluate(self.context):
-                next_node = self.pipeline.get_node(condition.then_goto)
-                break
-        if not next_node and node.else_goto:
-            next_node = self.pipeline.get_node(node.else_goto)
-
-        self.emit(Event(
-            type="condition_evaluated",
-            session_id=self.id,
-            stage_id=node.id,
-            payload={"next_node": next_node.id if next_node else None},
-        ))
-        return next_node
-
-    async def _handle_parallel(self, node: ParallelNode):
-        branch_tasks = {
-            branch_id: asyncio.create_task(self._run_branch_graph(branch_id))
-            for branch_id in node.children
-        }
-        errors = []
-
-        async def cancel_pending(pending):
-            for t in pending:
-                t.cancel()
-            for t in pending:
-                try:
-                    await t
-                except Exception:
-                    pass
-
-        if node.policy == "all":
-            results = await asyncio.gather(*branch_tasks.values(), return_exceptions=True)
-            for branch_id, res in zip(branch_tasks.keys(), results):
-                if isinstance(res, Exception):
-                    errors.append((branch_id, res))
-                    if node.cancel_on_error:
-                        break
-            if errors and node.cancel_on_error:
-                raise RuntimeError(f"Parallel node {node.id} failed: {errors}")
-        elif node.policy == "any":
-            pending = set(branch_tasks.values())
-            success = False
-            while pending and not success:
-                done, pending = await asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
-                for t in done:
-                    try:
-                        await t
-                        success = True
-                        break
-                    except Exception as e:
-                        errors.append(("unknown", e))
-                        if node.cancel_on_error:
-                            await cancel_pending(pending)
-                            raise RuntimeError(f"Parallel node {node.id} failed: {errors}")
-            await cancel_pending(pending)
-            if not success:
-                raise RuntimeError(f"Parallel node {node.id} completed with no successful branch")
-
-        next_node = self.pipeline.get_node(node.next) if node.next else None
-        self.emit(Event(
-            type="parallel_completed",
-            session_id=self.id,
-            stage_id=node.id,
-            payload={"next_node": next_node.id if next_node else None},
-        ))
-        return next_node
-
-    async def _run_branch_graph(self, start_id: str) -> None:
-        node = self.pipeline.get_node(start_id)
-        while node:
-            if isinstance(node, TerminalNode):
-                return
-            handler = self._get_handler(node)
-            if handler is self._handle_terminal:
-                return
-            next_node = await handler(node)
-            node = next_node
-
-    async def _run_subpipeline(self, node: SubPipelineNode):
-        if node.subpipeline_id not in self.pipeline.subpipelines:
-            raise ValueError(f"Subpipeline '{node.subpipeline_id}' not found")
-        subpipeline_data = dict(self.pipeline.subpipelines[node.subpipeline_id])
-        subpipeline_data["subpipelines"] = self.pipeline.subpipelines
-        subpipeline = Pipeline.from_dict(subpipeline_data)
-        child_ctx = Context(payload={})
-        for child_path, parent_path in node.inputs.items():
-            child_ctx.set(child_path, copy.deepcopy(self.context.get(parent_path)))
-
-        def proxy_event(event: Event):
-            event.payload = {"subpipeline_node": node.id, **(event.payload or {})}
-            self.emit(event)
-
-        child_session = Session(
-            id=f"{self.id}:{node.id}",
-            pipeline=subpipeline,
-            context=child_ctx,
-            event_handler=proxy_event,
-        )
-        result = await child_session.run()
-        for parent_path, child_art in node.artifact_outputs.items():
-            if child_art not in result.artifacts:
-                raise ValueError(f"Artifact '{child_art}' not found in subpipeline '{node.subpipeline_id}'")
-            self.context.set(parent_path, result.artifacts[child_art])
-        if node.result_output:
-            self.context.set(node.result_output, result.result)
-        return {"artifacts": result.artifacts, "result": result.result}
-
-    async def _handle_subpipeline(self, node: SubPipelineNode):
-        await self._run_subpipeline(node)
-        next_node = self.pipeline.get_node(node.next) if node.next else None
-        self.emit(Event(
-            type="subpipeline_completed",
-            session_id=self.id,
-            stage_id=node.id,
-            payload={"next_node": next_node.id if next_node else None, "subpipeline_id": node.subpipeline_id},
-        ))
-        return next_node
+        session._current_node_id = snapshot.get("current_node_id")
+        session.result = snapshot.get("result")
+        session.artifacts = snapshot.get("artifacts", {})
+        session.inputs.history.extend(snapshot.get("input_history", []))
+        session.event_history = [Event.from_dict(e) for e in snapshot.get("event_history", [])]
+        session._skip_requested = snapshot.get("skip_requested", False)
+        if snapshot.get("stopped", False):
+            session._stop_requested.set()
+        if snapshot.get("paused", False):
+            session._running.clear()
+        return session

@@ -1,12 +1,19 @@
 import asyncio
 import unittest
 
-from stageflow.core.context import Context
-from stageflow.core.jsonlogic import JsonLogic
-from stageflow.core.node import StageNode, TerminalNode
-from stageflow.core.pipeline import Pipeline
-from stageflow.core.session import Session
-from stageflow.core.stage import BaseStage, register_stage
+from stageflow import (
+    BaseStage,
+    Context,
+    ExceptHandler,
+    Pipeline,
+    Retrier,
+    Session,
+    StageNode,
+    TerminalNode,
+    TryNode,
+    register_stage,
+)
+from stageflow.exceptions import ArtifactNotFoundError, StageOutputError
 
 
 @register_stage("EchoStage")
@@ -19,48 +26,192 @@ class EchoStage(BaseStage):
 class SessionFlowTests(unittest.IsolatedAsyncioTestCase):
     async def test_stage_success_and_outputs(self):
         nodes = [
-            StageNode(id="start", type="stage", stage="EchoStage",
-                      arguments={"value": "input_value"}, outputs={"echo": "echoed"}, next="end"),
-            TerminalNode(id="end", type="terminal", result={"status": "ok"}, artifact_paths=["echoed"])
+            StageNode(
+                id="start",
+                stage="EchoStage",
+                arguments={"vars": {"value": "input_value"}},
+                outputs={"echo": "echoed"},
+                next="end",
+            ),
+            TerminalNode(id="end", result={"status": "ok"}, artifacts=["echoed"]),
         ]
         pipeline = Pipeline(entry="start", nodes=nodes)
-        ctx = Context(payload={"input_value": 123})
-        session = Session(id="s", pipeline=pipeline, context=ctx)
+        session = Session(id="s", pipeline=pipeline, context=Context(vars={"input_value": 123}))
         result = await session.run()
         self.assertEqual(result.artifacts["echoed"], 123)
         self.assertEqual(result.result, {"status": "ok"})
 
-    async def test_fallback_on_failure(self):
+    async def test_try_catches_failure_in_body(self):
+        """Блок `try` ловит ошибку любого узла своего тела."""
         nodes = [
-            StageNode(id="failing", type="stage", stage="FailStage", next=None, fallback="recover"),
-            StageNode(id="recover", type="stage", stage="EchoStage",
-                      arguments={"value": "payload_val"}, outputs={"echo": "echoed"}, next="end"),
-            TerminalNode(id="end", type="terminal", result={"status": "recovered"}, artifact_paths=["echoed"])
+            TryNode(
+                id="guard",
+                body="failing",
+                handlers=[ExceptHandler(error_equals=["*"], next="recover", result_var="error")],
+            ),
+            StageNode(
+                id="failing",
+                stage="FailStage",
+                arguments={"const": {"message": "boom"}},
+            ),
+            StageNode(
+                id="recover",
+                stage="EchoStage",
+                arguments={"vars": {"value": "payload_val"}},
+                outputs={"echo": "echoed"},
+                next="end",
+            ),
+            TerminalNode(id="end", result={"status": "recovered"}, artifacts=["echoed", "error"]),
         ]
-        pipeline = Pipeline(entry="failing", nodes=nodes)
-        ctx = Context(payload={"payload_val": "ok"})
-        session = Session(id="s", pipeline=pipeline, context=ctx)
+        pipeline = Pipeline(entry="guard", nodes=nodes)
+        session = Session(id="s", pipeline=pipeline, context=Context(vars={"payload_val": "ok"}))
         result = await session.run()
         self.assertEqual(result.result, {"status": "recovered"})
         self.assertEqual(result.artifacts["echoed"], "ok")
+        self.assertEqual(result.artifacts["error"]["type"], "RuntimeError")
+        self.assertEqual(result.artifacts["error"]["message"], "boom")
+
+    async def test_retry_then_success(self):
+        attempts = {"n": 0}
+
+        @register_stage("FlakyStage")
+        class FlakyStage(BaseStage):
+            async def run(self):
+                attempts["n"] += 1
+                if attempts["n"] < 3:
+                    raise TimeoutError("not yet")
+                self.set_outputs({"ok": True})
+
+        nodes = [
+            StageNode(
+                id="flaky",
+                stage="FlakyStage",
+                outputs={"ok": "flag"},
+                retry=[Retrier(error_equals=["TimeoutError"], max_attempts=5, interval_seconds=0.001)],
+                next="end",
+            ),
+            TerminalNode(id="end", artifacts=["flag"], result={"status": "ok"}),
+        ]
+        session = Session(id="s", pipeline=Pipeline(entry="flaky", nodes=nodes))
+        result = await session.run()
+        self.assertIs(result.artifacts["flag"], True)
+        self.assertEqual(attempts["n"], 3)
 
 
-class JsonLogicContextTests(unittest.TestCase):
-    def test_jsonlogic_reads_payload(self):
-        ctx = Context(payload={"score": 10, "flag": True})
-        cond = JsonLogic({"and": [{"==": [{"var": "score"}, 10]}, {"var": "flag"}]})
-        self.assertTrue(cond.evaluate(ctx))
+# сценарий падений для RetryBudgetTests: реестр стадий не допускает повторной
+# регистрации имени, поэтому стадия одна, а сценарий перезаряжается
+_SCRIPT: dict = {"errors": [], "runs": 0}
 
-    def test_context_get_set_paths(self):
-        ctx = Context(payload={"a": {"b": 1}})
-        self.assertEqual(ctx.get("a.b"), 1)
-        ctx.set("a.c", 2)
-        self.assertEqual(ctx.get("a.c"), 2)
+
+@register_stage("ScriptedBoomStage")
+class ScriptedBoomStage(BaseStage):
+    async def run(self):
+        index = _SCRIPT["runs"]
+        _SCRIPT["runs"] += 1
+        errors = _SCRIPT["errors"]
+        raise errors[index] if index < len(errors) else RuntimeError("сценарий кончился")
+
+
+class RetryBudgetTests(unittest.IsolatedAsyncioTestCase):
+    """``max_attempts`` читается буквально: это все запуски узла, включая
+    первый, а не «сколько раз повторить сверху»."""
+
+    @staticmethod
+    def _pipeline(retry: list[Retrier]) -> Pipeline:
+        return Pipeline(entry="boom", nodes=[
+            StageNode(id="boom", stage="ScriptedBoomStage", retry=retry, next="end"),
+            TerminalNode(id="end", result={"status": "ok"}),
+        ])
+
+    @staticmethod
+    def _scripted(errors: list[Exception]) -> dict:
+        """Заряжает сценарий падений; в ``runs`` — счётчик запусков стадии."""
+        _SCRIPT["errors"] = errors
+        _SCRIPT["runs"] = 0
+        return _SCRIPT
+
+    async def test_max_attempts_counts_the_first_run(self):
+        state = self._scripted([TimeoutError("boom")] * 10)
+        retry = [Retrier(error_equals=["TimeoutError"], max_attempts=3, interval_seconds=0)]
+        with self.assertRaises(TimeoutError):
+            await Session(id="s", pipeline=self._pipeline(retry)).run()
+        self.assertEqual(state["runs"], 3)
+
+    async def test_single_attempt_means_no_retry(self):
+        state = self._scripted([TimeoutError("boom")] * 10)
+        retry = [Retrier(error_equals=["TimeoutError"], max_attempts=1, interval_seconds=0)]
+        with self.assertRaises(TimeoutError):
+            await Session(id="s", pipeline=self._pipeline(retry)).run()
+        self.assertEqual(state["runs"], 1)
+
+    async def test_each_retrier_spends_its_own_budget(self):
+        """Общий счётчик на узел обнулял бы лимит соседней политики: два
+        ``TimeoutError`` подряд — и первый же ``ValueError`` улетал наверх,
+        хотя не повторялся ещё ни разу."""
+        state = self._scripted([
+            TimeoutError("раз"), TimeoutError("два"),
+            ValueError("три"), ValueError("четыре"),
+        ])
+        retry = [
+            Retrier(error_equals=["TimeoutError"], max_attempts=5, interval_seconds=0),
+            Retrier(error_equals=["ValueError"], max_attempts=2, interval_seconds=0),
+        ]
+        with self.assertRaises(ValueError):
+            await Session(id="s", pipeline=self._pipeline(retry)).run()
+        self.assertEqual(state["runs"], 4)
+
+
+class ErrorMessageTests(unittest.TestCase):
+    """Часть исключений смешана с ``KeyError`` — у него ``__str__`` это
+    ``repr`` аргумента, и сообщение приезжало в кавычках всюду, где берётся
+    ``str(exc)``: события ``try_caught``, ``error_payload.message``, логи."""
+
+    def test_message_is_not_wrapped_in_quotes(self):
+        for cls in (StageOutputError, ArtifactNotFoundError):
+            with self.subTest(cls=cls.__name__):
+                message = "стадия не вернула поле 'x' (есть: ['y'])"
+                self.assertEqual(str(cls(message)), message)
+
+    def test_builtin_type_is_still_catchable(self):
+        with self.assertRaises(KeyError):
+            raise StageOutputError("нет поля")
+
+
+class ContextTests(unittest.TestCase):
+    def test_frame_is_immutable(self):
+        ctx = Context(vars={"a": 1})
+        other = ctx.with_var("b", 2)
+        self.assertIsNone(ctx.get_var("b"))
+        self.assertEqual(other.get_var("b"), 2)
+        self.assertEqual(other.get_var("a"), 1)
+
+    def test_without_var(self):
+        ctx = Context(vars={"secret": "x", "keep": 1})
+        dropped = ctx.without_var("secret")
+        self.assertEqual(ctx.get_var("secret"), "x")
+        self.assertIsNone(dropped.get_var("secret"))
+        self.assertEqual(dropped.get_var("keep"), 1)
+
+    def test_same_frame_can_be_shared_by_concurrent_branches(self):
+        """Фрейм иммутабелен, поэтому ветки ``parallel`` получают ОДИН объект и
+        расходятся сами — без fork/deepcopy и без разделяемого состояния."""
+        base = Context(vars={"shared": 0})
+        left = base.with_var("only_left", "L")
+        right = base.with_var("only_right", "R")
+        self.assertIsNone(left.get_var("only_right"))
+        self.assertIsNone(right.get_var("only_left"))
+        self.assertEqual(base.var_names(), frozenset({"shared"}))
+
+    def test_roundtrip_dict(self):
+        ctx = Context(vars={"a": 1})
+        restored = Context.from_dict(ctx.to_dict())
+        self.assertEqual(restored.get_var("a"), 1)
+        self.assertEqual(ctx.to_dict(), {"vars": {"a": 1}})
 
 
 class WaitInputBroadcastTests(unittest.IsolatedAsyncioTestCase):
     async def test_wait_input_multiple(self):
-        pipeline = Pipeline(entry="end", nodes=[TerminalNode(id="end", type="terminal", result={"status": "done"})])
+        pipeline = Pipeline(entry="end", nodes=[TerminalNode(id="end", result={"status": "done"})])
         session = Session(id="s", pipeline=pipeline, context=Context())
 
         async def waiter():
@@ -73,6 +224,91 @@ class WaitInputBroadcastTests(unittest.IsolatedAsyncioTestCase):
         res1, res2 = await asyncio.wait_for(asyncio.gather(task1, task2), timeout=1.0)
         self.assertEqual(res1["payload"]["msg"], "hello")
         self.assertEqual(res2["payload"]["msg"], "hello")
+
+class OutputFieldValidationTests(unittest.TestCase):
+    """Ключ ``outputs`` — имя поля в результате стадии. Поле, которого стадия
+    не возвращает, гарантированно падает ``StageOutputError`` при исполнении,
+    поэтому ловится статически по спеке стадии."""
+
+    @staticmethod
+    def _errors(outputs, stage="SetValueStage"):
+        return Pipeline.from_dict({
+            "entry": "s",
+            "nodes": [
+                {"id": "s", "type": "stage", "stage": stage,
+                 "arguments": {"const": {"value": 1}}, "outputs": outputs, "next": "end"},
+                {"id": "end", "type": "terminal", "result": {"status": "ok"}},
+            ],
+        }).collect_errors()
+
+    def test_unknown_output_field_rejected(self):
+        errors = self._errors({"value": "n", "meta": "m"})
+        self.assertTrue(any("не возвращает поле 'meta'" in e for e in errors), errors)
+
+    def test_declared_field_passes(self):
+        self.assertEqual(self._errors({"value": "n"}), [])
+
+    def test_subset_of_declared_fields_passes(self):
+        self.assertEqual(self._errors({"list": "l"}, stage="PopListStage"), [])
+
+    def test_computed_output_is_not_a_result_field(self):
+        """У ключа с ``.$`` значение — выражение, а само имя относится к
+        переменной назначения, так что сверять его со спекой нечего."""
+        self.assertEqual(self._errors({"value": "n", "rep.$": "vars.n + 1"}), [])
+
+    def test_stage_without_declared_outputs_is_not_checked(self):
+        """Пустая секция ``outputs`` в спеке = контракт не объявлен: та же
+        конвенция, что у ``allowed_events``/``allowed_inputs``."""
+        self.assertEqual(self._errors({"whatever": "x"}, stage="EchoStage"), [])
+
+    def test_runtime_error_matches_the_static_one(self):
+        """Проверка существует ровно затем, чтобы не доводить до этой ошибки."""
+        pipeline = Pipeline(entry="s", nodes=[
+            StageNode(id="s", stage="EchoStage", arguments={"const": {"value": 1}},
+                      outputs={"nope": "x"}, next="end"),
+            TerminalNode(id="end", result={"status": "ok"}),
+        ])
+        from stageflow.exceptions import StageOutputError
+        with self.assertRaises(StageOutputError) as caught:
+            asyncio.run(Session(id="t", pipeline=pipeline, context=Context()).run())
+        self.assertIn("nope", str(caught.exception))
+
+class OutputsAreSimultaneousTests(unittest.TestCase):
+    """Выходы узла применяются как одновременное присваивание.
+
+    Выражение в ``outputs`` видит фрейм на входе в узел, а не записи соседних
+    ключей того же узла — иначе результат зависел бы от порядка ключей в
+    JSON-объекте, которого автор пайплайна не выбирал осознанно.
+    """
+
+    @staticmethod
+    def _run(outputs):
+        pipeline = Pipeline.from_dict({
+            "entry": "s",
+            "nodes": [
+                {"id": "s", "type": "stage", "stage": "SetValueStage",
+                 "arguments": {"const": {"value": 5}},
+                 "outputs": outputs, "next": "end"},
+                {"id": "end", "type": "terminal", "result": {"status": "ok"},
+                 "artifacts": ["n", "echo"]},
+            ],
+        })
+        session = Session(id="t", pipeline=pipeline, context=Context(vars={"n": 111}))
+        return asyncio.run(session.run()).artifacts
+
+    def test_expression_sees_frame_before_the_node(self):
+        self.assertEqual(self._run({"value": "n", "echo.$": "vars.n"}),
+                         {"n": 5, "echo": 111})
+
+    def test_key_order_does_not_change_the_result(self):
+        self.assertEqual(self._run({"value": "n", "echo.$": "vars.n"}),
+                         self._run({"echo.$": "vars.n", "value": "n"}))
+
+    def test_expression_still_sees_the_stage_result(self):
+        """``output.*`` — это результат стадии, он доступен независимо от того,
+        замаплено ли то же поле обычным ключом."""
+        self.assertEqual(self._run({"value": "n", "echo.$": "output.value"}),
+                         {"n": 5, "echo": 5})
 
 
 if __name__ == "__main__":

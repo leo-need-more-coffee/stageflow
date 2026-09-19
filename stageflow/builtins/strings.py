@@ -1,81 +1,89 @@
-from stageflow.core.stage import BaseStage, register_stage
+"""Стадии работы со строками.
+
+Стадия не имеет доступа к фрейму сессии (см. MEMORY_MODEL.md §2): все
+значения приходят уже резолвнутыми аргументами, никаких «путей в контексте»
+здесь нет.
+"""
+import string
+
+from ..core.stage import BaseStage, register_stage
+from ..exceptions import StageContractError
+from ._args import require_list, require_present
+
+
+class _NameOnlyFormatter(string.Formatter):
+    """Формат-строка Python умеет ходить по атрибутам и индексам
+    (``"{x.__class__}"`` → ``<class 'str'>``), то есть шаблон перестаёт быть
+    данными и получает доступ к внутренностям значения. Шаблон приходит из
+    описания пайплайна, а не снаружи, так что дыры наружу тут нет — но
+    декларативность теряется, поэтому плейсхолдер здесь — строго имя
+    аргумента: ни точек, ни скобок, ни номеров позиций.
+    """
+
+    def get_field(self, field_name, args, kwargs):
+        if not field_name.isidentifier():
+            raise StageContractError(
+                f"TemplateStage: плейсхолдер '{{{field_name}}}' — не имя аргумента; "
+                "атрибуты, индексы и позиционные номера в шаблоне запрещены"
+            )
+        if field_name not in kwargs:
+            raise StageContractError(
+                f"TemplateStage: шаблон ссылается на '{field_name}', "
+                f"но такого аргумента нет (есть: {sorted(kwargs)})"
+            )
+        return kwargs[field_name], field_name
 
 
 @register_stage("ConcatStage")
 class ConcatStage(BaseStage):
     """
-    description: "Concatenate parts (values or context paths) with separator"
+    description: "Concatenate stringified parts with separator"
+    icon: "⧺"
     arguments:
       parts:
         type: list
-        description: "List of values or context paths to concatenate"
+        description: "Values to concatenate (non-strings are stringified)"
       separator:
         type: string
-        description: "Separator overriding config"
-    config:
-      parts:
-        type: list
-        description: "Default parts when argument is missing"
-      separator:
-        type: string
-        description: "Default separator"
-      output_key:
-        type: string
-        description: "Context key for resulting string"
+        optional: true
+        default: ""
+        description: "Separator between parts"
     outputs:
       value:
         type: string
         description: "Concatenated string"
     """
+
     category = "builtin.strings"
 
     async def run(self):
         args = self.get_arguments()
-        parts = args.get("parts", self.config.get("parts", []))
-        sep = args.get("separator", self.config.get("separator", ""))
-        out_key = self.config.get("output_key", "value")
-        values = []
-        for p in parts:
-            if isinstance(p, str):
-                values.append(str(self.session.context.get(p, p)))
-            else:
-                values.append(str(p))
-        self.set_outputs({out_key: sep.join(values)})
+        parts = require_list("ConcatStage", "parts", args.get("parts", []))
+        separator = args.get("separator", "")
+        self.set_outputs({"value": separator.join(str(part) for part in parts)})
 
 
 @register_stage("TemplateStage")
 class TemplateStage(BaseStage):
     """
-    description: "Format template string with values pulled from context paths"
+    description: "Format template string with the stage's own arguments"
+    icon: "{}"
     arguments:
       template:
         type: string
-        description: "Template overriding config"
-    config:
-      template:
-        type: string
-        description: "Default template string"
-      output_key:
-        type: string
-        description: "Context key for rendered value"
-      values:
-        type: object
-        description: "Mapping placeholder -> context path"
+        description: "Template string; a placeholder is the bare name of another argument ({name}) — attributes and indexes are rejected"
+      "*":
+        type: any
+        description: "Any other argument becomes a template placeholder value"
     outputs:
       value:
         type: string
         description: "Rendered string"
     """
+
     category = "builtin.strings"
 
     async def run(self):
         args = self.get_arguments()
-        template = self.config.get("template") or args.get("template")
-        out_key = self.config.get("output_key", "value")
-        values_cfg = self.config.get("values", {})
-        if template is None:
-            raise ValueError("TemplateStage requires template")
-        values = {}
-        for key, path in values_cfg.items():
-            values[key] = self.session.context.get(path)
-        self.set_outputs({out_key: template.format(**values)})
+        template = require_present("TemplateStage", "template", args.pop("template", None))
+        self.set_outputs({"value": _NameOnlyFormatter().vformat(template, (), args)})
