@@ -29,7 +29,7 @@ class AppendListStage(BaseStage):
     async def run(self):
         args = self.get_arguments()
         if "value" not in args:
-            raise StageContractError("AppendListStage: требуется аргумент 'value'")
+            raise StageContractError("AppendListStage: argument 'value' is required")
         value = args["value"]
         base = require_list("AppendListStage", "list", args.get("list") or [])
         self.set_outputs({"list": [*base, value]})
@@ -63,7 +63,7 @@ class ExtendListStage(BaseStage):
         items = args.get("items", [])
         if not isinstance(items, (list, tuple)):
             raise StageContractError(
-                f"ExtendListStage: 'items' должен быть списком, получен {type(items).__name__}"
+                f"ExtendListStage: 'items' must be a list, got {type(items).__name__}"
             )
         self.set_outputs({"list": [*base, *items]})
 
@@ -95,7 +95,7 @@ class FilterListStage(BaseStage):
         args = self.get_arguments()
         condition = args.pop("condition", None)
         if condition is None:
-            raise StageContractError("FilterListStage: требуется аргумент 'condition'")
+            raise StageContractError("FilterListStage: argument 'condition' is required")
         items = require_list("FilterListStage", "items", args.pop("items", []))
         scope = Context(vars=args)
         result = [item for item in items if self.session.cel.eval(condition, scope, item=item)]
@@ -159,13 +159,13 @@ class PopListStage(BaseStage):
         args = self.get_arguments()
         items = require_list("PopListStage", "items", args.get("items", []))
         if not items:
-            raise StageContractError("PopListStage: нельзя извлечь элемент из пустого списка")
+            raise StageContractError("PopListStage: cannot pop from an empty list")
         index = args.get("index", -1)
         remaining = list(items)
         try:
             popped = remaining.pop(index)
         except IndexError:
             raise StageContractError(
-                f"PopListStage: индекс {index} вне списка длины {len(items)}"
+                f"PopListStage: index {index} is out of range for a list of length {len(items)}"
             ) from None
         self.set_outputs({"list": remaining, "popped": popped})

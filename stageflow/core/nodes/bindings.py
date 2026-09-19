@@ -75,7 +75,7 @@ def apply_outputs(
             dest = spec
             if key not in output_ns:
                 raise StageOutputError(
-                    f"Стадия не вернула поле '{key}' (есть: {sorted(output_ns)})"
+                    f"Stage did not return field '{key}' (available: {sorted(output_ns)})"
                 )
             value = output_ns[key]
         writes.append((dest, value))

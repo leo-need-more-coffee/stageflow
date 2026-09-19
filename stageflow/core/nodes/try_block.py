@@ -22,7 +22,7 @@ class ExceptHandler:
     @classmethod
     def from_dict(cls, data: dict) -> "ExceptHandler":
         if "next" not in data:
-            raise PipelineDefinitionError("except: поле 'next' обязательно")
+            raise PipelineDefinitionError("except: field 'next' is required")
         return cls(
             error_equals=list(data.get("error_equals", ["*"])),
             next=data["next"],
@@ -61,7 +61,7 @@ class TryNode(Node):
     def _parse(cls, data: dict) -> "TryNode":
         body = data.get("body")
         if not body:
-            raise PipelineDefinitionError(f"Node '{data.get('id')}': поле 'body' обязательно")
+            raise PipelineDefinitionError(f"Node '{data.get('id')}': field 'body' is required")
         return cls(
             body=body,
             handlers=[ExceptHandler.from_dict(h) for h in data.get("except", [])],
@@ -84,18 +84,18 @@ class TryNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if not pipeline.has_node(self.body):
-            errors.append(f"{self.id}: body '{self.body}' не найден в графе")
+            errors.append(f"{self.id}: body '{self.body}' not found in the graph")
         if not self.handlers:
-            errors.append(f"{self.id}: нужен хотя бы один обработчик в 'except'")
+            errors.append(f"{self.id}: at least one handler is required in 'except'")
         for handler in self.handlers:
             if not pipeline.has_node(handler.next):
-                errors.append(f"{self.id}: except.next '{handler.next}' не найден в графе")
+                errors.append(f"{self.id}: except.next '{handler.next}' not found in the graph")
             elif pipeline.has_node(self.body) and handler.next in self.scope(pipeline):
                 errors.append(
-                    f"{self.id}: обработчик '{handler.next}' находится внутри тела блока"
+                    f"{self.id}: handler '{handler.next}' is inside the block body"
                 )
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' не найден в графе")
+            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:

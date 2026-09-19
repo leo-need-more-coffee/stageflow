@@ -106,7 +106,7 @@ class ScriptedBoomStage(BaseStage):
         index = _SCRIPT["runs"]
         _SCRIPT["runs"] += 1
         errors = _SCRIPT["errors"]
-        raise errors[index] if index < len(errors) else RuntimeError("сценарий кончился")
+        raise errors[index] if index < len(errors) else RuntimeError("scripted errors exhausted")
 
 
 class RetryBudgetTests(unittest.IsolatedAsyncioTestCase):
@@ -139,8 +139,8 @@ class RetryBudgetTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_each_retrier_spends_its_own_budget(self):
         state = self._scripted([
-            TimeoutError("раз"), TimeoutError("два"),
-            ValueError("три"), ValueError("четыре"),
+            TimeoutError("one"), TimeoutError("two"),
+            ValueError("three"), ValueError("four"),
         ])
         retry = [
             Retrier(error_equals=["TimeoutError"], max_attempts=5, interval_seconds=0),
@@ -155,12 +155,12 @@ class ErrorMessageTests(unittest.TestCase):
     def test_message_is_not_wrapped_in_quotes(self):
         for cls in (StageOutputError, ArtifactNotFoundError):
             with self.subTest(cls=cls.__name__):
-                message = "стадия не вернула поле 'x' (есть: ['y'])"
+                message = "stage did not return field 'x' (available: ['y'])"
                 self.assertEqual(str(cls(message)), message)
 
     def test_builtin_type_is_still_catchable(self):
         with self.assertRaises(KeyError):
-            raise StageOutputError("нет поля")
+            raise StageOutputError("no such field")
 
 
 class ContextTests(unittest.TestCase):
@@ -224,7 +224,7 @@ class OutputFieldValidationTests(unittest.TestCase):
 
     def test_unknown_output_field_rejected(self):
         errors = self._errors({"value": "n", "meta": "m"})
-        self.assertTrue(any("не возвращает поле 'meta'" in e for e in errors), errors)
+        self.assertTrue(any("does not return field 'meta'" in e for e in errors), errors)
 
     def test_declared_field_passes(self):
         self.assertEqual(self._errors({"value": "n"}), [])

@@ -28,8 +28,8 @@ class CelEngine:
         self._compiled: dict[str, Any] = {}
         if _BACKEND is None:  # pragma: no cover
             raise ExpressionError(
-                "Не найден ни один CEL-байндинг. Поставь "
-                "'common-expression-language' (рекомендуется) или 'cel-python'."
+                "No CEL backend found. Install "
+                "'common-expression-language' (recommended) or 'cel-python'."
             )
 
     @property
@@ -46,7 +46,7 @@ class CelEngine:
                     env = _celpy.Environment()
                     program = env.program(env.compile(expr))
             except Exception as exc:  # noqa: BLE001
-                raise ExpressionError(f"Не удалось скомпилировать CEL {expr!r}: {exc}") from exc
+                raise ExpressionError(f"Cannot compile CEL {expr!r}: {exc}") from exc
             self._compiled[expr] = program
         return program
 
@@ -72,4 +72,4 @@ class CelEngine:
                 return program.execute(activation)
             return program.evaluate(activation)  # pragma: no cover
         except Exception as exc:  # noqa: BLE001
-            raise ExpressionError(f"Ошибка вычисления CEL {expr!r}: {exc}") from exc
+            raise ExpressionError(f"Cannot evaluate CEL {expr!r}: {exc}") from exc

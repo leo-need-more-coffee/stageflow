@@ -42,24 +42,24 @@ class EntryNodeSeedTests(unittest.TestCase):
     def test_literals_land_in_frame(self):
         result = _run(_pipeline(
             {"id": "start", "type": "entry",
-             "variables": {"n": 5, "items": [1, 2, 3], "flag": True, "name": "мир"},
+             "variables": {"n": 5, "items": [1, 2, 3], "flag": True, "name": "world"},
              "next": "done"},
             {"id": "done", "type": "terminal", "result": {"status": "ok"},
              "artifacts": ["n", "items", "flag", "name"]},
         ))
         self.assertEqual(
             result.artifacts,
-            {"n": 5, "items": [1, 2, 3], "flag": True, "name": "мир"},
+            {"n": 5, "items": [1, 2, 3], "flag": True, "name": "world"},
         )
 
     def test_cel_variable(self):
         result = _run(_pipeline(
             {"id": "start", "type": "entry",
-             "variables": {"attempts.$": "0", "greeting.$": "'привет ' + vars.who"},
+             "variables": {"attempts.$": "0", "greeting.$": "'hello ' + vars.who"},
              "next": "done"},
             {"id": "done", "type": "terminal", "artifacts": ["attempts", "greeting"]},
-        ), context=Context(vars={"who": "мир"}))
-        self.assertEqual(result.artifacts, {"attempts": 0, "greeting": "привет мир"})
+        ), context=Context(vars={"who": "world"}))
+        self.assertEqual(result.artifacts, {"attempts": 0, "greeting": "hello world"})
 
     def test_seeded_variable_feeds_next_stage(self):
         result = _run(_pipeline(
@@ -87,10 +87,10 @@ class EntryNodeSeedTests(unittest.TestCase):
     def test_expose_works_on_entry(self):
         result = _run(_pipeline(
             {"id": "start", "type": "entry", "variables": {"n": 3},
-             "expose": {"n": "копия"}, "next": "done"},
-            {"id": "done", "type": "terminal", "artifacts": ["копия"]},
+             "expose": {"n": "cópia"}, "next": "done"},
+            {"id": "done", "type": "terminal", "artifacts": ["cópia"]},
         ))
-        self.assertEqual(result.artifacts, {"копия": 3})
+        self.assertEqual(result.artifacts, {"cópia": 3})
 
 
 class EntryDefaultsTests(unittest.TestCase):
@@ -179,22 +179,22 @@ class EntryNonAsciiNameTests(unittest.TestCase):
         result = _run(_pipeline(
             {"id": "start", "type": "entry", "variables": {
                 "n": 5,
-                "итог.$": "vars.n * 2",
-                "вывод.$": "'итог = ' + string(vars['итог'])",
+                "tótal.$": "vars.n * 2",
+                "resúmen.$": "'tótal = ' + string(vars['tótal'])",
             }, "next": "done"},
-            {"id": "done", "type": "terminal", "artifacts": ["итог", "вывод"]},
+            {"id": "done", "type": "terminal", "artifacts": ["tótal", "resúmen"]},
         ))
-        self.assertEqual(result.artifacts, {"итог": 10, "вывод": "итог = 10"})
+        self.assertEqual(result.artifacts, {"tótal": 10, "resúmen": "tótal = 10"})
 
     def test_index_access_counts_as_dependency(self):
         node = Pipeline.from_dict(_pipeline(
             {"id": "start", "type": "entry", "variables": {
-                "вывод.$": "string(vars['итог'])", "итог.$": "vars.n * 2", "n": 5,
+                "resúmen.$": "string(vars['tótal'])", "tótal.$": "vars.n * 2", "n": 5,
             }, "next": "done"},
             {"id": "done", "type": "terminal"},
         )).get_node("start")
         self.assertEqual([name for name, _, _ in node.seed_plan()],
-                         ["n", "итог", "вывод"])
+                         ["n", "tótal", "resúmen"])
 
     def test_cycle_through_index_access_rejected(self):
         pipeline = Pipeline.from_dict(_pipeline(
@@ -202,7 +202,7 @@ class EntryNonAsciiNameTests(unittest.TestCase):
              "variables": {"x.$": "vars['y']", "y.$": "vars.x"}, "next": "done"},
             {"id": "done", "type": "terminal"},
         ))
-        self.assertIn("циклическая зависимость переменных: x, y",
+        self.assertIn("cyclic variable dependency: x, y",
                       " ".join(pipeline.collect_errors()))
 
 
@@ -218,7 +218,7 @@ class EntryPointDerivationTests(unittest.TestCase):
 
     def test_entry_field_still_required_without_entry_node(self):
         pipeline = Pipeline.from_dict({"nodes": [{"id": "done", "type": "terminal"}]})
-        self.assertIn("В пайплайне не задан entry", pipeline.collect_errors())
+        self.assertIn("The pipeline has no entry", pipeline.collect_errors())
 
     def test_matching_entry_field_accepted(self):
         pipeline = Pipeline.from_dict({"entry": "start", "nodes": [
@@ -233,7 +233,7 @@ class EntryPointDerivationTests(unittest.TestCase):
             {"id": "done", "type": "terminal"},
         ]})
         errors = " ".join(pipeline.collect_errors())
-        self.assertIn("не является точкой входа", errors)
+        self.assertIn("is not the pipeline entry point", errors)
 
     def test_two_entry_nodes_rejected(self):
         pipeline = Pipeline.from_dict({"entry": "a", "nodes": [
@@ -242,7 +242,7 @@ class EntryPointDerivationTests(unittest.TestCase):
             {"id": "done", "type": "terminal"},
         ]})
         errors = " ".join(pipeline.collect_errors())
-        self.assertIn("больше одного", errors)
+        self.assertIn("more than one entry node", errors)
 
     def test_two_entry_nodes_without_field_report_only_the_cause(self):
         pipeline = Pipeline.from_dict(_pipeline(
@@ -252,7 +252,7 @@ class EntryPointDerivationTests(unittest.TestCase):
         ))
         self.assertEqual(
             pipeline.collect_errors(),
-            ["узлов entry больше одного: a, b — точка входа должна быть одна"],
+            ["more than one entry node: a, b — there must be exactly one"],
         )
 
     def test_jump_back_into_entry_rejected(self):
@@ -263,16 +263,16 @@ class EntryPointDerivationTests(unittest.TestCase):
             {"id": "done", "type": "terminal"},
         ))
         errors = " ".join(pipeline.collect_errors())
-        self.assertIn("переход в точку входа", errors)
+        self.assertIn("jumping into the entry node", errors)
 
 
 class EntryValidationTests(unittest.TestCase):
     def test_bad_next(self):
         pipeline = Pipeline.from_dict(_pipeline(
-            {"id": "start", "type": "entry", "next": "нет-такого"},
+            {"id": "start", "type": "entry", "next": "no-such-node"},
             {"id": "done", "type": "terminal"},
         ))
-        self.assertIn("start: next 'нет-такого' не найден в графе",
+        self.assertIn("start: next 'no-such-node' not found in the graph",
                       pipeline.collect_errors())
 
     def test_cycle_rejected(self):
@@ -282,35 +282,35 @@ class EntryValidationTests(unittest.TestCase):
             {"id": "done", "type": "terminal"},
         ))
         errors = " ".join(pipeline.collect_errors())
-        self.assertIn("циклическая зависимость переменных: a, b", errors)
+        self.assertIn("cyclic variable dependency: a, b", errors)
 
     def test_empty_expression_rejected(self):
         pipeline = Pipeline.from_dict(_pipeline(
             {"id": "start", "type": "entry", "variables": {"n.$": "  "}, "next": "done"},
             {"id": "done", "type": "terminal"},
         ))
-        self.assertIn("пустое выражение", " ".join(pipeline.collect_errors()))
+        self.assertIn("empty expression", " ".join(pipeline.collect_errors()))
 
     def test_bad_variable_name_rejected_by_schema(self):
         with self.assertRaises(PipelineDefinitionError):
             Pipeline.from_dict(_pipeline(
-                {"id": "start", "type": "entry", "variables": {"не имя": 1},
+                {"id": "start", "type": "entry", "variables": {"not a name": 1},
                  "next": "done"},
                 {"id": "done", "type": "terminal"},
             ))
         ok = Pipeline.from_dict(_pipeline(
-            {"id": "start", "type": "entry", "variables": {"счётчик": 1}, "next": "done"},
+            {"id": "start", "type": "entry", "variables": {"cóntador": 1}, "next": "done"},
             {"id": "done", "type": "terminal"},
         ))
         self.assertEqual(ok.collect_errors(), [])
 
     def test_declared_type_checked_statically(self):
         pipeline = Pipeline.from_dict(_pipeline(
-            {"id": "start", "type": "entry", "variables": {"n": "пять"}, "next": "done"},
+            {"id": "start", "type": "entry", "variables": {"n": "five"}, "next": "done"},
             {"id": "done", "type": "terminal"},
             variables={"n": "int"},
         ))
-        self.assertIn("ожидался int", " ".join(pipeline.collect_errors()))
+        self.assertIn("expected int", " ".join(pipeline.collect_errors()))
         with self.assertRaises(PipelineValidationError):
             Session(id="t", pipeline=pipeline)
 

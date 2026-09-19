@@ -13,7 +13,7 @@
       ]
     },
     "entry": {
-      "description": "id узла, с которого начинается исполнение. Можно не задавать, если в графе есть узел типа 'entry' — он и есть точка входа.",
+      "description": "Id of the node execution starts from. Optional when the graph has a node of type 'entry' — that node is the entry point.",
       "type": "string"
     },
     "metadata": {
@@ -34,7 +34,7 @@
       "default": {}
     },
     "types": {
-      "description": "Именованные типы: структура (mapping поле->тип, суффикс ? = optional; либо {fields, strict}) или алиас-выражение. Выражения: string|int|float|number|bool|any|null, list<T>, map<T>, T|U, T?.",
+      "description": "Named types: a structure (a mapping of field -> type, the ? suffix means optional; or {fields, strict}) or an alias expression. Expressions: string|int|float|number|bool|any|null, list<T>, map<T>, T|U, T?.",
       "type": "object",
       "additionalProperties": {
         "oneOf": [
@@ -49,7 +49,7 @@
       "default": {}
     },
     "variables": {
-      "description": "Объявленные типы переменных фрейма: {имя: тип}. Необъявленные переменные не проверяются (постепенная типизация).",
+      "description": "Declared types of frame variables: {name: type}. Undeclared variables are not checked (gradual typing).",
       "$ref": "#/$defs/variable_declarations"
     }
   },
@@ -72,7 +72,7 @@
       }
     },
     "argument_bucket": {
-      "description": "Ссылки на фрейм: {имя_аргумента: имя_переменной}. Список — сахар для одноимённого копирования. Суффикс .$ на ключе = значение вычислить как CEL.",
+      "description": "References into the frame: {argument_name: variable_name}. A list is sugar for copying under the same name. The .$ suffix on a key means the value is evaluated as CEL.",
       "oneOf": [
         {
           "type": "object",
@@ -100,7 +100,7 @@
       "additionalProperties": false
     },
     "outputs": {
-      "description": "Раскладка результата стадии по переменным. Голый ключ: имя поля результата -> имя переменной. Ключ с .$: имя переменной в самом ключе, значение — CEL (виден `vars` до узла и `output`).",
+      "description": "Mapping of the stage result onto variables. A bare key is a result field name -> a variable name. A key with .$ names the variable itself and its value is CEL (`vars` as of node entry and `output` are visible).",
       "type": "object",
       "propertyNames": {
         "pattern": "^[^\\W\\d]\\w*(\\.\\$)?$"
@@ -108,7 +108,7 @@
       "additionalProperties": true
     },
     "expose": {
-      "description": "Переименование/копирование во фрейме без стадии: {'из_переменной': 'в_переменную'}.",
+      "description": "Renaming or copying inside the frame without a stage: {'from_variable': 'to_variable'}.",
       "type": "object",
       "propertyNames": {
         "pattern": "^[^\\W\\d]\\w*$"
@@ -119,7 +119,7 @@
       }
     },
     "consume": {
-      "description": "Имена переменных, которые физически убираются из фрейма после этой ноды.",
+      "description": "Variable names physically removed from the frame after this node.",
       "type": "array",
       "items": {
         "type": "string"
@@ -164,7 +164,7 @@
       }
     },
     "entry_variables": {
-      "description": "Переменные, с которыми стартует пайплайн: {имя: значение}. Суффикс .$ на ключе = значение вычислить как CEL. Это ЗНАЧЕНИЯ ПО УМОЛЧАНИЮ: имя, пришедшее во фрейме снаружи, узел не перезаписывает. Связывание идёт по зависимостям, поэтому выражение может сослаться на соседнюю переменную.",
+      "description": "Variables the pipeline starts with: {name: value}. The .$ suffix on a key means the value is evaluated as CEL. These are DEFAULTS: a name already present in the frame is not overwritten. Binding follows dependencies, so an expression may reference a sibling variable.",
       "type": "object",
       "additionalProperties": true,
       "propertyNames": {
@@ -188,7 +188,7 @@
           "type": "object"
         }
       },
-      "description": "Узел графа. Тип выбирает конкретную схему: 'if/then' по значению 'type' (OpenAPI-style 'discriminator' здесь не годится — JSON Schema его не исполняет, и схемы типов узлов просто не применялись бы).",
+      "description": "A graph node. The concrete schema is picked by 'type' through 'if/then' (an OpenAPI-style 'discriminator' does not work here: JSON Schema does not execute it, so the per-type schemas would never be applied).",
       "allOf": [
         {
           "if": {
@@ -404,7 +404,7 @@
         },
         "condition": {
           "type": "string",
-          "description": "CEL-выражение"
+          "description": "CEL expression"
         },
         "then": {
           "type": "string"
@@ -450,7 +450,7 @@
             "properties": {
               "when": {
                 "type": "string",
-                "description": "CEL-выражение"
+                "description": "CEL expression"
               },
               "next": {
                 "type": "string"
@@ -667,7 +667,7 @@
         },
         "body": {
           "type": "string",
-          "description": "Вход в тело блока; область — всё достижимое отсюда, но не из next"
+          "description": "Entry into the block body; the region is everything reachable from here but not from next"
         },
         "except": {
           "type": "array",

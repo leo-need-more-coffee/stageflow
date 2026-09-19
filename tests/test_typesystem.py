@@ -125,7 +125,7 @@ class TypeExpressionTests(unittest.TestCase):
             _check("list<User>", [{"id": "nope"}], types)
 
     def test_parse_errors(self):
-        for bad in ("", "list<int", "спец-символы", "int||string"):
+        for bad in ("", "list<int", "bad-chars", "int||string"):
             with self.assertRaises(TypeDeclarationError):
                 parse_type(bad)
 
@@ -372,7 +372,7 @@ class RemovedGlobalScopeTests(unittest.TestCase):
             ]})
         errors = " ".join(pipeline.collect_errors())
         self.assertIn("global", errors)
-        self.assertIn("убран в 0.7.0", errors)
+        self.assertIn("was removed in 0.7.0", errors)
 
     def test_global_scope_in_variables_rejected(self):
         message = self._rejected({
@@ -390,7 +390,7 @@ class RemovedGlobalScopeTests(unittest.TestCase):
     def test_context_has_no_global_api(self):
         ctx = Context(vars={"a": 1})
         for attr in ("global_", "get_global", "set_global", "fork", "resolve"):
-            self.assertFalse(hasattr(ctx, attr), f"Context всё ещё несёт '{attr}'")
+            self.assertFalse(hasattr(ctx, attr), f"Context still carries '{attr}'")
 
 
 if __name__ == "__main__":

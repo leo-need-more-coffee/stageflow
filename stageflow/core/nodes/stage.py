@@ -37,7 +37,7 @@ class StageNode(Node):
     def _parse(cls, data: dict) -> "StageNode":
         stage = data.get("stage")
         if not stage:
-            raise PipelineDefinitionError(f"Node '{data.get('id')}': поле 'stage' обязательно")
+            raise PipelineDefinitionError(f"Node '{data.get('id')}': field 'stage' is required")
         return cls(
             stage=stage,
             arguments=data.get("arguments", {}),
@@ -57,13 +57,13 @@ class StageNode(Node):
         except RegistryError as exc:
             errors.append(f"{self.id}: {exc}")
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' не найден в графе")
+            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
         for bucket in ("vars", "const"):
             value = self.arguments.get(bucket)
             if value is not None and not isinstance(value, (dict, list)):
-                errors.append(f"{self.id}: arguments.{bucket} должен быть объектом или списком")
+                errors.append(f"{self.id}: arguments.{bucket} must be an object or a list")
         if self.outputs and not isinstance(self.outputs, dict):
-            errors.append(f"{self.id}: outputs должен быть объектом")
+            errors.append(f"{self.id}: outputs must be an object")
         errors.extend(self._validate_legacy_scope())
         errors.extend(self._validate_output_fields())
         errors.extend(self._validate_variable_types(pipeline))
@@ -71,8 +71,8 @@ class StageNode(Node):
 
     def _validate_legacy_scope(self) -> list[str]:
         return [
-            f"{self.id}: уровень скоупа '{key}' в outputs убран в 0.7.0 — "
-            'ключи плоские: {"поле_результата": "переменная"}'
+            f"{self.id}: the '{key}' scope level in outputs was removed in 0.7.0 — "
+            'keys are flat: {"result_field": "variable"}'
             for key in ("local", "global")
             if isinstance((self.outputs or {}).get(key), dict)
         ]
@@ -88,8 +88,8 @@ class StageNode(Node):
             return []
 
         return [
-            f"{self.id}: стадия {self.stage} не возвращает поле '{key}' "
-            f"(есть: {sorted(declared)})"
+            f"{self.id}: stage {self.stage} does not return field '{key}' "
+            f"(available: {sorted(declared)})"
             for key in (self.outputs or {})
             if not key.endswith(CEL_SUFFIX) and key not in declared
         ]
@@ -116,8 +116,8 @@ class StageNode(Node):
                 hint = arg_hints.get(arg_name)
                 if declared is not None and not ts.hint_compatible(declared, hint):
                     errors.append(
-                        f"{self.id}: аргумент '{arg_name}' стадии {self.stage} ожидает "
-                        f"'{hint}', но vars.{var_ref} объявлена как '{declared}'"
+                        f"{self.id}: argument '{arg_name}' of stage {self.stage} expects "
+                        f"'{hint}', but vars.{var_ref} is declared as '{declared}'"
                     )
 
         for out_field, dest in (self.outputs or {}).items():
@@ -127,8 +127,8 @@ class StageNode(Node):
             hint = out_hints.get(out_field)
             if declared is not None and not ts.hint_compatible(declared, hint):
                 errors.append(
-                    f"{self.id}: выход '{out_field}' стадии {self.stage} имеет тип "
-                    f"'{hint}', но пишется в vars.{dest} с типом '{declared}'"
+                    f"{self.id}: output '{out_field}' of stage {self.stage} has type "
+                    f"'{hint}', but is written to vars.{dest} typed '{declared}'"
                 )
         return errors
 

@@ -9,13 +9,13 @@ class _NameOnlyFormatter(string.Formatter):
     def get_field(self, field_name, args, kwargs):
         if not field_name.isidentifier():
             raise StageContractError(
-                f"TemplateStage: плейсхолдер '{{{field_name}}}' — не имя аргумента; "
-                "атрибуты, индексы и позиционные номера в шаблоне запрещены"
+                f"TemplateStage: placeholder '{{{field_name}}}' is not an argument name; "
+                "attributes, indexes and positional numbers are not allowed"
             )
         if field_name not in kwargs:
             raise StageContractError(
-                f"TemplateStage: шаблон ссылается на '{field_name}', "
-                f"но такого аргумента нет (есть: {sorted(kwargs)})"
+                f"TemplateStage: template references '{field_name}', "
+                f"but there is no such argument (available: {sorted(kwargs)})"
             )
         return kwargs[field_name], field_name
 

@@ -39,8 +39,8 @@ class Context:
     def from_dict(cls, data: dict[str, Any]) -> "Context":
         if "local" in data and "vars" not in data:
             raise PipelineDefinitionError(
-                "Снапшот содержит скоуп 'local' (до 0.7.0); "
-                "фрейм теперь называется 'vars'"
+                "Snapshot contains the 'local' scope (pre-0.7.0); "
+                "the frame is now called 'vars'"
             )
         return cls(vars=data.get("vars", {}))
 

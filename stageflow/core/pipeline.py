@@ -44,7 +44,7 @@ class Pipeline:
         try:
             typesystem = TypeSystem.from_dict(data.get("types"), data.get("variables"))
         except TypeDeclarationError as exc:
-            raise PipelineDefinitionError(f"Объявления типов некорректны: {exc}") from exc
+            raise PipelineDefinitionError(f"Invalid type declarations: {exc}") from exc
 
         nodes = [Node.from_dict(node) for node in data.get("nodes", [])]
         return cls(
@@ -103,16 +103,16 @@ class Pipeline:
         errors: list[str] = []
         if len(entries) > 1:
             ids = ", ".join(sorted(node.id for node in entries))
-            errors.append(f"узлов entry больше одного: {ids} — точка входа должна быть одна")
+            errors.append(f"more than one entry node: {ids} — there must be exactly one")
         for node in entries:
             if self.entry and self.entry != node.id:
                 errors.append(
-                    f"{node.id}: узел entry не является точкой входа пайплайна "
+                    f"{node.id}: this entry node is not the pipeline entry point "
                     f"(entry = '{self.entry}')"
                 )
             for other in self.nodes:
                 if other.id != node.id and node.id in other.order_targets():
-                    errors.append(f"{other.id}: переход в точку входа '{node.id}' недопустим")
+                    errors.append(f"{other.id}: jumping into the entry node '{node.id}' is not allowed")
         return errors
 
     def collect_errors(self) -> list[str]:
@@ -120,9 +120,9 @@ class Pipeline:
         entry_nodes = self.entry_nodes()
         if not self.entry:
             if not entry_nodes:
-                errors.append("В пайплайне не задан entry")
+                errors.append("The pipeline has no entry")
         elif self.entry not in self._nodes_map:
-            errors.append(f"Entry node '{self.entry}' не найден в графе")
+            errors.append(f"Entry node '{self.entry}' not found in the graph")
 
         errors.extend(self.typesystem.collect_errors())
         errors.extend(self._entry_node_errors())
@@ -130,7 +130,7 @@ class Pipeline:
         seen: set[str] = set()
         for node in self.nodes:
             if node.id in seen:
-                errors.append(f"Дублирующийся id узла: '{node.id}'")
+                errors.append(f"Duplicate node id: '{node.id}'")
             seen.add(node.id)
             errors.extend(node.validate(self))
         return errors

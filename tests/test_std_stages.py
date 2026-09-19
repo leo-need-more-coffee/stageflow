@@ -122,7 +122,7 @@ class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
                          "arguments": {"vars": {"who": "s"},
                                        "const": {"template": template}},
                          "outputs": {"value": "t"}, "next": "end"},
-                    ], {"s": "мир"}, ["t"])
+                    ], {"s": "world"}, ["t"])
 
     async def test_template_reports_unknown_placeholder(self):
         with self.assertRaises(StageContractError) as ctx:
@@ -137,10 +137,10 @@ class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
         result, _ = await self._run([
             {"id": "tpl", "type": "stage", "stage": "TemplateStage",
              "arguments": {"vars": {"n": "n"},
-                           "const": {"template": "{n:03d} {{не плейсхолдер}}"}},
+                           "const": {"template": "{n:03d} {{not a placeholder}}"}},
              "outputs": {"value": "t"}, "next": "end"},
         ], {"n": 7}, ["t"])
-        self.assertEqual(result.artifacts["t"], "007 {не плейсхолдер}")
+        self.assertEqual(result.artifacts["t"], "007 {not a placeholder}")
 
     async def test_assert_sees_other_arguments_as_vars(self):
         result, _ = await self._run([
@@ -155,27 +155,27 @@ class ConstArgumentsTests(unittest.IsolatedAsyncioTestCase):
             await self._run([
                 {"id": "a", "type": "stage", "stage": "AssertStage",
                  "arguments": {"vars": {"n": "n"},
-                               "const": {"condition": "vars.n > 10", "message": "мало"}},
+                               "const": {"condition": "vars.n > 10", "message": "too small"}},
                  "next": "end"},
             ], {"n": 5})
-        self.assertIn("мало", str(ctx.exception))
+        self.assertIn("too small", str(ctx.exception))
 
     async def test_log_merges_message_with_other_arguments(self):
         _, session = await self._run([
             {"id": "l", "type": "stage", "stage": "LogStage",
-             "arguments": {"vars": {"n": "n"}, "const": {"message": "привет"}},
+             "arguments": {"vars": {"n": "n"}, "const": {"message": "hello"}},
              "next": "end"},
         ], {"n": 7})
         logs = [e.payload for e in session.event_history if e.type == "log"]
-        self.assertEqual(logs, [{"message": "привет", "n": 7}])
+        self.assertEqual(logs, [{"message": "hello", "n": 7}])
 
     async def test_fail_message_comes_from_argument(self):
         with self.assertRaises(RuntimeError) as ctx:
             await self._run([
                 {"id": "f", "type": "stage", "stage": "FailStage",
-                 "arguments": {"const": {"message": "бум"}}, "next": "end"},
+                 "arguments": {"const": {"message": "boom"}}, "next": "end"},
             ])
-        self.assertIn("бум", str(ctx.exception))
+        self.assertIn("boom", str(ctx.exception))
 
     async def test_variable_reference_wins_over_const(self):
         result, _ = await self._run([

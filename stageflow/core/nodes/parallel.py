@@ -58,15 +58,15 @@ class ParallelNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if not self.branches:
-            errors.append(f"{self.id}: нужна хотя бы одна ветка")
+            errors.append(f"{self.id}: at least one branch is required")
         for branch in self.branches:
             if not pipeline.has_node(branch["entry"]):
                 errors.append(
-                    f"{self.id}: вход ветки '{branch['id']}' -> "
-                    f"'{branch['entry']}' не найден в графе"
+                    f"{self.id}: entry of branch '{branch['id']}' -> "
+                    f"'{branch['entry']}' not found in the graph"
                 )
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' не найден в графе")
+            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
@@ -91,7 +91,7 @@ class ParallelNode(Node):
             )
             if failure is not None:
                 branch_id, exc = failure
-                raise BranchError(f"ветка '{branch_id}' упала: {exc}") from exc
+                raise BranchError(f"branch '{branch_id}' failed: {exc}") from exc
 
             merged = self._merge(
                 ctx, baseline_keys, {bid: task.result() for bid, task in tasks.items()}
@@ -138,8 +138,8 @@ class ParallelNode(Node):
             for key in sorted(branch_ctx.var_names() - baseline_keys):
                 if key in owner:
                     raise BranchError(
-                        f"{self.id}: ветки '{owner[key]}' и '{branch_id}' "
-                        f"обе пишут {key}"
+                        f"{self.id}: branches '{owner[key]}' and '{branch_id}' "
+                        f"both write {key}"
                     )
                 owner[key] = branch_id
                 merged = merged.with_var(key, branch_ctx.get_var(key))

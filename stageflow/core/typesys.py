@@ -22,7 +22,7 @@ class VarType:
 
 
 def _fail(path: str, expected: "VarType", value: Any) -> None:
-    raise TypeCheckError(f"{path}: ожидался {expected}, получен {type(value).__name__}")
+    raise TypeCheckError(f"{path}: expected {expected}, got {type(value).__name__}")
 
 
 @dataclass(frozen=True)
@@ -105,7 +105,7 @@ class MapType(VarType):
         for key, element in value.items():
             if not isinstance(key, str):
                 raise TypeCheckError(
-                    f"{path}: ключи map должны быть строками, найден {type(key).__name__}"
+                    f"{path}: map keys must be strings, got {type(key).__name__}"
                 )
             self.value.check(element, f"{path}.{key}", registry)
 
@@ -166,14 +166,14 @@ class StructType(VarType):
                 if spec.optional:
                     continue
                 raise TypeCheckError(
-                    f"{path}: в структуре {self.name} нет обязательного поля '{field_name}'"
+                    f"{path}: structure {self.name} is missing required field '{field_name}'"
                 )
             spec.type.check(value[field_name], f"{path}.{field_name}", registry)
         if self.strict:
             extra = set(value) - set(self.fields)
             if extra:
                 raise TypeCheckError(
-                    f"{path}: структура {self.name} не допускает лишних полей: {sorted(extra)}"
+                    f"{path}: structure {self.name} forbids extra fields: {sorted(extra)}"
                 )
 
     def kinds(self, registry):
@@ -232,7 +232,7 @@ def _split_top_level(expr: str, sep: str) -> list[str]:
 
 def parse_type(expr: str) -> VarType:
     if not isinstance(expr, str) or not expr.strip():
-        raise TypeDeclarationError(f"Пустое или нестроковое типовое выражение: {expr!r}")
+        raise TypeDeclarationError(f"Empty or non-string type expression: {expr!r}")
     expr = expr.strip()
 
     union_parts = _split_top_level(expr, "|")
@@ -249,11 +249,11 @@ def parse_type(expr: str) -> VarType:
         prefix = container + "<"
         if expr.startswith(prefix):
             if not expr.endswith(">"):
-                raise TypeDeclarationError(f"Незакрытый '{container}<' в выражении {expr!r}")
+                raise TypeDeclarationError(f"Unclosed '{container}<' in expression {expr!r}")
             return cls(parse_type(expr[len(prefix):-1]))
 
     if not _IDENT_RE.match(expr):
-        raise TypeDeclarationError(f"Некорректное типовое выражение: {expr!r}")
+        raise TypeDeclarationError(f"Malformed type expression: {expr!r}")
     return NamedRef(expr)
 
 
@@ -263,7 +263,7 @@ def _parse_type_value(name: str, spec: Any) -> VarType:
     if isinstance(spec, dict):
         return parse_struct(name, spec)
     raise TypeDeclarationError(
-        f"Тип '{name}' должен быть выражением или структурой, получен {type(spec).__name__}"
+        f"Type '{name}' must be an expression or a structure, got {type(spec).__name__}"
     )
 
 
@@ -272,7 +272,7 @@ def parse_struct(name: str, data: dict) -> StructType:
         fields_raw = data["fields"]
         strict = bool(data.get("strict", False))
         if not isinstance(fields_raw, dict):
-            raise TypeDeclarationError(f"Тип '{name}': 'fields' должен быть объектом")
+            raise TypeDeclarationError(f"Type '{name}': 'fields' must be an object")
     else:
         fields_raw, strict = data, False
 
@@ -281,7 +281,7 @@ def parse_struct(name: str, data: dict) -> StructType:
         optional = raw_name.endswith("?")
         field_name = raw_name[:-1] if optional else raw_name
         if not _IDENT_RE.match(field_name):
-            raise TypeDeclarationError(f"Тип '{name}': некорректное имя поля {raw_name!r}")
+            raise TypeDeclarationError(f"Type '{name}': malformed field name {raw_name!r}")
         fields[field_name] = StructField(
             type=_parse_type_value(f"{name}.{field_name}", spec), optional=optional
         )
@@ -297,7 +297,7 @@ class TypeRegistry:
         types: dict[str, VarType] = {}
         for name, spec in (data or {}).items():
             if not _IDENT_RE.match(name):
-                raise TypeDeclarationError(f"Некорректное имя типа: {name!r}")
+                raise TypeDeclarationError(f"Malformed type name: {name!r}")
             types[name] = _parse_type_value(name, spec)
         return cls(types)
 
@@ -305,7 +305,7 @@ class TypeRegistry:
         try:
             return self._types[name]
         except KeyError:
-            raise TypeDeclarationError(f"Неизвестный тип '{name}'") from None
+            raise TypeDeclarationError(f"Unknown type '{name}'") from None
 
     def __contains__(self, name: str) -> bool:
         return name in self._types
@@ -315,7 +315,7 @@ class TypeRegistry:
         for name, declared in self._types.items():
             for ref in declared.refs():
                 if ref not in self._types:
-                    errors.append(f"тип '{name}' ссылается на неизвестный тип '{ref}'")
+                    errors.append(f"type '{name}' references unknown type '{ref}'")
         return errors
 
 
@@ -348,8 +348,8 @@ class TypeSystem:
         for legacy in ("local", "global"):
             if legacy in declarations and isinstance(declarations[legacy], dict):
                 raise TypeDeclarationError(
-                    f"variables: уровень скоупа '{legacy}' убран в 0.7.0 — "
-                    'объявления плоские: {"n": "int"}'
+                    f"variables: the '{legacy}' scope level was removed in 0.7.0 — "
+                    'declarations are flat: {"n": "int"}'
                 )
         variables = {
             name: _parse_type_value(f"vars.{name}", spec)
@@ -369,7 +369,7 @@ class TypeSystem:
             for ref in declared.refs():
                 if ref not in self._registry:
                     errors.append(
-                        f"переменная vars.{name} ссылается на неизвестный тип '{ref}'"
+                        f"variable vars.{name} references unknown type '{ref}'"
                     )
         return errors
 

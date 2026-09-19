@@ -49,7 +49,7 @@ class RemovedLocalScopeTests(unittest.TestCase):
             _stage_node(arguments={"const": {"value": 1}},
                         outputs={"local": {"value": "total"}}), entry="p"))
         errors = " ".join(pipeline.collect_errors())
-        self.assertIn("уровень скоупа 'local' в outputs убран в 0.7.0", errors)
+        self.assertIn("the 'local' scope level in outputs was removed in 0.7.0", errors)
 
     def test_local_level_in_variables_rejected(self):
         message = self._definition_error(_graph(
@@ -98,7 +98,7 @@ class RemovedLocalScopeTests(unittest.TestCase):
         ctx = Context(vars={"a": 1})
         for attr in ("local", "get_local", "has_local", "with_local",
                      "without_local", "local_keys"):
-            self.assertFalse(hasattr(ctx, attr), f"Context всё ещё несёт '{attr}'")
+            self.assertFalse(hasattr(ctx, attr), f"Context still carries '{attr}'")
         self.assertEqual(ctx.to_dict(), {"vars": {"a": 1}})
 
     def test_old_snapshot_context_rejected(self):

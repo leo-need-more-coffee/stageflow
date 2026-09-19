@@ -124,7 +124,7 @@ class StepDebugger:
         for name, value in values.items():
             try:
                 if types is not None:
-                    types.check_write(name, value, f"отладчик перед узлом '{self.node}'")
+                    types.check_write(name, value, f"debugger before node '{self.node}'")
             except Exception as exc:  # noqa: BLE001
                 self._emit("var_rejected", name=name, error=str(exc))
                 continue

@@ -227,7 +227,7 @@ class TryScopeTests(unittest.TestCase):
         ])
         with self.assertRaises(PipelineValidationError) as caught:
             pipeline.validate()
-        self.assertIn("внутри тела блока", str(caught.exception))
+        self.assertIn("inside the block body", str(caught.exception))
 
     def test_missing_body_and_empty_except_are_reported(self):
         with self.assertRaises(ValueError):
@@ -243,7 +243,7 @@ class TryScopeTests(unittest.TestCase):
             TerminalNode(id="after"),
         ])
         errors = pipeline.collect_errors()
-        self.assertTrue(any("хотя бы один обработчик" in e for e in errors))
+        self.assertTrue(any("at least one handler" in e for e in errors))
 
     def test_handler_object_matches_by_full_name(self):
         handler = ExceptHandler(error_equals=["builtins.TimeoutError"], next="h")

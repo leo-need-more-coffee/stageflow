@@ -49,15 +49,15 @@ class StepModeTests(unittest.TestCase):
 
             self.assertTrue(await wait_until(lambda: debugger.waiting))
             self.assertEqual(debugger.node, "start")
-            self.assertFalse(task.done(), "сессия не должна идти дальше без команды")
+            self.assertFalse(task.done(), "the session must not advance without a command")
 
             debugger.step()
             self.assertTrue(await wait_until(lambda: debugger.node == "bump" and debugger.waiting))
-            self.assertEqual(debugger.vars.get("n"), 1, "фрейм показан до исполнения узла")
+            self.assertEqual(debugger.vars.get("n"), 1, "the frame is shown before the node runs")
 
             debugger.step()
             self.assertTrue(await wait_until(lambda: debugger.node == "done" and debugger.waiting))
-            self.assertEqual(debugger.vars.get("n"), 6, "после стадии фрейм обновился")
+            self.assertEqual(debugger.vars.get("n"), 6, "the frame is updated after the stage")
 
             debugger.resume()
             result = await asyncio.wait_for(task, 2)
@@ -158,10 +158,10 @@ class FrameEditingTests(unittest.TestCase):
             self.assertTrue(await wait_until(lambda: debugger.waiting))
             debugger.step()
             self.assertTrue(await wait_until(lambda: debugger.node == "done" and debugger.waiting))
-            debugger.set_vars({"n": "не число"})
+            debugger.set_vars({"n": "not a number"})
             debugger.resume()
             result = await asyncio.wait_for(task, 2)
-            self.assertEqual(result.artifacts, {"n": 1}, "отвергнутая правка не должна применяться")
+            self.assertEqual(result.artifacts, {"n": 1}, "a rejected edit must not be applied")
             rejected = [e for e in events if e["type"] == "var_rejected"]
             self.assertEqual(len(rejected), 1)
             self.assertEqual(rejected[0]["name"], "n")
@@ -179,7 +179,7 @@ class DelayTests(unittest.TestCase):
             return time.monotonic() - started
 
         elapsed = asyncio.run(scenario())
-        self.assertGreaterEqual(elapsed, 0.12, "три узла по 0.05 с задержкой")
+        self.assertGreaterEqual(elapsed, 0.12, "three nodes at a 0.05 s delay")
 
 
 class CoverageTests(unittest.TestCase):
@@ -190,7 +190,7 @@ class CoverageTests(unittest.TestCase):
                 {"id": "guard", "type": "try", "body": "boom", "next": "done",
                  "except": [{"error_equals": ["*"], "next": "rescue"}]},
                 {"id": "boom", "type": "stage", "stage": "FailStage",
-                 "arguments": {"const": {"message": "бум"}}},
+                 "arguments": {"const": {"message": "boom"}}},
                 {"id": "rescue", "type": "stage", "stage": "SetValueStage",
                  "arguments": {"const": {"value": 1}}, "outputs": {"value": "saved"},
                  "next": "done"},
@@ -205,8 +205,8 @@ class CoverageTests(unittest.TestCase):
             return [e["node"] for e in events if e["type"] == "node_enter"]
 
         entered = asyncio.run(scenario())
-        self.assertIn("boom", entered, "узел внутри тела try должен быть виден отладчику")
-        self.assertIn("rescue", entered, "обработчик except — тоже узел")
+        self.assertIn("boom", entered, "a node inside a try body must be visible to the debugger")
+        self.assertIn("rescue", entered, "an except handler is a node too")
 
     def test_sees_parallel_branches_and_subpipeline(self):
         pipeline = Pipeline.from_dict({
@@ -239,7 +239,7 @@ class CoverageTests(unittest.TestCase):
 
         entered = asyncio.run(scenario())
         for node in ("one", "two", "inner_start", "inner_end"):
-            self.assertIn(node, entered, f"узел '{node}' не дошёл до отладчика")
+            self.assertIn(node, entered, f"node '{node}' never reached the debugger")
 
     def test_without_debugger_nothing_changes(self):
         async def scenario():

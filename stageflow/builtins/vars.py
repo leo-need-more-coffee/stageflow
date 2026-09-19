@@ -23,7 +23,7 @@ class SetValueStage(BaseStage):
     async def run(self):
         args = self.get_arguments()
         if "value" not in args:
-            raise StageContractError("SetValueStage: требуется аргумент 'value'")
+            raise StageContractError("SetValueStage: argument 'value' is required")
         self.set_outputs({"value": args["value"]})
 
 

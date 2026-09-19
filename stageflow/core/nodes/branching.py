@@ -33,9 +33,9 @@ class ConditionNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if not pipeline.has_node(self.then):
-            errors.append(f"{self.id}: then '{self.then}' не найден в графе")
+            errors.append(f"{self.id}: then '{self.then}' not found in the graph")
         if self.else_ and not pipeline.has_node(self.else_):
-            errors.append(f"{self.id}: else '{self.else_}' не найден в графе")
+            errors.append(f"{self.id}: else '{self.else_}' not found in the graph")
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
@@ -69,12 +69,12 @@ class SwitchNode(Node):
         errors = self._validate_common(pipeline)
         for case in self.cases:
             if "when" not in case or "next" not in case:
-                errors.append(f"{self.id}: каждый case должен иметь 'when' и 'next'")
+                errors.append(f"{self.id}: every case needs 'when' and 'next'")
                 continue
             if not pipeline.has_node(case["next"]):
-                errors.append(f"{self.id}: case next '{case['next']}' не найден в графе")
+                errors.append(f"{self.id}: case next '{case['next']}' not found in the graph")
         if self.default and not pipeline.has_node(self.default):
-            errors.append(f"{self.id}: default '{self.default}' не найден в графе")
+            errors.append(f"{self.id}: default '{self.default}' not found in the graph")
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:

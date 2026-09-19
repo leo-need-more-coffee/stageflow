@@ -77,10 +77,10 @@ class Node:
         errors: list[str] = []
         for src, dst in self.expose.items():
             malformed = False
-            for path, side in ((src, "источник"), (dst, "назначение")):
+            for path, side in ((src, "source"), (dst, "destination")):
                 if not isinstance(path, str) or not path.isidentifier():
                     errors.append(
-                        f"{self.id}: expose {side} '{path}' должен быть именем переменной"
+                        f"{self.id}: expose {side} '{path}' must be a variable name"
                     )
                     malformed = True
             if malformed:
@@ -90,8 +90,8 @@ class Node:
             dst_type = ts.declared(dst)
             if src_type and dst_type and not ts.expose_compatible(src_type, dst_type):
                 errors.append(
-                    f"{self.id}: expose {src} -> {dst}: несовместимые типы "
-                    f"'{src_type}' и '{dst_type}'"
+                    f"{self.id}: expose {src} -> {dst}: incompatible types "
+                    f"'{src_type}' and '{dst_type}'"
                 )
         return errors
 
