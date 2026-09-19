@@ -376,7 +376,7 @@ color: "#ff8800"    # акцент карточки (по умолчанию —
 `InputSpec` с `payload_schema`), `category` и `timeout`. Всё это попадает в
 `get_specs()`.
 
-## Схема и визуализация
+## Схема и спецификации стадий
 
 JSON Schema пайплайна и спецификации зарегистрированных стадий:
 
@@ -389,14 +389,8 @@ stages = generate_stages_json(get_stages())       # спеки стадий дл
 ```
 
 `load_pipeline_schema()` отдаёт схему без подстановки enum — её же использует
-`Pipeline.validate()`.
-
-Диаграмма пайплайна (Mermaid и таблица потока данных):
-
-```bash
-python -m stageflow.docs.graph pipeline.json -o graph.html
-python -m stageflow.docs.graph pipeline.json --mermaid
-```
+`Pipeline.validate()`. Из этих двух функций и собирается всё, что нужно
+внешнему инструменту: редактору, валидатору в CI, генератору документации.
 
 ## Тесты
 
@@ -416,7 +410,7 @@ from stageflow.testing import PipelineTestSpec, run_pipeline_test
 stageflow/
   core/          ядро: pipeline, session, nodes/, context, cel, stage, typesys, inputs, debug
   builtins/      встроенные стадии
-  docs/          JSON Schema пайплайна, спецификации стадий, визуализатор графа
+  docs/          JSON Schema пайплайна и спецификации стадий
   exceptions.py  иерархия исключений
   testing.py     хелпер тестирования пайплайнов
 tests/           unit-тесты
