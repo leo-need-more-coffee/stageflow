@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,6 +7,8 @@ name = "stageflow-framework"
 version = "0.9.0"
 description = "StageFlow: pipeline framework for stages"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "лень", email = "pzrnqt1vrss@protonmail.com" }
 ]

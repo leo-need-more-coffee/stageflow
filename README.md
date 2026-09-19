@@ -431,6 +431,10 @@ with `twine check`, and uploads them through PyPI Trusted Publishing, so no
 API token is stored in the repository. The upload step runs in the `pypi`
 environment, which can be configured to require a manual approval.
 
+## License
+
+MIT — see [LICENSE](LICENSE).
+
 ## Package layout
 
 ```
