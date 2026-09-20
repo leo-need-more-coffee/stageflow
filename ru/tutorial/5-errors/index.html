@@ -769,7 +769,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Обработчик должен сказать, куда идти
+        Где кончается дорога
       
     </span>
   </a>
@@ -1309,7 +1309,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Обработчик должен сказать, куда идти
+        Где кончается дорога
       
     </span>
   </a>
@@ -1381,16 +1381,19 @@
 <p><img alt="Узел try, его тело и дорога except" src="../../../img/tut-try.png" width="418" /></p>
 <p>Редактор обводит обе области: тело — вокруг <code>triage</code>, обработчик — вокруг
 <code>rules</code>.</p>
-<h2 id="_1">Обработчик должен сказать, куда идти<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Тело и обработчик заканчиваются по-разному, и на этом легко споткнуться.</p>
-<p>Дорога тела, кончающаяся <code>"next": null</code>, возвращается на <code>next</code> узла <code>try</code>.
-Дорога обработчика, кончающаяся <code>"next": null</code>, вместо этого завершает весь
-запуск. Поэтому последний узел обработчика обязан назвать, куда идти дальше:</p>
+<h2 id="_1">Где кончается дорога<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Обе дороги блока заканчиваются одинаково. Дорога, которая просто кончилась
+(<code>"next": null</code>), возвращает управление узлу <code>try</code>, и граф идёт дальше с его
+собственного <code>next</code> — неважно, тело это было или обработчик.</p>
+<p>Поэтому стадия с правилами может и назвать следующий узел, и обойтись без
+<code>next</code>: в обоих случаях граф продолжится с <code>gather</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"rules"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"stage"</span><span class="p">,</span><span class="w"> </span><span class="nt">"stage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ClassifyByRulesStage"</span><span class="p">,</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w"> </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"vars"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s2">"subject"</span><span class="p">}},</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w"> </span><span class="nt">"outputs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"topic"</span><span class="p">,</span><span class="w"> </span><span class="nt">"urgency"</span><span class="p">:</span><span class="w"> </span><span class="s2">"urgency"</span><span class="p">},</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w"> </span><span class="nt">"next"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gather"</span><span class="p">}</span>
 </code></pre></div>
+<p>Исключение — узел <code>terminal</code> внутри блока: он завершает весь запуск, и ничего
+после блока не исполняется.</p>
 <h2 id="_2">Как это выглядит, когда срабатывает<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>Запустите бота без рабочего ключа. Стадия с моделью падает, обработчик её
 ловит, дальше работают правила:</p>

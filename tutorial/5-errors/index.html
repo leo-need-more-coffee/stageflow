@@ -766,10 +766,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#say-where-the-handler-goes" class="md-nav__link">
+  <a href="#where-a-road-ends" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Say where the handler goes
+        Where a road ends
       
     </span>
   </a>
@@ -1306,10 +1306,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#say-where-the-handler-goes" class="md-nav__link">
+  <a href="#where-a-road-ends" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Say where the handler goes
+        Where a road ends
       
     </span>
   </a>
@@ -1381,16 +1381,19 @@ anything. <code>result_var</code> puts the error into the frame as an object wit
 <p><img alt="The try node, its body and its except road" src="../../img/tut-try.png" width="418" /></p>
 <p>The editor frames both regions: the body around <code>triage</code>, the handler around
 <code>rules</code>.</p>
-<h2 id="say-where-the-handler-goes">Say where the handler goes<a class="headerlink" href="#say-where-the-handler-goes" title="Permanent link">&para;</a></h2>
-<p>The body and the handler end differently, and this is easy to trip over.</p>
-<p>A body road that ends with <code>"next": null</code> returns to the <code>try</code> node's <code>next</code>.
-A handler road that ends with <code>"next": null</code> ends the run instead. So the last
-node of a handler has to name where execution continues:</p>
+<h2 id="where-a-road-ends">Where a road ends<a class="headerlink" href="#where-a-road-ends" title="Permanent link">&para;</a></h2>
+<p>Both roads of the block end the same way. A road that simply stops
+(<code>"next": null</code>) hands control back to the <code>try</code> node, and the graph goes on
+at the node's own <code>next</code> — whether that road was the body or a handler.</p>
+<p>So the rules stage can either name where it continues or leave <code>next</code> out; in
+both cases the graph carries on at <code>gather</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"rules"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"stage"</span><span class="p">,</span><span class="w"> </span><span class="nt">"stage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ClassifyByRulesStage"</span><span class="p">,</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w"> </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"vars"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s2">"subject"</span><span class="p">}},</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w"> </span><span class="nt">"outputs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"topic"</span><span class="p">,</span><span class="w"> </span><span class="nt">"urgency"</span><span class="p">:</span><span class="w"> </span><span class="s2">"urgency"</span><span class="p">},</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w"> </span><span class="nt">"next"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gather"</span><span class="p">}</span>
 </code></pre></div>
+<p>A <code>terminal</code> inside the block is the exception: it ends the whole run, and
+nothing after the block is executed.</p>
 <h2 id="what-it-looks-like-when-it-fires">What it looks like when it fires<a class="headerlink" href="#what-it-looks-like-when-it-fires" title="Permanent link">&para;</a></h2>
 <p>Run the bot without a working key. The model stage fails, the handler catches
 it, and the rules take over:</p>

@@ -1252,9 +1252,11 @@ an error raised by any node inside it goes to the matching <code>except</code>.<
   <code>full_type</code>, <code>message</code> and <code>node</code>.</li>
 <li><code>error_equals</code> accepts a bare exception class name, a fully qualified path,
   or <code>*</code>.</li>
-<li>A body road that ends with <code>"next": null</code> continues at the <code>try</code> node's
-  <code>next</code>. A handler road that ends with <code>"next": null</code> ends the run, so the
-  last node of a handler has to name where execution goes on.</li>
+<li>A road that simply ends (<code>"next": null</code>) hands control back to the block,
+  which continues at its own <code>next</code>. This is the same for the body and for a
+  handler: a handler is a part of the block, not an exit from it.</li>
+<li>A <code>terminal</code> inside the block ends the whole run, and nothing after the
+  block is executed.</li>
 </ul>
 <p><img alt="A try node, its body and its handler" src="../img/tut-try.png" width="418" /></p>
 <p>The two regions are framed on the canvas: the body around the nodes whose
