@@ -113,6 +113,64 @@ class TryBlockTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts["m"], "fine")
         self.assertIn("try_completed", [e.type for e in session.event_history])
 
+    async def test_handler_road_without_next_continues_after_the_block(self):
+        data = {
+            "entry": "guard",
+            "nodes": [
+                {"id": "guard", "type": "try", "body": "boom", "next": "after",
+                 "except": [{"error_equals": ["*"], "next": "handler", "result_var": "err"}]},
+                {"id": "boom", "type": "stage", "stage": "BoomStage",
+                 "arguments": {"const": {"message": "fell over"}}},
+                {"id": "handler", "type": "stage", "stage": "MarkStage",
+                 "arguments": {"const": {"mark": "recovered"}}, "outputs": {"mark": "m"}},
+                {"id": "after", "type": "terminal", "result": {"status": "after"},
+                 "artifacts": ["m", "err"]},
+            ],
+        }
+        result, session = await self._run(data)
+        self.assertEqual(result.result, {"status": "after"})
+        self.assertEqual(result.artifacts["m"], "recovered")
+        self.assertEqual(result.artifacts["err"]["message"], "fell over")
+        self.assertIn("try_completed", [e.type for e in session.event_history])
+
+    async def test_terminal_inside_the_block_ends_the_run(self):
+        data = {
+            "entry": "guard",
+            "nodes": [
+                {"id": "guard", "type": "try", "body": "work", "next": "after",
+                 "except": [{"error_equals": ["*"], "next": "handler"}]},
+                {"id": "work", "type": "stage", "stage": "MarkStage",
+                 "arguments": {"const": {"mark": "inside"}}, "outputs": {"mark": "m"},
+                 "next": "stop_here"},
+                {"id": "stop_here", "type": "terminal", "result": {"status": "stopped inside"},
+                 "artifacts": ["m"]},
+                {"id": "handler", "type": "terminal", "result": {"status": "handled"}},
+                {"id": "after", "type": "terminal", "result": {"status": "after"}},
+            ],
+        }
+        result, _ = await self._run(data)
+        self.assertEqual(result.result, {"status": "stopped inside"})
+        self.assertEqual(result.artifacts["m"], "inside")
+
+    async def test_terminal_on_a_handler_road_ends_the_run(self):
+        data = {
+            "entry": "guard",
+            "nodes": [
+                {"id": "guard", "type": "try", "body": "boom", "next": "after",
+                 "except": [{"error_equals": ["*"], "next": "handler"}]},
+                {"id": "boom", "type": "stage", "stage": "BoomStage", "arguments": {}},
+                {"id": "handler", "type": "stage", "stage": "MarkStage",
+                 "arguments": {"const": {"mark": "recovered"}}, "outputs": {"mark": "m"},
+                 "next": "handled"},
+                {"id": "handled", "type": "terminal", "result": {"status": "handled"},
+                 "artifacts": ["m"]},
+                {"id": "after", "type": "terminal", "result": {"status": "after"}},
+            ],
+        }
+        result, _ = await self._run(data)
+        self.assertEqual(result.result, {"status": "handled"})
+        self.assertEqual(result.artifacts["m"], "recovered")
+
     async def test_nested_try_inner_handles_first(self):
         data = {
             "entry": "outer",

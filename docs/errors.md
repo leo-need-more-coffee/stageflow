@@ -38,9 +38,11 @@ an error raised by any node inside it goes to the matching `except`.
   `full_type`, `message` and `node`.
 - `error_equals` accepts a bare exception class name, a fully qualified path,
   or `*`.
-- A body road that ends with `"next": null` continues at the `try` node's
-  `next`. A handler road that ends with `"next": null` ends the run, so the
-  last node of a handler has to name where execution goes on.
+- A road that simply ends (`"next": null`) hands control back to the block,
+  which continues at its own `next`. This is the same for the body and for a
+  handler: a handler is a part of the block, not an exit from it.
+- A `terminal` inside the block ends the whole run, and nothing after the
+  block is executed.
 
 ![A try node, its body and its handler](img/tut-try.png){ width="418" }
 

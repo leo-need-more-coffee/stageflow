@@ -60,6 +60,8 @@ class Session:
 
         self.artifacts: dict[str, Any] = {}
         self.result: dict | None = None
+        #: a terminal node has ended the run; nothing else should be executed
+        self.finished = False
         self.event_history: list[Event] = []
         self.inputs = InputHub(self._emit_input_event)
 
@@ -206,7 +208,7 @@ class Session:
         scope: frozenset[str],
         frame: "ScopeFrame | None" = None,
     ) -> tuple["Node | None", Context]:
-        while node is not None and node.id in scope:
+        while node is not None and node.id in scope and not self.finished:
             node, ctx = await self.execute_node(node, ctx)
             if frame is not None:
                 frame.ctx = ctx
@@ -221,6 +223,7 @@ class Session:
     def finish(self, node: TerminalNode, ctx: Context) -> None:
         self.artifacts = {name: ctx.get_var(name) for name in node.artifacts}
         self.result = node.result
+        self.finished = True
         self.emit_node_event("session_terminated", node, {"artifacts": sorted(self.artifacts)})
 
     async def run(self) -> SessionResult:

@@ -42,13 +42,14 @@ anything. `result_var` puts the error into the frame as an object with `type`,
 The editor frames both regions: the body around `triage`, the handler around
 `rules`.
 
-## Say where the handler goes
+## Where a road ends
 
-The body and the handler end differently, and this is easy to trip over.
+Both roads of the block end the same way. A road that simply stops
+(`"next": null`) hands control back to the `try` node, and the graph goes on
+at the node's own `next` — whether that road was the body or a handler.
 
-A body road that ends with `"next": null` returns to the `try` node's `next`.
-A handler road that ends with `"next": null` ends the run instead. So the last
-node of a handler has to name where execution continues:
+So the rules stage can either name where it continues or leave `next` out; in
+both cases the graph carries on at `gather`:
 
 ```json
 {"id": "rules", "type": "stage", "stage": "ClassifyByRulesStage",
@@ -56,6 +57,9 @@ node of a handler has to name where execution continues:
  "outputs": {"topic": "topic", "urgency": "urgency"},
  "next": "gather"}
 ```
+
+A `terminal` inside the block is the exception: it ends the whole run, and
+nothing after the block is executed.
 
 ## What it looks like when it fires
 

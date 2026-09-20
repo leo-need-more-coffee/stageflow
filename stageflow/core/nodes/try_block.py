@@ -56,6 +56,7 @@ class TryNode(Node):
         self.handlers = handlers or []
         self.next = next
         self._scope: frozenset[str] | None = None
+        self._handler_scopes: dict[str, frozenset[str]] = {}
 
     @classmethod
     def _parse(cls, data: dict) -> "TryNode":
@@ -71,9 +72,22 @@ class TryNode(Node):
 
     def scope(self, pipeline: "Pipeline") -> frozenset[str]:
         if self._scope is None:
-            after = pipeline.reachable([self.next]) if self.next else frozenset()
-            self._scope = pipeline.reachable([self.body], stop_at=after) - {self.id}
+            self._scope = self._region(pipeline, self.body)
         return self._scope
+
+    def handler_scope(self, pipeline: "Pipeline", handler: ExceptHandler) -> frozenset[str]:
+        """The region of a handler, derived the same way as the body's.
+
+        A handler road is a part of the block too: when it ends, execution
+        continues where the block continues.
+        """
+        if handler.next not in self._handler_scopes:
+            self._handler_scopes[handler.next] = self._region(pipeline, handler.next)
+        return self._handler_scopes[handler.next]
+
+    def _region(self, pipeline: "Pipeline", start: str) -> frozenset[str]:
+        after = pipeline.reachable([self.next]) if self.next else frozenset()
+        return pipeline.reachable([start], stop_at=after) - {self.id}
 
     def order_targets(self) -> list[str]:
         targets = [self.body, *(h.next for h in self.handlers)]
@@ -122,9 +136,28 @@ class TryNode(Node):
             )
             if handler.result_var:
                 ctx = ctx.with_var(handler.result_var, handler.error_payload(exc, self.id))
-            return session.pipeline.get_node(handler.next), ctx
+            node, ctx = await session.run_scope(
+                session.pipeline.get_node(handler.next),
+                ctx,
+                self.handler_scope(session.pipeline, handler),
+            )
+            return self._after_region(session, node, ctx, {"handler": handler.next})
 
+        return self._after_region(session, node, ctx, {"body": self.body})
+
+    def _after_region(
+        self, session: "Session", node: Node | None, ctx: Context, payload: dict
+    ) -> tuple[Node | None, Context]:
+        """Where to go once a road of the block has ended.
+
+        A road that led out of the block says where it goes itself. A road that
+        simply ended hands control back to the block, which continues at its
+        own `next` — the body and the handlers alike. A terminal inside the
+        block ends the whole run, and then there is nowhere to continue.
+        """
         if node is not None:
             return node, ctx
-        session.emit_node_event("try_completed", self, {"body": self.body})
+        if session.finished:
+            return None, ctx
+        session.emit_node_event("try_completed", self, payload)
         return self._goto(session, self.next), ctx
