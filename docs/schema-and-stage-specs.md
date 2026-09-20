@@ -13,3 +13,10 @@ stages = generate_stages_json(get_stages())       # stage specs for an editor
 `load_pipeline_schema()` returns the schema without the injected enum; it is
 the one `Pipeline.validate()` uses. These two functions supply everything an
 external tool needs: an editor, a CI validator, a documentation generator.
+
+The editor is one such tool. It holds no stages of its own: it asks a backend
+for the specs and draws the palette, the cards and the argument forms from
+them.
+
+![The editor working off a backend's specs](img/tut-final.png)
+

@@ -20,3 +20,9 @@ A key with the `.$` suffix in `outputs` names a variable rather than a stage
 field, so a single node can introduce any number of pipeline variables.
 
 Backend: `common-expression-language` (native), falling back to `cel-python`.
+
+In the editor an expression is a field like any other. A `condition` node has
+one, and every argument has a switch between "variable" and "expression".
+
+![A condition node in the inspector](img/ref-expression.png){ width="372" }
+

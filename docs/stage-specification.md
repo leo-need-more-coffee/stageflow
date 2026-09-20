@@ -28,3 +28,9 @@ the category.
 A stage may also declare `allowed_events` and `allowed_inputs` (`EventSpec` /
 `InputSpec` with a `payload_schema`), a `category` and a `timeout`. All of it
 ends up in `get_specs()`.
+
+This is what the specification above turns into on the canvas: the icon, the
+description, the arguments it reads and the outputs it writes.
+
+![A stage card drawn from its specification](img/ref-hello-card.png){ width="278" }
+

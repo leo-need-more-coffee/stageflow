@@ -12,3 +12,9 @@ await session.input("command", {"name": "skip"})
 
 Снапшоты: `session.snapshot()` возвращает dict, `Session.from_snapshot(snap)`
 восстанавливает сессию, `run()` продолжает с сохранённого узла.
+
+
+Те же команды — кнопки в панели отладки редактора: продолжить, шаг, стоп и
+пауза между узлами.
+
+![Управление запуском](img/ref-debug-controls.png)

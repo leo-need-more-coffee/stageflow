@@ -38,3 +38,12 @@ an error raised by any node inside it goes to the matching `except`.
   `full_type`, `message` and `node`.
 - `error_equals` accepts a bare exception class name, a fully qualified path,
   or `*`.
+- A body road that ends with `"next": null` continues at the `try` node's
+  `next`. A handler road that ends with `"next": null` ends the run, so the
+  last node of a handler has to name where execution goes on.
+
+![A try node, its body and its handler](img/tut-try.png){ width="418" }
+
+The two regions are framed on the canvas: the body around the nodes whose
+errors are caught, the handler around the road out of them.
+

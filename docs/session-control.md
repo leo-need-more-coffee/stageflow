@@ -12,3 +12,9 @@ validated against the `payload_schema` from the declaration.
 
 Snapshots: `session.snapshot()` returns a dict, `Session.from_snapshot(snap)`
 restores the session, and `run()` resumes from the saved node.
+
+The same commands are buttons in the editor's debug panel: continue, one step,
+stop, and the pause between nodes.
+
+![The run controls](img/ref-debug-controls.png)
+

@@ -20,3 +20,8 @@ name raise `BranchError` naming both.
 one fails: `true` cancels them immediately (the `parallel_cancelled` event),
 `false` lets them finish. Either way the node fails with the error of the
 first branch that failed.
+
+The editor draws the branches as a framed region under the node:
+
+![A parallel node and its branches](img/tut-parallel.png){ width="418" }
+

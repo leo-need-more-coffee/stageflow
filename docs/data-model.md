@@ -32,3 +32,14 @@ skipped.
 A node's outputs are applied as a simultaneous assignment: values are computed
 against the frame as it was on entry and only then written, so key order does
 not affect the result.
+
+On a card this is the two halves: above the divider what the node reads,
+below it what it writes.
+
+![A stage node on the canvas](img/ref-node-card.png){ width="278" }
+
+The panel on the right is the same node as a form, built from the stage
+specification:
+
+![The same node in the inspector](img/ref-inspector.png){ width="372" }
+

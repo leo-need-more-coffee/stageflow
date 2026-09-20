@@ -25,3 +25,11 @@ types — a mismatch is rejected with an event rather than crashing the session.
 The debugger also applies inside a `try` body, inside `parallel` branches and
 inside a subpipeline: every node goes through `Session.execute_node`, and a
 child session inherits the debugger. Commands are thread-safe.
+
+The [editor](tutorial/7-debugger.md) is a front end for exactly this: it stops
+between nodes, shows the frame on the left and the event stream on the right.
+
+![The debugger stopped before a node](img/debug-paused.png)
+
+![The events of a run](img/debug-events.png)
+

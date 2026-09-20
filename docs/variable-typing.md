@@ -40,3 +40,8 @@ Checks come in two layers:
 
 A subpipeline inherits its parent's named types and may declare its own;
 variable types are its own.
+
+Both sections are editable in the editor, under "File" → "Pipeline settings…":
+
+![Named types and variable types in the editor](img/ref-pipeline-settings.png){ width="560" }
+

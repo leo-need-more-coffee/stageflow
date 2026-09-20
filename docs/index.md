@@ -10,12 +10,19 @@ pip install stageflow-framework
 
 Requires Python 3.11+ (the `common-expression-language` CEL binding does).
 
+![A pipeline in the StageFlow editor](img/tut-final.png)
+
+The picture is the [editor](https://github.com/leo-need-more-coffee/stageflow-ui):
+a separate web page that draws and debugs a graph, while the core executes it.
+
 ## Where to start
+
+New here? The [tutorial](tutorial/index.md) builds a working pipeline step by
+step, with screenshots from the editor.
 
 | Page | What it covers |
 |---|---|
 | [Quick start](quick-start.md) | installing, writing a stage, running a pipeline |
-| [Worked example](worked-example.md) | one pipeline end to end, in the editor, with screenshots |
 | [Node types](node-types.md) | the eight node types and their fields |
 | [Data model](data-model.md) | the frame, argument buckets, outputs |
 | [Expressions](expressions.md) | CEL, the `.$` suffix, the `vars` namespace |

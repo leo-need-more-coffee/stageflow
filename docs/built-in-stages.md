@@ -9,3 +9,9 @@
 | logic | `AssertStage`, `FailStage`, `LogStage`, `SleepStage` |
 
 All of them return new values and never mutate their input.
+
+They arrive in the editor's palette together with your own stages, grouped by
+category:
+
+![Built-in stages in the palette](img/ref-palette-stages.png){ width="240" }
+

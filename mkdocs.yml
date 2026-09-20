@@ -39,10 +39,18 @@ nav:
   - Home: index.md
   - Getting started:
       - Quick start: quick-start.md
-      - Worked example: worked-example.md
       - Node types: node-types.md
       - Data model: data-model.md
       - Expressions: expressions.md
+  - Tutorial:
+      - What we build: tutorial/index.md
+      - 1. A pipeline that runs: tutorial/1-first-pipeline.md
+      - 2. Data between nodes: tutorial/2-frame.md
+      - 3. Choosing the road: tutorial/3-branching.md
+      - 4. Two things at once: tutorial/4-parallel.md
+      - 5. When a node fails: tutorial/5-errors.md
+      - 6. A graph inside a node: tutorial/6-subpipelines.md
+      - 7. Watching it run: tutorial/7-debugger.md
   - Reference:
       - The entry node: entry-node.md
       - Parallel branches: parallel-branches.md
@@ -89,10 +97,18 @@ plugins:
             Home: Главная
             Getting started: Начало работы
             Quick start: Быстрый старт
-            Worked example: Разбор примера
             Node types: Типы узлов
             Data model: Модель данных
             Expressions: Выражения
+            Tutorial: Туториал
+            What we build: Что собираем
+            1. A pipeline that runs: 1. Первый запуск
+            2. Data between nodes: 2. Данные между узлами
+            3. Choosing the road: 3. Выбор дороги
+            4. Two things at once: 4. Два дела сразу
+            5. When a node fails: 5. Когда узел падает
+            6. A graph inside a node: 6. Граф внутри узла
+            7. Watching it run: 7. Смотрим, как он работает
             Reference: Справочник
             The entry node: Узел entry
             Parallel branches: Параллельные ветки

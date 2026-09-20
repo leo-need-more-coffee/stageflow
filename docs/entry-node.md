@@ -25,3 +25,6 @@ declares the pipeline's initial variables.
   forbidden. The pipeline-level `entry` field is optional when such a node
   exists, and must point at it when given.
 - Value types are checked statically, during validation.
+
+![The entry node on the canvas](img/ref-entry-card.png){ width="278" }
+

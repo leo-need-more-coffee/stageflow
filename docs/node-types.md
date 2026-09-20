@@ -13,3 +13,9 @@
 
 Every node additionally accepts `retry`, `consume` (drop names from the frame
 after the step) and `expose` (copy or rename a variable without a stage).
+
+In the [editor](tutorial/7-debugger.md) the node types are the top of the
+palette; the stages the backend knows about come below them.
+
+![The node types in the palette](img/ref-palette-nodes.png){ width="240" }
+

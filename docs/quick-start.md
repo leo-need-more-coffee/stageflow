@@ -67,6 +67,13 @@ pipeline_dict = {
 }
 ```
 
+## In the editor
+
+The pipeline above, opened in the [editor](tutorial/7-debugger.md) against a
+backend that has `HelloStage` registered:
+
+![The quick start pipeline](img/ref-quick-start.png){ width="294" }
+
 ## Running it
 
 
