@@ -15,6 +15,7 @@ Requires Python 3.11+ (the `common-expression-language` CEL binding does).
 | Page | What it covers |
 |---|---|
 | [Quick start](quick-start.md) | installing, writing a stage, running a pipeline |
+| [Worked example](worked-example.md) | one pipeline end to end, in the editor, with screenshots |
 | [Node types](node-types.md) | the eight node types and their fields |
 | [Data model](data-model.md) | the frame, argument buckets, outputs |
 | [Expressions](expressions.md) | CEL, the `.$` suffix, the `vars` namespace |

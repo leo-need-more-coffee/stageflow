@@ -39,6 +39,7 @@ nav:
   - Home: index.md
   - Getting started:
       - Quick start: quick-start.md
+      - Worked example: worked-example.md
       - Node types: node-types.md
       - Data model: data-model.md
       - Expressions: expressions.md
@@ -88,6 +89,7 @@ plugins:
             Home: Главная
             Getting started: Начало работы
             Quick start: Быстрый старт
+            Worked example: Разбор примера
             Node types: Типы узлов
             Data model: Модель данных
             Expressions: Выражения
