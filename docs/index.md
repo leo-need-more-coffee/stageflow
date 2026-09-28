@@ -2,7 +2,8 @@
 
 A framework for describing and running JSON-defined pipelines: a graph of
 nodes, user-defined stages, an immutable data frame, CEL expressions, retry
-and block-scoped `try/except`, parallel branches, nested pipelines.
+and block-scoped `try/except`, parallel branches, loops over a list,
+nested pipelines.
 
 ```bash
 pip install stageflow-framework
@@ -23,7 +24,7 @@ step, with screenshots from the editor.
 | Page | What it covers |
 |---|---|
 | [Quick start](quick-start.md) | installing, writing a stage, running a pipeline |
-| [Node types](node-types.md) | the eight node types and their fields |
+| [Node types](node-types.md) | the nine node types and their fields |
 | [Data model](data-model.md) | the frame, argument buckets, outputs |
 | [Expressions](expressions.md) | CEL, the `.$` suffix, the `vars` namespace |
 
@@ -33,6 +34,7 @@ step, with screenshots from the editor.
 |---|---|
 | [The entry node](entry-node.md) | graph start and initial variables |
 | [Parallel branches](parallel-branches.md) | concurrency, merge rules, cancellation |
+| [The map node](map-node.md) | a region of the graph run once per element |
 | [Errors](errors.md) | `retry` per node, `try`/`except` per region |
 | [Variable typing](variable-typing.md) | gradual typing, static and runtime checks |
 | [Session control](session-control.md) | stop/pause/resume, user input, snapshots |

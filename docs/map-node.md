@@ -16,7 +16,10 @@
 
 `map` runs one region of the graph once per element of a list. The region is
 the body, derived exactly like the body of a [`try` block](errors.md):
-everything reachable from `body` but not from `next`.
+everything reachable from `body` but not from `next`. The editor frames it and
+shows on the card what goes in and what comes out:
+
+![A map node and the body it frames](img/ref-map-node.png){ width="340" }
 
 ## What an iteration sees
 
@@ -46,6 +49,11 @@ goes straight to `next`.
 
 Declared types are checked on the way out: if `replies` is declared, the
 collected list is checked against it before it enters the frame.
+
+The panel is the same JSON in words — the list, the pace, the names the
+element and the index arrive under, and the table of what to collect:
+
+![The map node in the inspector](img/ref-map-inspector.png){ width="372" }
 
 ## Sequential and parallel
 
