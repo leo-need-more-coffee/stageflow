@@ -902,6 +902,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nodes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Nodes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="entry-node/" class="md-nav__link">
         
@@ -911,6 +960,90 @@
     
   
     The entry node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="stage-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The stage node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="condition-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The condition node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="switch-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The switch node
   
 
     
@@ -947,6 +1080,126 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="try-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The try node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="map-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The map node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="subpipeline-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The subpipeline node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="terminal-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The terminal node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1329,7 +1582,8 @@
 <h1 id="stageflow">StageFlow<a class="headerlink" href="#stageflow" title="Permanent link">&para;</a></h1>
 <p>A framework for describing and running JSON-defined pipelines: a graph of
 nodes, user-defined stages, an immutable data frame, CEL expressions, retry
-and block-scoped <code>try/except</code>, parallel branches, nested pipelines.</p>
+and block-scoped <code>try/except</code>, parallel branches, loops over a list,
+nested pipelines.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>stageflow-framework
 </code></pre></div>
 <p>Requires Python 3.11+ (the <code>common-expression-language</code> CEL binding does).</p>
@@ -1353,7 +1607,7 @@ step, with screenshots from the editor.</p>
 </tr>
 <tr>
 <td><a href="node-types/">Node types</a></td>
-<td>the eight node types and their fields</td>
+<td>the nine node types and their fields</td>
 </tr>
 <tr>
 <td><a href="data-model/">Data model</a></td>
@@ -1379,12 +1633,40 @@ step, with screenshots from the editor.</p>
 <td>graph start and initial variables</td>
 </tr>
 <tr>
+<td><a href="stage-node/">The stage node</a></td>
+<td>arguments, outputs, <code>consume</code></td>
+</tr>
+<tr>
+<td><a href="condition-node/">The condition node</a></td>
+<td>a fork on a CEL expression</td>
+</tr>
+<tr>
+<td><a href="switch-node/">The switch node</a></td>
+<td>many roads, first matching case</td>
+</tr>
+<tr>
 <td><a href="parallel-branches/">Parallel branches</a></td>
 <td>concurrency, merge rules, cancellation</td>
 </tr>
 <tr>
+<td><a href="try-node/">The try node</a></td>
+<td>a region of the graph under <code>except</code></td>
+</tr>
+<tr>
+<td><a href="map-node/">The map node</a></td>
+<td>a region of the graph run once per element</td>
+</tr>
+<tr>
+<td><a href="subpipeline-node/">The subpipeline node</a></td>
+<td>a nested graph and its boundary</td>
+</tr>
+<tr>
+<td><a href="terminal-node/">The terminal node</a></td>
+<td>the end of a run, result and artifacts</td>
+</tr>
+<tr>
 <td><a href="errors/">Errors</a></td>
-<td><code>retry</code> per node, <code>try</code>/<code>except</code> per region</td>
+<td><code>retry</code>, how an error travels, the exceptions</td>
 </tr>
 <tr>
 <td><a href="variable-typing/">Variable typing</a></td>
