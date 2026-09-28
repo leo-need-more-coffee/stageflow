@@ -1313,6 +1313,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema and stage specs
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1329,6 +1347,36 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-build-can-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this build can do
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1449,6 +1497,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-build-can-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this build can do
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1486,6 +1553,31 @@ external tool needs: an editor, a CI validator, a documentation generator.</p>
 <p>The editor is one such tool. It holds no stages of its own: it asks a backend
 for the specs and draws the palette, the cards and the argument forms from
 them.</p>
+<h2 id="what-this-build-can-do">What this build can do<a class="headerlink" href="#what-this-build-can-do" title="Permanent link">&para;</a></h2>
+<p>An editor is written against one version of the core and then pointed at
+whatever backend is running. The question it needs answered is not "which
+release is this" but "may I offer a <code>map</code> node here", so the core answers that
+one directly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">capabilities</span><span class="p">,</span> <span class="n">__version__</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">capabilities</span><span class="p">()</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># {"stageflow": "0.10.0",</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">#  "node_types": ["condition", "entry", "map", "parallel", "stage",</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">#                 "subpipeline", "switch", "terminal", "try"],</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">#  "stages": 17}</span>
+</code></pre></div>
+<p><code>node_types</code> is the registry itself, not a list written down beside it: a type
+registered by a plugin appears here too, and a name missing from it is exactly
+a name <code>Pipeline.from_dict</code> will reject with <code>Unknown node type</code>. That makes
+it something a client can branch on, which a version range is not — a build
+with a custom node type belongs to no range.</p>
+<p>A backend is expected to hand this to its clients. The example backend serves
+it at <code>GET /api/meta</code>, together with the version of its own HTTP contract:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">"api"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"stageflow"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.10.0"</span><span class="p">,</span><span class="w"> </span><span class="nt">"node_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"condition"</span><span class="p">,</span><span class="w"> </span><span class="s2">"…"</span><span class="p">],</span><span class="w"> </span><span class="nt">"stages"</span><span class="p">:</span><span class="w"> </span><span class="mi">17</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><code>__version__</code> is read from the installed distribution. In a source checkout
+that was never installed it reads <code>0.0.0+unknown</code> — deliberately not a
+plausible number, so that nobody compares it with one.</p>
 <p><img alt="The editor working off a backend's specs" src="../img/tut-final.png" /></p>
 
 

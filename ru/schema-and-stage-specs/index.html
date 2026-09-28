@@ -1313,6 +1313,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Схема и спецификации
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1329,6 +1347,36 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Что умеет эта сборка
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1449,6 +1497,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Что умеет эта сборка
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1485,6 +1552,32 @@
 внешнему инструменту: редактору, валидатору в CI, генератору документации.</p>
 <p>Редактор — как раз такой инструмент. Своих стадий у него нет: он спрашивает
 спецификации у бэкенда и рисует по ним палитру, карточки и формы аргументов.</p>
+<h2 id="_2">Что умеет эта сборка<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>Редактор пишут под одну версию ядра, а направляют на тот бэкенд, который у
+пользователя запущен. Вопрос, на который ему нужен ответ, — не «что это за
+релиз», а «можно ли здесь предложить узел <code>map</code>», и ядро отвечает ровно на
+него:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">capabilities</span><span class="p">,</span> <span class="n">__version__</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">capabilities</span><span class="p">()</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># {"stageflow": "0.10.0",</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">#  "node_types": ["condition", "entry", "map", "parallel", "stage",</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">#                 "subpipeline", "switch", "terminal", "try"],</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">#  "stages": 17}</span>
+</code></pre></div>
+<p><code>node_types</code> — это сам реестр, а не список, записанный рядом с ним: тип,
+зарегистрированный плагином, тоже окажется здесь, а имя, которого в списке
+нет, — это ровно то имя, которое <code>Pipeline.from_dict</code> отвергнет с
+<code>Unknown node type</code>. По такому ответу клиент может ветвиться, а по диапазону
+версий не может: сборка с собственным типом узла не попадает ни в один
+диапазон.</p>
+<p>Ожидается, что бэкенд отдаёт это своим клиентам. Бэкенд-пример отдаёт по
+<code>GET /api/meta</code>, вместе с версией собственного HTTP-контракта:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">"api"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"stageflow"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.10.0"</span><span class="p">,</span><span class="w"> </span><span class="nt">"node_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"condition"</span><span class="p">,</span><span class="w"> </span><span class="s2">"…"</span><span class="p">],</span><span class="w"> </span><span class="nt">"stages"</span><span class="p">:</span><span class="w"> </span><span class="mi">17</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><code>__version__</code> читается из установленного дистрибутива. В чекауте, который
+никогда не устанавливали, там будет <code>0.0.0+unknown</code> — намеренно неправдоподобный
+номер, чтобы его никто не сравнивал с настоящими.</p>
 <p><img alt="Редактор, работающий на спецификациях бэкенда" src="../../img/tut-final.png" /></p>
 
 
