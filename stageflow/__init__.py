@@ -1,4 +1,5 @@
 from . import builtins  # noqa: F401
+from .capabilities import __version__, capabilities
 from .core import (
     BaseStage,
     CelEngine,
@@ -50,6 +51,8 @@ from .exceptions import (
 )
 
 __all__ = [
+    "__version__",
+    "capabilities",
     "Pipeline",
     "Session",
     "SessionResult",

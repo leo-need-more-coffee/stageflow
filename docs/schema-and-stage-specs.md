@@ -18,5 +18,39 @@ The editor is one such tool. It holds no stages of its own: it asks a backend
 for the specs and draws the palette, the cards and the argument forms from
 them.
 
+## What this build can do
+
+An editor is written against one version of the core and then pointed at
+whatever backend is running. The question it needs answered is not "which
+release is this" but "may I offer a `map` node here", so the core answers that
+one directly:
+
+```python
+from stageflow import capabilities, __version__
+
+capabilities()
+# {"stageflow": "0.10.0",
+#  "node_types": ["condition", "entry", "map", "parallel", "stage",
+#                 "subpipeline", "switch", "terminal", "try"],
+#  "stages": 17}
+```
+
+`node_types` is the registry itself, not a list written down beside it: a type
+registered by a plugin appears here too, and a name missing from it is exactly
+a name `Pipeline.from_dict` will reject with `Unknown node type`. That makes
+it something a client can branch on, which a version range is not — a build
+with a custom node type belongs to no range.
+
+A backend is expected to hand this to its clients. The example backend serves
+it at `GET /api/meta`, together with the version of its own HTTP contract:
+
+```json
+{ "api": 1, "stageflow": "0.10.0", "node_types": ["condition", "…"], "stages": 17 }
+```
+
+`__version__` is read from the installed distribution. In a source checkout
+that was never installed it reads `0.0.0+unknown` — deliberately not a
+plausible number, so that nobody compares it with one.
+
 ![The editor working off a backend's specs](img/tut-final.png)
 
