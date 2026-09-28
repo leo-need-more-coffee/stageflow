@@ -52,9 +52,16 @@ nav:
       - 6. A graph inside a node: tutorial/6-subpipelines.md
       - 7. Watching it run: tutorial/7-debugger.md
   - Reference:
-      - The entry node: entry-node.md
-      - Parallel branches: parallel-branches.md
-      - The map node: map-node.md
+      - Nodes:
+          - The entry node: entry-node.md
+          - The stage node: stage-node.md
+          - The condition node: condition-node.md
+          - The switch node: switch-node.md
+          - Parallel branches: parallel-branches.md
+          - The try node: try-node.md
+          - The map node: map-node.md
+          - The subpipeline node: subpipeline-node.md
+          - The terminal node: terminal-node.md
       - Errors: errors.md
       - Variable typing: variable-typing.md
       - Session control: session-control.md
@@ -111,9 +118,16 @@ plugins:
             6. A graph inside a node: 6. Граф внутри узла
             7. Watching it run: 7. Смотрим, как он работает
             Reference: Справочник
+            Nodes: Узлы
             The entry node: Узел entry
+            The stage node: Узел stage
+            The condition node: Узел condition
+            The switch node: Узел switch
             Parallel branches: Параллельные ветки
+            The try node: Узел try
             The map node: Узел map
+            The subpipeline node: Узел subpipeline
+            The terminal node: Узел terminal
             Errors: Ошибки
             Variable typing: Типизация переменных
             Session control: Управление сессией

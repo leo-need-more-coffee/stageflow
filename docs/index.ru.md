@@ -34,9 +34,15 @@ pip install stageflow-framework
 | Страница | О чём |
 |---|---|
 | [Узел entry](entry-node.ru.md) | начало графа и переменные старта |
+| [Узел stage](stage-node.ru.md) | аргументы, выходы, `consume` |
+| [Узел condition](condition-node.ru.md) | развилка по CEL-выражению |
+| [Узел switch](switch-node.ru.md) | много дорог, первый подошедший case |
 | [Параллельные ветки](parallel-branches.ru.md) | конкурентность, слияние, отмена |
+| [Узел try](try-node.ru.md) | область графа под `except` |
 | [Узел map](map-node.ru.md) | область графа, исполняемая по разу на элемент |
-| [Ошибки](errors.ru.md) | `retry` на узле, `try`/`except` на области |
+| [Узел subpipeline](subpipeline-node.ru.md) | вложенный граф и его граница |
+| [Узел terminal](terminal-node.ru.md) | конец прогона, result и артефакты |
+| [Ошибки](errors.ru.md) | `retry`, путь ошибки, исключения ядра |
 | [Типизация переменных](variable-typing.ru.md) | постепенная типизация, две линии проверок |
 | [Управление сессией](session-control.ru.md) | стоп, пауза, ввод, снапшоты |
 | [Пошаговая отладка](step-debugging.ru.md) | остановка между узлами, правка фрейма |

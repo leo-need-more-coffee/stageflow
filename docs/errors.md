@@ -1,51 +1,68 @@
 # Errors: retry and try/except
 
-Retrying is a property of an operation, so `retry` is a node field:
+Two mechanisms, deliberately separate. Retrying is a property of an
+**operation**, so `retry` is a field of a node. Catching is a property of a
+**region**, so it is a node of its own — the [`try` block](try-node.md).
 
-```json
-{ "retry": [{ "error_equals": ["TimeoutError"], "max_attempts": 3, "backoff_rate": 2.0 }] }
-```
-
-`max_attempts` counts every run of the node including the first: `3` means one
-run and two retries. Each policy in the list keeps its own counter.
-
-Error handling is block-scoped: a `try` node covers a region of the graph, and
-an error raised by any node inside it goes to the matching `except`.
+## retry
 
 ```json
 {
-  "id": "safe_fetch",
-  "type": "try",
-  "body": "fetch",
-  "except": [
-    { "error_equals": ["TimeoutError"], "next": "on_timeout", "result_var": "error" },
-    { "error_equals": ["*"], "next": "on_any" }
+  "id": "fetch",
+  "type": "stage",
+  "stage": "HttpGetStage",
+  "retry": [
+    { "error_equals": ["TimeoutError"], "max_attempts": 3, "interval_seconds": 1.0,
+      "backoff_rate": 2.0, "max_delay_seconds": 30 }
   ],
-  "next": "after"
+  "next": "parse"
 }
 ```
 
-- The region is every node reachable from `body` but not reachable from
-  `next`; it is derived from the graph rather than listed by hand.
-- The failing node's `retry` policies are exhausted first, then the error
-  propagates to the nearest enclosing `try`; an error no handler matches keeps
-  propagating outwards.
-- Nested `try` nodes work as expected: the inner one simply lies inside the
-  outer one's region.
-- A handler sees the frame as the last successfully completed node of the body
-  left it.
-- `result_var` puts the error object into the frame with the fields `type`,
-  `full_type`, `message` and `node`.
-- `error_equals` accepts a bare exception class name, a fully qualified path,
-  or `*`.
-- A road that simply ends (`"next": null`) hands control back to the block,
-  which continues at its own `next`. This is the same for the body and for a
-  handler: a handler is a part of the block, not an exit from it.
-- A `terminal` inside the block ends the whole run, and nothing after the
-  block is executed.
+| Field | Default | Means |
+|---|---|---|
+| `error_equals` | `["*"]` | which errors this policy answers for |
+| `max_attempts` | `3` | runs **including the first**: `3` is one run and two retries |
+| `interval_seconds` | `1.0` | the pause before the first retry |
+| `backoff_rate` | `2.0` | each further pause is multiplied by this |
+| `max_delay_seconds` | none | a ceiling for the pause |
 
-![A try node, its body and its handler](img/tut-try.png){ width="418" }
+`retry` is a list, and each policy keeps its own counter: a node can be
+patient with `TimeoutError` and give up at once on everything else. The first
+policy whose `error_equals` matches is the one that answers.
 
-The two regions are framed on the canvas: the body around the nodes whose
-errors are caught, the handler around the road out of them.
+Every node type accepts `retry`, and it always repeats **the whole node** —
+for a [`subpipeline`](subpipeline-node.md) the entire child run, for a
+[`map`](map-node.md) the entire loop rather than the element that failed.
 
+## How an error travels
+
+1. The node's own `retry` policies are exhausted.
+2. The error propagates to the nearest enclosing [`try`](try-node.md) block,
+   and the first handler whose `error_equals` matches takes it.
+3. An error nobody matches keeps going outwards, and out of the session — the
+   exception surfaces from `session.run()`.
+
+Inside a [`parallel`](parallel-branches.md) node the first failing branch
+raises `BranchError`; inside a [`map`](map-node.md) loop the error of the
+element is raised unchanged.
+
+## The exceptions of the core
+
+Every error raised by StageFlow inherits `StageFlowError` **and** a builtin
+type, so `except ValueError` keeps working on code that never heard of this
+package:
+
+| Exception | Also a | Raised when |
+|---|---|---|
+| `PipelineDefinitionError` | `ValueError` | the JSON does not describe a pipeline |
+| `PipelineValidationError` | `ValueError` | `validate()` collected problems |
+| `StageContractError` | `ValueError` | a stage broke its own contract |
+| `StageOutputError` | `KeyError` | an output field asked for was not returned |
+| `ArtifactNotFoundError` | `KeyError` | a subpipeline did not return an artifact |
+| `ExpressionError` | `RuntimeError` | a CEL expression failed to evaluate |
+| `BranchError` | `RuntimeError` | a parallel branch failed, or two wrote the same name |
+| `TypeCheckError` | `TypeError` | a value did not match a declared type |
+| `TypeDeclarationError` | `ValueError` | the type declarations themselves are broken |
+| `PayloadValidationError` | `ValueError` | an event or input payload failed its schema |
+| `RegistryError` | `ValueError` | an unknown stage or node type |

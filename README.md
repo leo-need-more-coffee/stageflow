@@ -106,11 +106,20 @@ The reference covers the rest:
 [Data model](https://leo-need-more-coffee.github.io/stageflow/data-model/) ·
 [Expressions](https://leo-need-more-coffee.github.io/stageflow/expressions/) ·
 [Errors](https://leo-need-more-coffee.github.io/stageflow/errors/) ·
-[Parallel branches](https://leo-need-more-coffee.github.io/stageflow/parallel-branches/) ·
-[The map node](https://leo-need-more-coffee.github.io/stageflow/map-node/) ·
 [Variable typing](https://leo-need-more-coffee.github.io/stageflow/variable-typing/) ·
 [Session control](https://leo-need-more-coffee.github.io/stageflow/session-control/) ·
 [Step debugging](https://leo-need-more-coffee.github.io/stageflow/step-debugging/)
+
+One page per node type:
+[entry](https://leo-need-more-coffee.github.io/stageflow/entry-node/) ·
+[stage](https://leo-need-more-coffee.github.io/stageflow/stage-node/) ·
+[condition](https://leo-need-more-coffee.github.io/stageflow/condition-node/) ·
+[switch](https://leo-need-more-coffee.github.io/stageflow/switch-node/) ·
+[parallel](https://leo-need-more-coffee.github.io/stageflow/parallel-branches/) ·
+[try](https://leo-need-more-coffee.github.io/stageflow/try-node/) ·
+[map](https://leo-need-more-coffee.github.io/stageflow/map-node/) ·
+[subpipeline](https://leo-need-more-coffee.github.io/stageflow/subpipeline-node/) ·
+[terminal](https://leo-need-more-coffee.github.io/stageflow/terminal-node/)
 
 Sources are in [`docs/`](docs) (`*.md` English, `*.ru.md` Russian) and publish
 themselves on every push to `main`.
