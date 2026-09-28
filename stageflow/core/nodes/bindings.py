@@ -12,7 +12,7 @@ if TYPE_CHECKING:  # pragma: no cover
 CEL_SUFFIX = ".$"
 
 
-def _normalize_bucket(bucket: Any) -> dict[str, str]:
+def normalize_bucket(bucket: Any) -> dict[str, str]:
     if bucket is None:
         return {}
     if isinstance(bucket, list):
@@ -35,7 +35,7 @@ def resolve_arguments(
         else:
             kwargs[key] = value
 
-    for arg_name, ref in _normalize_bucket(arguments.get("vars")).items():
+    for arg_name, ref in normalize_bucket(arguments.get("vars")).items():
         if arg_name.endswith(CEL_SUFFIX):
             kwargs[arg_name[: -len(CEL_SUFFIX)]] = cel.eval(ref, ctx, **extra)
         else:

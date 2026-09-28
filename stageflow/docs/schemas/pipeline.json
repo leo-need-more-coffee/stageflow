@@ -118,6 +118,23 @@
         "pattern": "^[^\\W\\d]\\w*$"
       }
     },
+    "collect": {
+      "description": "What leaves an iteration: a name written by the body becomes a list outside, one entry per element, in the order of the items. A list is shorthand for keeping the same name",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      ]
+    },
     "consume": {
       "description": "Variable names physically removed from the frame after this node.",
       "type": "array",
@@ -308,6 +325,21 @@
           },
           "then": {
             "$ref": "#/$defs/try_node"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "map"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/map_node"
           }
         }
       ]
@@ -675,6 +707,73 @@
           "items": {
             "$ref": "#/$defs/except_handler"
           }
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
+        },
+        "retry": {
+          "$ref": "#/$defs/retry"
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "map_node": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "items",
+        "body"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "map"
+        },
+        "items": {
+          "type": "string",
+          "description": "CEL expression yielding the list to walk, e.g. vars.tickets"
+        },
+        "body": {
+          "type": "string",
+          "description": "Entry into the loop body; the region is everything reachable from here but not from next. Every road inside it must end inside it"
+        },
+        "item_var": {
+          "type": "string",
+          "default": "item",
+          "description": "Name the element is bound to inside the body"
+        },
+        "index_var": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Name the zero-based index is bound to inside the body"
+        },
+        "collect": {
+          "$ref": "#/$defs/collect"
+        },
+        "mode": {
+          "enum": [
+            "sequential",
+            "parallel"
+          ],
+          "default": "sequential"
+        },
+        "cancel_on_error": {
+          "type": "boolean",
+          "default": true
         },
         "expose": {
           "$ref": "#/$defs/expose"

@@ -1,6 +1,7 @@
 from .base import Node, get_node_types, register_node
 from .branching import ConditionNode, SwitchNode
 from .entry import EntryNode
+from .map_block import MapNode
 from .parallel import ParallelNode
 from .recovery import Retrier, run_with_retry
 from .stage import StageNode
@@ -18,6 +19,7 @@ __all__ = [
     "ExceptHandler",
     "EntryNode",
     "StageNode",
+    "MapNode",
     "ConditionNode",
     "SwitchNode",
     "ParallelNode",

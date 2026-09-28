@@ -8,6 +8,7 @@
 | `switch` | n-way branch, first matching case wins | `cases: [{when, next}]`, `default` |
 | `parallel` | concurrent branches with independent frames | `branches`, `cancel_on_error`, `next` |
 | `try` | block-scoped error handling over a graph region | `body`, `except`, `next` |
+| `map` | run a graph region once per element of a list | `items`, `body`, `item_var`, `collect`, `mode`, `next` |
 | `subpipeline` | nested pipeline with a fresh frame | `subpipeline_id`, `inputs`, `artifact_outputs`, `result_output`, `next` |
 | `terminal` | end of execution | `result`, `artifacts` |
 

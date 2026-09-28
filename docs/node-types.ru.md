@@ -8,6 +8,7 @@
 | `switch` | n-way ветвление, первый истинный case | `cases: [{when, next}]`, `default` |
 | `parallel` | конкурентные ветки с независимыми фреймами | `branches`, `cancel_on_error`, `next` |
 | `try` | блочная обработка ошибок области графа | `body`, `except`, `next` |
+| `map` | область графа, исполняемая по разу на элемент списка | `items`, `body`, `item_var`, `collect`, `mode`, `next` |
 | `subpipeline` | вложенный пайплайн со свежим фреймом | `subpipeline_id`, `inputs`, `artifact_outputs`, `result_output`, `next` |
 | `terminal` | конец исполнения | `result`, `artifacts` |
 

@@ -54,6 +54,7 @@ nav:
   - Reference:
       - The entry node: entry-node.md
       - Parallel branches: parallel-branches.md
+      - The map node: map-node.md
       - Errors: errors.md
       - Variable typing: variable-typing.md
       - Session control: session-control.md
@@ -112,6 +113,7 @@ plugins:
             Reference: Справочник
             The entry node: Узел entry
             Parallel branches: Параллельные ветки
+            The map node: Узел map
             Errors: Ошибки
             Variable typing: Типизация переменных
             Session control: Управление сессией

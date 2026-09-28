@@ -6,7 +6,7 @@ from ...exceptions import PipelineDefinitionError, RegistryError
 from ..context import Context
 from ..stage import BaseStage, get_stage
 from .base import Node, register_node
-from .bindings import CEL_SUFFIX, _normalize_bucket, apply_outputs, resolve_arguments
+from .bindings import CEL_SUFFIX, apply_outputs, normalize_bucket, resolve_arguments
 from .recovery import run_with_retry
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -109,7 +109,7 @@ class StageNode(Node):
 
         bucket = self.arguments.get("vars")
         if isinstance(bucket, (dict, list, type(None))):
-            for arg_name, var_ref in _normalize_bucket(bucket).items():
+            for arg_name, var_ref in normalize_bucket(bucket).items():
                 if arg_name.endswith(CEL_SUFFIX):
                     continue
                 declared = ts.declared(var_ref)

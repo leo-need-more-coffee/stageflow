@@ -6,6 +6,7 @@ from .inputs import InputHub
 from .nodes import (
     ConditionNode,
     EntryNode,
+    MapNode,
     Node,
     ParallelNode,
     Retrier,
@@ -48,6 +49,7 @@ __all__ = [
     "ExceptHandler",
     "EntryNode",
     "StageNode",
+    "MapNode",
     "ConditionNode",
     "SwitchNode",
     "ParallelNode",

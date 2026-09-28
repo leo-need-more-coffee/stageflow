@@ -85,11 +85,12 @@ against it, so a wrong argument name is an error before anything runs.
 
 | | |
 |---|---|
-| **Eight node types** | `entry`, `stage`, `condition`, `switch`, `parallel`, `try`, `subpipeline`, `terminal` |
+| **Nine node types** | `entry`, `stage`, `condition`, `switch`, `parallel`, `try`, `map`, `subpipeline`, `terminal` |
 | **One immutable frame** | variables travel along the path; a write produces a new frame, so branches never collide |
 | **CEL expressions** | in conditions, in switch cases, and in any argument or output through the `.$` suffix |
 | **Errors as roads** | `retry` on a node, `try`/`except` over a region of the graph derived from its shape |
 | **Real concurrency** | `parallel` branches with their own frames and explicit merge rules |
+| **Loops over data** | `map` runs a region of the graph once per element, sequentially or at once |
 | **Nested graphs** | a `subpipeline` starts with a fresh frame and returns artifacts |
 | **Gradual typing** | declare the variables that matter; checked at validation and on every write |
 | **Step debugging** | stop between nodes, read and edit the frame, replay the event stream |
@@ -106,6 +107,7 @@ The reference covers the rest:
 [Expressions](https://leo-need-more-coffee.github.io/stageflow/expressions/) ·
 [Errors](https://leo-need-more-coffee.github.io/stageflow/errors/) ·
 [Parallel branches](https://leo-need-more-coffee.github.io/stageflow/parallel-branches/) ·
+[The map node](https://leo-need-more-coffee.github.io/stageflow/map-node/) ·
 [Variable typing](https://leo-need-more-coffee.github.io/stageflow/variable-typing/) ·
 [Session control](https://leo-need-more-coffee.github.io/stageflow/session-control/) ·
 [Step debugging](https://leo-need-more-coffee.github.io/stageflow/step-debugging/)
