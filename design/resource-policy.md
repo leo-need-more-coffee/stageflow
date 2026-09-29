@@ -110,7 +110,20 @@ A child session of a `subpipeline` gets **the same** `Budget` object, not a
 copy — otherwise nesting multiplies the allowance. The debugger is already
 threaded down this way.
 
-## Price: a declared formula plus the real figure
+## Price: two slots, and the one that matters is the second
+
+The cost of a model call is decided by the answer, not by the question. So a
+price is not one formula evaluated up front; it is two optional slots, and
+they differ only in what they can see:
+
+| Slot | Evaluated | Sees | For |
+|---|---|---|---|
+| `reserve` | before the stage runs | `args` | may this be attempted at all |
+| `actual` | after it returns | `args` **and** `output` | what it really cost |
+
+`output` is the same namespace the `outputs` mapping already works over — the
+dict a stage returned, or its attributes, exactly as `apply_outputs` sees it.
+Nothing new to learn, and the number the vendor reports is right there:
 
 ```python
 @register_stage("LlmTriageStage")
@@ -118,41 +131,73 @@ class LlmTriageStage(BaseStage):
     """
     description: "Classify a ticket with a model"
     timeout: 60
+    outputs:
+      topic: {type: string}
+      tokens_in: {type: int}
+      tokens_out: {type: int}
     price:
-      usd: "0.002 + 0.000002 * size(args.text)"
+      usd:
+        reserve: 0.05                      # the worst this call may cost
+        actual: "0.000003 * output.tokens_in + 0.000015 * output.tokens_out"
       llm_calls: 1
     """
 
     async def run(self):
         answer = await self.client.chat(self.get_arguments()["text"])
-        self.charge(usd=answer.cost, tokens=answer.usage.total)
+        self.set_outputs({"topic": answer.topic,
+                          "tokens_in": answer.usage.input,
+                          "tokens_out": answer.usage.output})
 ```
 
-The formula is CEL over the resolved arguments (`args`), not a Python method,
-because a formula in the spec is **introspectable**: the editor can show the
-price on the card, the platform can estimate without executing, the docs
-generate themselves. `estimate()` stays available for the rare case a formula
-cannot express.
+The stage does not mention money at all. It returns what it used; the price
+of those units is a property of the deployment, and it lives in the spec
+where the platform can read and show it.
 
-The order is reserve → run → settle:
+A fixed price is a bare number — it means both slots at once:
 
-1. the price is evaluated and reserved. It does not fit the remaining budget →
-   **the stage does not start**, and the run stops. An expensive operation is
-   never begun, rather than cut off halfway;
-2. the stage runs;
-3. `charge()` **replaces** the reservation for the meters it names and adds
-   the ones it does not. Without replacing, an estimated then charged `usd`
-   would be counted twice.
+```yaml
+price:
+  usd: 0.001
+  http_calls: 1
+```
+
+### When a formula is the wrong tool
+
+Per-model rate tables, vendor-reported totals, a price that depends on which
+branch the code took — these are not worth bending CEL around. The stage says
+so directly, and an explicit charge wins over whatever the spec computed:
+
+```python
+self.charge(usd=answer.billed_usd, tokens=answer.usage.total)
+```
+
+So: `reserve` gates admission, `actual` prices the common linear case
+declaratively, `charge()` is for everything a formula should not express.
+
+### The order, and what happens when it goes wrong
+
+1. `reserve` is evaluated and held. It does not fit the remaining budget →
+   **the stage never starts** and the run stops. An expensive operation is not
+   begun, rather than cut off halfway.
+2. The stage runs.
+3. `actual` (or `charge()`) replaces the reservation for the meters it names
+   and adds the ones it does not. Without replacing, an amount both reserved
+   and charged would be counted twice.
+
+**If the stage fails, the reservation stands.** A call that went out and then
+timed out still cost money; refunding it by default would be the optimistic
+lie. A stage that knows better charges the truth from its own `except`.
 
 A stage with no `price` is free. Forgetting it therefore gives work away, so
-`validate()` warns when a pipeline uses a priced-registry stage that declares
-none and the policy limits meters.
+`validate()` warns when a pipeline uses a stage that declares no price while
+the policy limits meters.
 
 **The unavoidable overshoot.** With an after-the-fact price the ceiling can be
 exceeded by one call: the model has already answered and the money is spent.
-The most that can be overshot is the priciest stage in the plan. A platform
-that cannot accept that must treat `price` as an upper bound rather than an
-estimate, and refuse a stage without the full amount in hand.
+The most that can be overshot is the difference between the priciest
+`reserve` in the plan and what it actually cost. A platform that cannot accept
+even that sets `reserve` to a true upper bound — which is what `max_tokens`
+on the call is for.
 
 ## Exceeding it
 
