@@ -63,6 +63,7 @@ nav:
           - The subpipeline node: subpipeline-node.md
           - The terminal node: terminal-node.md
       - Errors: errors.md
+      - Policy: policy.md
       - Variable typing: variable-typing.md
       - Session control: session-control.md
       - Step debugging: step-debugging.md
@@ -129,6 +130,7 @@ plugins:
             The subpipeline node: Узел subpipeline
             The terminal node: Узел terminal
             Errors: Ошибки
+            Policy: Политика
             Variable typing: Типизация переменных
             Session control: Управление сессией
             Step debugging: Пошаговая отладка

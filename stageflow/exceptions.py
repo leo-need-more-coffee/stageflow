@@ -16,6 +16,12 @@ class PipelineDefinitionError(StageFlowError, ValueError):
     pass
 
 
+class PolicyViolationError(StageFlowError, PermissionError):
+    """A pipeline used a stage or a node type its policy does not allow."""
+
+    pass
+
+
 class PipelineValidationError(StageFlowError, ValueError):
     def __init__(self, errors: list[str]):
         self.errors = list(errors)

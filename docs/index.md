@@ -42,6 +42,7 @@ step, with screenshots from the editor.
 | [The subpipeline node](subpipeline-node.md) | a nested graph and its boundary |
 | [The terminal node](terminal-node.md) | the end of a run, result and artifacts |
 | [Errors](errors.md) | `retry`, how an error travels, the exceptions |
+| [Policy](policy.md) | restricting the stages and node types a pipeline may use |
 | [Variable typing](variable-typing.md) | gradual typing, static and runtime checks |
 | [Session control](session-control.md) | stop/pause/resume, user input, snapshots |
 | [Step debugging](step-debugging.md) | stopping between nodes, editing the frame |

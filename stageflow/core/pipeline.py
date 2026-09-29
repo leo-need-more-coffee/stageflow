@@ -11,6 +11,7 @@ from ..exceptions import (
     TypeDeclarationError,
 )
 from .nodes import EntryNode, Node
+from .policy import Policy
 from .typesys import TypeSystem
 
 
@@ -115,8 +116,10 @@ class Pipeline:
                     errors.append(f"{other.id}: jumping into the entry node '{node.id}' is not allowed")
         return errors
 
-    def collect_errors(self) -> list[str]:
+    def collect_errors(self, policy: "Policy | None" = None) -> list[str]:
         errors: list[str] = []
+        if policy is not None:
+            errors.extend(policy.errors_for(self))
         entry_nodes = self.entry_nodes()
         if not self.entry:
             if not entry_nodes:
@@ -135,8 +138,14 @@ class Pipeline:
             errors.extend(node.validate(self))
         return errors
 
-    def validate(self) -> None:
-        errors = self.collect_errors()
+    def validate(self, policy: "Policy | None" = None) -> None:
+        """Everything wrong with this pipeline, as one error.
+
+        A policy is checked here rather than at run time so that a tenant
+        saving a graph is told what to change before anything executes; the
+        session checks again while running, for a pipeline built by hand.
+        """
+        errors = self.collect_errors(policy)
         if errors:
             raise PipelineValidationError(errors)
 

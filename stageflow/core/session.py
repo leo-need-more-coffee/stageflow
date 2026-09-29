@@ -11,6 +11,7 @@ from .event import Event
 from .inputs import InputHub
 from .nodes import Node, StageNode, TerminalNode
 from .pipeline import Pipeline
+from .policy import OPEN, Policy
 
 if TYPE_CHECKING:  # pragma: no cover
     from .debug import StepDebugger
@@ -49,8 +50,12 @@ class Session:
         context: Context | None = None,
         event_handler: EventHandler | None = None,
         debugger: "StepDebugger | None" = None,
+        policy: Policy | None = None,
     ):
-        pipeline.validate()
+        # what this session may be made of. Given by the host, never by the
+        # pipeline: a graph that could widen its own allowance has none
+        self.policy = policy or OPEN
+        pipeline.validate(self.policy)
         self.id = id
         self.pipeline = pipeline
         self.context = context or Context()
@@ -154,6 +159,7 @@ class Session:
         return not self._running.is_set()
 
     async def execute_node(self, node: Node, ctx: Context) -> tuple["Node | None", Context]:
+        self.policy.check_node_type(node.type, node.id)
         if self.debugger is None:
             return await node.execute(self, ctx)
         ctx = await self.debugger.before_node(self, node, ctx) or ctx
@@ -162,6 +168,7 @@ class Session:
         return next_node, ctx
 
     async def run_stage(self, node: StageNode, kwargs: dict) -> dict:
+        self.policy.check_stage(node.stage, node.id)
         stage_cls = node.get_stage_class()
         stage = stage_cls(stage_id=node.id, arguments=kwargs, session=self)
         self.emit_node_event("stage_started", node, {"stage": node.stage})
@@ -198,6 +205,9 @@ class Session:
             context=child_ctx,
             event_handler=proxy_event,
             debugger=self.debugger,
+            # the allowance is the tenant's, not the graph's: a subpipeline
+            # is not a way out of it
+            policy=self.policy,
         )
         return await child.run()
 

@@ -16,6 +16,7 @@ from importlib.metadata import PackageNotFoundError, version as _package_version
 from typing import Any
 
 from .core.nodes import get_node_types
+from .core.policy import Policy
 from .core.stage import get_stages
 
 DISTRIBUTION = "stageflow-framework"
@@ -38,19 +39,30 @@ def _installed_version() -> str:
 __version__ = _installed_version()
 
 
-def capabilities() -> dict[str, Any]:
-    """The language this build understands.
+def capabilities(policy: Policy | None = None) -> dict[str, Any]:
+    """The language this build understands — or this caller may use.
 
     - `stageflow` — the version of the core, for a human reading a log;
     - `node_types` — the types a pipeline may use here, sorted. This is the
       field a client should branch on: a name that is not in the list will be
-      rejected by `Pipeline.from_dict` with `Unknown node type`.
-    - `stages` — how many stages are registered. The specs themselves are a
+      rejected by `Pipeline.from_dict` with `Unknown node type`, or by the
+      policy.
+    - `stages` — how many stages may be used. The specs themselves are a
       separate, much larger answer (`get_stages`), so this is only a hint that
       a registry is there at all.
+
+    With a `policy` the answer narrows to what that policy allows, which is
+    what a backend should serve to a client: an editor needs to know what
+    *this* caller may draw, and the reason a node is unavailable — an older
+    core or a narrower allowance — is not a distinction it has to make.
     """
+    node_types = sorted(get_node_types())
+    stages = sorted(get_stages())
+    if policy is not None:
+        node_types = [t for t in node_types if policy.allows_node_type(t)]
+        stages = [name for name in stages if policy.allows_stage(name)]
     return {
         "stageflow": __version__,
-        "node_types": sorted(get_node_types()),
-        "stages": len(get_stages()),
+        "node_types": node_types,
+        "stages": len(stages),
     }

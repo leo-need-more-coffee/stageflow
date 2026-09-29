@@ -20,6 +20,7 @@ from .nodes import (
     register_node,
 )
 from .pipeline import Pipeline
+from .policy import OPEN, Policy
 from .session import Session, SessionResult
 from .stage import (
     BaseStage,
@@ -56,6 +57,8 @@ __all__ = [
     "SubPipelineNode",
     "TerminalNode",
     "Pipeline",
+    "Policy",
+    "OPEN",
     "Session",
     "SessionResult",
     "BaseStage",

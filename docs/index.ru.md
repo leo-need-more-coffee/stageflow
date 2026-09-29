@@ -43,6 +43,7 @@ pip install stageflow-framework
 | [Узел subpipeline](subpipeline-node.ru.md) | вложенный граф и его граница |
 | [Узел terminal](terminal-node.ru.md) | конец прогона, result и артефакты |
 | [Ошибки](errors.ru.md) | `retry`, путь ошибки, исключения ядра |
+| [Политика](policy.ru.md) | ограничение стадий и типов узлов для пайплайна |
 | [Типизация переменных](variable-typing.ru.md) | постепенная типизация, две линии проверок |
 | [Управление сессией](session-control.ru.md) | стоп, пауза, ввод, снапшоты |
 | [Пошаговая отладка](step-debugging.ru.md) | остановка между узлами, правка фрейма |
