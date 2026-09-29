@@ -946,7 +946,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Реестр, отданный наружу
+        Отдаём реестр
       
     </span>
   </a>
@@ -979,7 +979,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Секреты: имена, никогда значения
+        Секреты: только имена, никогда значения
       
     </span>
   </a>
@@ -990,7 +990,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Сказать, что умеешь
+        Рассказать, что умеешь
       
     </span>
   </a>
@@ -1001,7 +1001,7 @@
   <a href="#cors" class="md-nav__link">
     <span class="md-ellipsis">
       
-        CORS, дважды
+        CORS, и два разных случая
       
     </span>
   </a>
@@ -1031,7 +1031,7 @@
   <span class="md-ellipsis">
     
   
-    3. Что можно собирать
+    3. Что разрешено собирать
   
 
     
@@ -1087,7 +1087,7 @@
   <span class="md-ellipsis">
     
   
-    5. Кто звонит
+    5. Чей это запрос
   
 
     
@@ -1335,7 +1335,7 @@
   <span class="md-ellipsis">
     
   
-    Параллельные ветки
+    Узел parallel
   
 
     
@@ -1845,7 +1845,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Реестр, отданный наружу
+        Отдаём реестр
       
     </span>
   </a>
@@ -1878,7 +1878,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Секреты: имена, никогда значения
+        Секреты: только имена, никогда значения
       
     </span>
   </a>
@@ -1889,7 +1889,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Сказать, что умеешь
+        Рассказать, что умеешь
       
     </span>
   </a>
@@ -1900,7 +1900,7 @@
   <a href="#cors" class="md-nav__link">
     <span class="md-ellipsis">
       
-        CORS, дважды
+        CORS, и два разных случая
       
     </span>
   </a>
@@ -1933,8 +1933,8 @@
 
 
 <h1 id="2">2. Эндпоинты<a class="headerlink" href="#2" title="Permanent link">&para;</a></h1>
-<p>Их семь, и чтобы войти, редактору нужен ровно один.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>GET    /api/stages             спеки стадий, доступных этому вызывающему
+<p>Их семь, и чтобы редактор вообще открылся, нужен ровно один.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>GET    /api/stages             спецификации стадий, доступных этому вызову
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>GET    /api/meta               что этот бэкенд умеет исполнять  (необязателен)
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>GET    /api/secrets            ИМЕНА секретов из окружения
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>POST   /api/run                {pipeline, vars, mode, delay, secrets} -&gt; {id, state}
@@ -1943,24 +1943,25 @@
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>POST   /api/run/&lt;id&gt;/control   {action: "step"|"resume"|"pause"|"stop"|"delay"}
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>POST   /api/run/&lt;id&gt;/vars      {set: {...}, drop: [...]}
 </code></pre></div>
-<p>Ничего специфичного для StageFlow в них нет, кроме форм; пример использует
-FastAPI, потому что так короче, а сам протокол описан в
-<a href="https://github.com/leo-need-more-coffee/stageflow-ui/blob/main/docs/backend.md">руководстве по бэкенду</a>
-редактора.</p>
-<h2 id="_1">Реестр, отданный наружу<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Ничего специфичного для StageFlow в них нет, кроме формы ответов; пример
+написан на FastAPI просто потому, что так короче. Сам протокол подробно
+расписан в <a href="https://github.com/leo-need-more-coffee/stageflow-ui/blob/main/docs/backend.md">руководстве по
+бэкенду</a>
+на стороне редактора.</p>
+<h2 id="_1">Отдаём реестр<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/stages"</span><span class="p">)</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stages</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_stages</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"stages"</span><span class="p">:</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_specs</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">get_stages</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()}}</span>
 </code></pre></div>
-<p><code>get_specs()</code> — это разобранный докстринг из <a href="../1-stages/">шага 1</a>.
-Единственный эндпоинт, без которого редактор не откроется, — и он же тот,
-которым проверяется адрес на экране подключения: «подключено» значит, что
-штука действительно отвечает и действительно разрешает этот origin, а не что
-строка похожа на URL.</p>
+<p><code>get_specs()</code> возвращает разобранный докстринг из <a href="../1-stages/">шага 1</a>.
+Это единственный эндпоинт, без которого редактор не откроется, — им же он и
+проверяет адрес на экране подключения. Поэтому «подключено» означает, что
+сервис действительно отвечает и действительно разрешает этот origin, а не
+что введённая строка похожа на URL.</p>
 <h2 id="session">Прогон — это настоящая Session<a class="headerlink" href="#session" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">"pipeline"</span><span class="p">])</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">pipeline</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>          <span class="c1"># плохой граф отвечает из запроса, а не из потока</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">pipeline</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>          <span class="c1"># про кривой граф отвечаем сразу, а не из фонового потока</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">debugger</span> <span class="o">=</span> <span class="n">StepDebugger</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="n">delay</span><span class="p">,</span> <span class="n">on_event</span><span class="o">=</span><span class="n">bus</span><span class="o">.</span><span class="n">push</span><span class="p">)</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span>
@@ -1971,13 +1972,14 @@ FastAPI, потому что так короче, а сам протокол о�
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">debugger</span><span class="o">=</span><span class="n">debugger</span><span class="p">,</span>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">)</span>
 </code></pre></div>
-<p><strong>Настоящая</strong> <code>Session</code>, и в этом весь смысл: отладчик показывает то, что
-произойдёт, потому что это и происходит. <code>StepDebugger</code> — собственный
-отладчик ядра (<a href="../../step-debugging/">Пошаговая отладка</a>): он открывает
-точку останова, фрейм и возможность принять правку в него, а эндпоинты —
-тонкая обёртка над его потокобезопасными методами.</p>
-<p>Каждому прогону — свой поток со своим event loop, потому что HTTP-обработчики
-живут в серверном. Команды заходят через отладчик, события выходят через лог.</p>
+<p>Именно <strong>настоящая</strong> <code>Session</code> — в этом весь смысл: отладчик показывает то,
+что произойдёт, потому что это ровно то, что происходит. <code>StepDebugger</code> —
+собственный отладчик ядра (<a href="../../step-debugging/">Пошаговая отладка</a>): он
+даёт точку останова, доступ к фрейму и возможность этот фрейм поправить, а
+эндпоинты — тонкая обёртка над его потокобезопасными методами.</p>
+<p>Каждому прогону достаётся свой поток со своим циклом событий, потому что
+HTTP-обработчики живут в потоке сервера. Команды заходят внутрь через
+отладчик, события выходят наружу через лог.</p>
 <h2 id="_2">Лог событий, и почему именно лог<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/run/</span><span class="si">{run_id}</span><span class="s2">/events"</span><span class="p">)</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_events</span><span class="p">(</span><span class="n">run</span><span class="p">:</span> <span class="n">CurrentRun</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">FromEvent</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StreamingResponse</span><span class="p">:</span>
@@ -1987,43 +1989,45 @@ FastAPI, потому что так короче, а сам протокол о�
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"X-Accel-Buffering"</span><span class="p">:</span> <span class="s2">"no"</span><span class="p">},</span>   <span class="c1"># буферизующий прокси придержит токены</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="p">)</span>
 </code></pre></div>
-<p>Лог, а не очередь, и каждое событие несёт свой <code>index</code>. Подписчик приходит
-отдельным HTTP-запросом уже <strong>после</strong> старта, и без истории он потерял бы
-начало — а в отладке начало и есть самое интересное. <code>?from=N</code> — тот же
-механизм, использованный для другого: редактор читает поток через <code>fetch</code>, а
-не <code>EventSource</code> (чтобы можно было послать учётные данные), и при обрыве
-возобновляется с события, следующего за последним увиденным.</p>
-<h2 id="_3">Секреты: имена, никогда значения<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Именно лог, а не очередь, и каждое событие несёт свой номер <code>index</code>.
+Подписчик приходит отдельным HTTP-запросом уже <strong>после</strong> старта прогона, и
+без истории он потерял бы начало — а в отладке начало обычно и есть самое
+интересное. <code>?from=N</code> пригодился и второй раз: редактор читает поток через
+<code>fetch</code>, а не через <code>EventSource</code> (иначе не отправить ключ доступа), и при
+обрыве связи продолжает с события, следующего за последним полученным.</p>
+<h2 id="_3">Секреты: только имена, никогда значения<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/secrets"</span><span class="p">)</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">secrets</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"names"</span><span class="p">:</span> <span class="n">env_secret_names</span><span class="p">(),</span> <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"env"</span><span class="p">}</span>
 </code></pre></div>
-<p>Браузер узнаёт, что <code>OPENAI_API_KEY</code> существует. Значение подставляется в
-стартовый фрейм на сервере и вычищается из каждого события по дороге на
-страницу, чтобы ключ не вернулся через отладочный лог. Подробности — в
+<p>Браузер узнаёт лишь то, что <code>OPENAI_API_KEY</code> существует. Значение
+подставляется в стартовый фрейм на сервере и вычищается из каждого события по
+дороге обратно, чтобы ключ не вернулся на страницу через отладочный лог.
+Подробнее — в
 <a href="https://github.com/leo-need-more-coffee/stageflow-ui/blob/main/docs/secrets.md">Секретах</a>.</p>
-<h2 id="_4">Сказать, что умеешь<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h2 id="_4">Рассказать, что умеешь<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/meta"</span><span class="p">)</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">meta</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">capabilities</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"api"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">capabilities</span><span class="p">()}</span>
 </code></pre></div>
-<p>Необязателен, две строки, и убирает целый класс путаницы. Редактор
-зеркалит реестр типов узлов ядра таким, каким он был на момент сборки
-редактора, так что редактор новее вашего бэкенда предложил бы узел, который
-ваши прогоны отвергнут, — в виде <code>Unknown node type: 'map'</code>, на середине, не
-называя ни причины, ни лекарства. <code>capabilities()</code> отвечает самим реестром,
-поэтому отсутствующее в нём имя — ровно то имя, которое прогон и отверг бы, и
-редактор его гасит, а не угадывает.</p>
-<p>Бэкенд, который <code>/meta</code> не отдаёт, не додумывают: ничего не помечается, всё
-работает, редактор пишет, что версия неизвестна.</p>
-<h2 id="cors">CORS, дважды<a class="headerlink" href="#cors" title="Permanent link">&para;</a></h2>
-<p>Редактор на другом origin, поэтому каждому ответу нужен
-<code>Access-Control-Allow-Origin</code>, а preflight'у JSON-POST'а — ответ. Ещё один
-случай выглядит со страницы точно так же, но это не то же самое: хостящийся
-редактор отдаётся по <strong>https</strong>, а ваш бэкенд отвечает на <code>127.0.0.1</code>, что
-Chrome называет private-network-запросом и отвергает, если в ответе на
-preflight нет <code>Access-Control-Allow-Private-Network: true</code>.</p>
+<p>Необязателен, занимает две строки и снимает целый класс недоразумений.
+Редактор носит в себе копию реестра типов узлов — такую, какой она была на
+момент его сборки. Значит, редактор новее бэкенда предложит узел, который
+прогон отвергнет, причём в виде <code>Unknown node type: 'map'</code> где-то на середине
+и без единого намёка на причину и лечение. <code>capabilities()</code> отвечает самим
+реестром, поэтому отсутствующее в ответе имя — ровно то имя, которое прогон и
+отклонил бы, и редактор гасит такой узел вместо того, чтобы гадать.</p>
+<p>За бэкенд, который <code>/meta</code> не отдаёт, редактор ничего не додумывает: ничего
+не помечается, всё работает как раньше, а в строке состояния сказано, что
+версия неизвестна.</p>
+<h2 id="cors">CORS, и два разных случая<a class="headerlink" href="#cors" title="Permanent link">&para;</a></h2>
+<p>Редактор живёт на другом origin, поэтому каждому ответу нужен
+<code>Access-Control-Allow-Origin</code>, а предварительному запросу к POST с JSON — свой
+ответ. Второй случай со страницы выглядит точно так же, но природа у него
+другая: редактор на GitHub Pages отдаётся по <strong>https</strong>, а ваш бэкенд отвечает
+на <code>127.0.0.1</code>. Chrome считает это обращением в приватную сеть и блокирует,
+если в ответе на preflight нет <code>Access-Control-Allow-Private-Network: true</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">CORSMiddleware</span><span class="p">,</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">allow_origins</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
@@ -2032,12 +2036,13 @@ preflight нет <code>Access-Control-Allow-Private-Network: true</code>.</p>
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">allow_private_network</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">)</span>
 </code></pre></div>
-<p><code>AUTH_HEADER</code> — это <a href="../5-tenants/">шаг 5</a>, заглянувший пораньше: заголовок,
-который браузеру не разрешили, — это запрос, который со страницы не уйдёт.</p>
+<p><code>AUTH_HEADER</code> тут — это <a href="../5-tenants/">шаг 5</a>, заглянувший пораньше:
+заголовок, который браузеру не разрешили, — это запрос, который со страницы
+даже не уйдёт.</p>
 <hr />
-<p>На этом бэкенд уже работает. Следующие три шага — о том, чтобы им мог
-пользоваться кто-то ещё.</p>
-<p>Дальше: <a href="../3-policy/">что можно собирать</a>.</p>
+<p>На этом бэкенд уже работает. Три следующих шага — про то, как пустить на него
+кого-то ещё.</p>
+<p>Дальше: <a href="../3-policy/">что разрешено собирать</a>.</p>
 
 
 

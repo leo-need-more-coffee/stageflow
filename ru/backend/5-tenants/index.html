@@ -31,7 +31,7 @@
     
     
       
-        <title>5. Кто звонит - StageFlow</title>
+        <title>5. Чей это запрос - StageFlow</title>
       
     
     
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              5. Кто звонит
+              5. Чей это запрос
             
           </span>
         </div>
@@ -918,7 +918,7 @@
   <span class="md-ellipsis">
     
   
-    3. Что можно собирать
+    3. Что разрешено собирать
   
 
     
@@ -983,7 +983,7 @@
   <span class="md-ellipsis">
     
   
-    5. Кто звонит
+    5. Чей это запрос
   
 
     
@@ -1001,7 +1001,7 @@
   <span class="md-ellipsis">
     
   
-    5. Кто звонит
+    5. Чей это запрос
   
 
     
@@ -1030,7 +1030,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Тарифы — это таблица
+        Тарифы — это просто таблица
       
     </span>
   </a>
@@ -1041,7 +1041,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Решают учётные данные
+        Решает ключ доступа
       
     </span>
   </a>
@@ -1052,7 +1052,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Быть показанным тариф — не значит быть на нём
+        Посмотреть тариф и работать на нём — разные вещи
       
     </span>
   </a>
@@ -1324,7 +1324,7 @@
   <span class="md-ellipsis">
     
   
-    Параллельные ветки
+    Узел parallel
   
 
     
@@ -1834,7 +1834,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Тарифы — это таблица
+        Тарифы — это просто таблица
       
     </span>
   </a>
@@ -1845,7 +1845,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Решают учётные данные
+        Решает ключ доступа
       
     </span>
   </a>
@@ -1856,7 +1856,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Быть показанным тариф — не значит быть на нём
+        Посмотреть тариф и работать на нём — разные вещи
       
     </span>
   </a>
@@ -1910,31 +1910,31 @@
   
 
 
-<h1 id="5">5. Кто звонит<a class="headerlink" href="#5" title="Permanent link">&para;</a></h1>
+<h1 id="5">5. Чей это запрос<a class="headerlink" href="#5" title="Permanent link">&para;</a></h1>
 <p><code>Policy</code> — это объект. Превратить в него HTTP-запрос и есть последний шаг, и
-именно о нём у StageFlow намеренно нет мнения.</p>
-<p><strong>Авторизации во фреймворке нет и не будет.</strong> Ядро принимает политику;
-токены, заголовки, сессии, тенанты и подписки — вещи, на которые у каждой
-платформы уже есть свой ответ, и ответ фреймворка был бы ещё одной вещью, с
-которой приходится бороться. В примере всё это — сорок строк в
-<code>app/auth.py</code>, и настоящий бэкенд заменяет этот файл, не трогая больше
-ничего.</p>
-<h2 id="_1">Тарифы — это таблица<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+именно про него у StageFlow намеренно нет своего мнения.</p>
+<p><strong>Авторизации во фреймворке нет и не будет.</strong> Ядро принимает готовую
+политику; токены, заголовки, сессии, клиенты и подписки — это то, к чему у
+каждой платформы уже есть свой подход, и подход фреймворка стал бы ещё одной
+вещью, с которой приходится бороться. В примере на всё про всё уходит сорок
+строк в <code>app/auth.py</code>, и настоящий бэкенд заменяет этот файл целиком, не
+трогая больше ничего.</p>
+<h2 id="_1">Тарифы — это просто таблица<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">PLANS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Policy</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">"full"</span><span class="p">:</span>  <span class="n">Policy</span><span class="p">(),</span>                     <span class="c1"># неограниченный пример</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">"full"</span><span class="p">:</span>  <span class="n">Policy</span><span class="p">(),</span>                     <span class="c1"># пример без ограничений</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="s2">"basic"</span><span class="p">:</span> <span class="n">Policy</span><span class="p">(</span><span class="n">stages</span><span class="o">=</span><span class="n">RULES_ONLY</span> <span class="o">|</span> <span class="n">PLUMBING</span><span class="p">,</span> <span class="n">node_types</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">},</span> <span class="n">limits</span><span class="o">=...</span><span class="p">),</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="s2">"pro"</span><span class="p">:</span>   <span class="n">Policy</span><span class="p">(</span><span class="n">node_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">Limits</span><span class="p">(</span><span class="n">counters</span><span class="o">=</span><span class="p">{</span><span class="s2">"tokens"</span><span class="p">:</span> <span class="mi">200_000</span><span class="p">,</span> <span class="o">...</span><span class="p">})),</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
 </code></pre></div>
-<p>Настоящая платформа находит тенанта и собирает политику из его подписки.
-Слова «тариф», «basic» и «pro» — дело платформы, как и прайс-лист,
-превращающий <code>result.meters</code> в счёт.</p>
-<p>Одно из примера стоит скопировать в любом случае: <strong><code>basic</code> умеет что-то
-запускать</strong>. У него есть свой пайплайн, <code>06-rules-only.json</code>, — весь бот без
-единой модели. Тариф, который не может запустить вообще ничего, — не дешёвый
-тариф, а сломанный, и пользователя он учит только тому, что продукт не
-работает.</p>
-<h2 id="_2">Решают учётные данные<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>Настоящая платформа найдёт клиента и соберёт политику из его подписки. Слова
+«тариф», «basic» и «pro» — дело платформы, ровно как и прайс-лист, который
+превращает <code>result.meters</code> в счёт.</p>
+<p>Одно из примера стоит перенять в любом случае: <strong><code>basic</code> умеет что-то
+запускать</strong>. У него есть свой пайплайн, <code>06-rules-only.json</code>, — весь бот
+целиком, но без единого обращения к модели. Тариф, на котором не работает
+вообще ничего, — это не дешёвый тариф, а сломанный, и пользователя он учит
+только тому, что продукт не работает.</p>
+<h2 id="_2">Решает ключ доступа<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">AUTH_HEADER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"SF_AUTH_HEADER"</span><span class="p">,</span> <span class="s2">"Authorization"</span><span class="p">)</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">TOKENS</span> <span class="o">=</span> <span class="n">_parse_tokens</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"SF_TOKENS"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>   <span class="c1"># "tok:plan,tok:plan"</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
@@ -1950,18 +1950,20 @@
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="mi">401</span><span class="p">,</span> <span class="s2">"the credentials were not recognised"</span><span class="p">)</span>
 <a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="k">return</span> <span class="n">plan</span>
 </code></pre></div>
-<p><strong>Имя</strong> заголовка настраивается, потому что бэкенды расходятся во мнениях —
-<code>Authorization: Bearer …</code>, <code>X-Api-Key: …</code>, что там положил шлюз, — и
-редактору тут решать нечего. Если не настроено ничего, авторизации нет вовсе,
-и пример запускается и работает, в чём и смысл примера.</p>
-<p>Со стороны редактора это поле, и его значение проверяется тем же запросом,
-которым проверяется адрес, — так что неверный токен неверен на том экране,
-где его правят, а не на первом прогоне:</p>
-<p><img alt="Экран подключения отказывает, поле учётных данных развёрнуто" src="../../../img/be-auth.png" /></p>
-<h2 id="_3">Быть показанным тариф — не значит быть на нём<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>Вот часть, которую важно не испортить, потому что очевидный на вид срез
-уничтожает всё, что построили два предыдущих шага.</p>
-<p>Читающие эндпоинты принимают <code>?plan=</code> — <strong>без проверки, от кого угодно</strong>:</p>
+<p><strong>Название</strong> заголовка вынесено в настройку, потому что бэкенды тут не
+сходятся во мнениях: <code>Authorization: Bearer …</code>, <code>X-Api-Key: …</code>, что-нибудь,
+что положил шлюз. Редактор такие вещи решать не должен. Если не настроено
+ничего, никакой авторизации нет вовсе и пример просто запускается и
+работает — в чём и смысл примера.</p>
+<p>В редакторе это просто поле, и его значение проверяется тем же запросом, что и
+адрес. Так что неправильный токен оказывается неправильным на том же экране,
+где его можно исправить, а не на первом прогоне:</p>
+<p><img alt="Экран подключения отказывает, поле с ключом раскрыто" src="../../../img/be-auth.png" /></p>
+<h2 id="_3">Посмотреть тариф и работать на нём — разные вещи<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Дальше идёт самая важная часть, потому что напрашивающееся здесь упрощение
+разрушает всё, что построили два предыдущих шага.</p>
+<p>Читающие эндпоинты принимают <code>?plan=</code> — <strong>от кого угодно и без всякой
+проверки</strong>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/meta"</span><span class="p">)</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">meta</span><span class="p">(</span><span class="n">caller</span><span class="p">:</span> <span class="n">CallerPlan</span><span class="p">,</span> <span class="n">plan</span><span class="p">:</span> <span class="n">ShownPlan</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">shown</span> <span class="o">=</span> <span class="n">plan</span> <span class="ow">or</span> <span class="n">caller</span>
@@ -1969,12 +1971,13 @@
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"api"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"plan"</span><span class="p">:</span> <span class="n">shown</span><span class="p">,</span> <span class="s2">"plan_source"</span><span class="p">:</span> <span class="n">source_of</span><span class="p">(</span><span class="n">plan</span><span class="p">),</span>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>            <span class="s2">"plans"</span><span class="p">:</span> <span class="n">plan_names</span><span class="p">(),</span> <span class="o">**</span><span class="n">capabilities</span><span class="p">(</span><span class="n">policy</span><span class="p">),</span> <span class="s2">"limits"</span><span class="p">:</span> <span class="n">_limits_of</span><span class="p">(</span><span class="n">policy</span><span class="p">)}</span>
 </code></pre></div>
-<p>Имя — не разрешение. Рисовать не значит запускать, а редактор, которому надо
-авторизоваться, прежде чем погасить элемент палитры, — это редактор, который
-никто не настраивает; поэтому «как этот граф выглядел бы на тарифе подешевле»
-может спросить кто угодно. <code>plans</code> — список, который можно предложить, чтобы
-клиенту не пришлось зашивать имена, которых он знать не может.</p>
-<p>Прогон такого параметра не принимает:</p>
+<p>Название тарифа — не пропуск на него. Рисовать не значит запускать, а
+редактор, которому нужно авторизоваться, прежде чем погасить кнопку в
+палитре, никто настраивать не станет. Поэтому вопрос «а как этот граф
+выглядел бы на тарифе подешевле» может задать кто угодно. <code>plans</code> — готовый
+список названий, чтобы клиенту не пришлось хранить их у себя: знать их
+заранее он не может.</p>
+<p>А вот запуск такого параметра не принимает:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/run"</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">201</span><span class="p">)</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_run</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="n">RunRequest</span><span class="p">,</span> <span class="n">caller</span><span class="p">:</span> <span class="n">CallerPlan</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">if</span> <span class="n">body</span><span class="o">.</span><span class="n">plan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">body</span><span class="o">.</span><span class="n">plan</span> <span class="o">!=</span> <span class="n">caller</span><span class="p">:</span>
@@ -1982,24 +1985,26 @@
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>                                 <span class="sa">f</span><span class="s2">"and these credentials are on '</span><span class="si">{</span><span class="n">caller</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">run</span> <span class="o">=</span> <span class="n">runs</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="n">policy_for</span><span class="p">(</span><span class="n">caller</span><span class="p">))</span>
 </code></pre></div>
-<p><code>body.plan</code> едет в обратную сторону: это то, <strong>подо что рисовали</strong>, а не
-просьба на этом запуститься. Сказать это — значит дать назвать расхождение, а
-это ответ куда лучше, чем груда ошибок валидации про отдельные стадии:</p>
-<p><img alt="Отказ, называющий оба тарифа" src="../../../img/be-run-refused.png" /></p>
-<p>Прокиньте <code>?plan=</code> в запуск вместо этого — одна строка, и очень очевидная на
-вид — и каждый потолок из двух предыдущих шагов станет query-параметром.
-<code>check_pipelines.py</code> в примере проверяет, что этого никто не сделал: такое
-свойство ломается незаметно для любого теста эндпоинтов.</p>
+<p><code>body.plan</code> едет в обратную сторону: это то, <strong>под какой тариф граф
+рисовали</strong>, а не просьба на нём запуститься. Если его прислали, расхождение
+можно назвать вслух — и это куда более полезный ответ, чем куча ошибок
+валидации про отдельные стадии:</p>
+<p><img alt="Отказ, в котором названы оба тарифа" src="../../../img/be-run-refused.png" /></p>
+<p>Прокиньте <code>?plan=</code> ещё и в запуск — одна строка, выглядит совершенно
+безобидно — и каждый потолок из двух предыдущих шагов превратится в
+query-параметр. В примере <code>check_pipelines.py</code> проверяет, что этого никто
+не сделал: такое свойство ломается незаметно для любого теста эндпоинтов.</p>
 <h2 id="_4">Что из этого делает редактор<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>Всё это собрано в один диалог — «File» → «Connection…» или клик по строке
-бэкенда в статус-баре:</p>
+бэкенда в строке состояния:</p>
 <p><img alt="Диалог подключения" src="../../../img/be-connection.png" width="520" /></p>
-<p>Адрес (его смена перезагружает страницу: это почва, на которой стоит сессия),
-учётные данные (применяются на месте — токен протухает <em>во время</em> работы, а
-отвергнутый откатывается, чтобы сессия выжила), тариф, под который рисуем, и
-то, что ответил бэкенд. <code>?plan=basic</code> в собственном URL редактора открывает
-его сразу так, а статус-бар помечает превью как превью, чтобы его нельзя было
-принять за разрешение.</p>
+<p>В нём четыре вещи: адрес, ключ доступа, тариф, под который рисуем, и то, что
+ответил бэкенд. Смена адреса перезагружает страницу — на адресе стоит вся
+сессия. Ключ, наоборот, применяется на месте: токен протухает <em>посреди</em>
+работы, а отвергнутый откатывается, чтобы сессия уцелела. <code>?plan=basic</code> в
+адресе самого редактора открывает его сразу в нужном виде, а строка состояния
+помечает предпросмотр как предпросмотр, чтобы его нельзя было принять за
+реальные права.</p>
 <h2 id="_5">Где проходит граница<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -2013,7 +2018,7 @@
 <tr>
 <td>что может содержать граф</td>
 <td><code>Policy</code></td>
-<td>какая именно политика</td>
+<td>какая именно политика кому достанется</td>
 </tr>
 <tr>
 <td>сколько прогон может потратить</td>
@@ -2021,7 +2026,7 @@
 <td>сколько стоит единица</td>
 </tr>
 <tr>
-<td>кто вызывающий</td>
+<td>кто прислал запрос</td>
 <td>—</td>
 <td>целиком</td>
 </tr>
@@ -2034,15 +2039,15 @@
 </table>
 <p>Последняя строка важна не меньше остальных. <code>concurrency: 8</code> ограничивает
 <strong>один прогон</strong>; сто прогонов — это восемьсот задач, а сколько прогонов
-существует, ядро знать не может. Допуск — очередь, пул на тенанта, месячный
-бюджет — дело платформы, а дело ядра — держать потолок одного прогона и
-честно сообщать, во что он обошёлся.</p>
+существует одновременно, ядро знать не может. Допуск к запуску — очередь,
+пул на клиента, месячный бюджет — это дело платформы. Дело ядра — держать
+потолок одного прогона и честно доложить, во что тот обошёлся.</p>
 <hr />
 <p>Вот и весь бэкенд: <a href="../1-stages/">стадии</a>, <a href="../2-endpoints/">эндпоинты</a>,
-<a href="../3-policy/">политика</a>, <a href="../4-metering/">счётчики</a> и учётные данные.
-Готовое целиком —
-<a href="https://github.com/leo-need-more-coffee/stageflow-example">stageflow-example</a>,
-около шестисот строк Python.</p>
+<a href="../3-policy/">политика</a>, <a href="../4-metering/">счётчики</a> и ключ доступа.
+Готовое целиком лежит в
+<a href="https://github.com/leo-need-more-coffee/stageflow-example">stageflow-example</a>
+— около шестисот строк на Python.</p>
 
 
 

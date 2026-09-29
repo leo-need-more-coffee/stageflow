@@ -987,7 +987,7 @@
   <span class="md-ellipsis">
     
   
-    3. Что можно собирать
+    3. Что разрешено собирать
   
 
     
@@ -1043,7 +1043,7 @@
   <span class="md-ellipsis">
     
   
-    5. Кто звонит
+    5. Чей это запрос
   
 
     
@@ -1291,7 +1291,7 @@
   <span class="md-ellipsis">
     
   
-    Параллельные ветки
+    Узел parallel
   
 
     
@@ -1846,34 +1846,34 @@
 
 <h1 id="_1">Как собрать бэкенд<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
 <p><a href="https://github.com/leo-need-more-coffee/stageflow-ui">Редактор</a> рисует граф,
-валидирует его и отлаживает — и не исполняет ничего. Всё, чего он не умеет
-сам, он спрашивает у бэкенда, и бэкенд этот ваш, потому что стадии ваши: что
-пайплайн вообще <em>может сделать</em> в вашем продукте, знает только ваш код.</p>
-<p>Это разделение не про упаковку. Семантика исполнения — CEL, фрейм,
-<code>try</code>/<code>except</code>, <code>parallel</code>, бюджет — живёт в ядре, и вторая её реализация на
-JavaScript означала бы, что отладчик показывает не то, что происходит. Поэтому
-реализация одна, редактор — её клиент, а между ними HTTP-контракт из семи
-эндпоинтов.</p>
-<p>Этот трек собирает такой бэкенд. Это тот самый
+проверяет его и отлаживает — но не исполняет ничего. За всем, чего он не
+умеет сам, он идёт на бэкенд, и бэкенд этот ваш: что пайплайн вообще <em>может
+сделать</em> в вашем продукте, знает только ваш код.</p>
+<p>Дело тут не в том, как удобнее разложить файлы. Семантика исполнения — CEL,
+фрейм, <code>try</code>/<code>except</code>, <code>parallel</code>, бюджет — живёт в ядре. Вторая её реализация
+на JavaScript означала бы, что отладчик показывает не то, что произойдёт на
+самом деле. Поэтому реализация одна, редактор — всего лишь её клиент, а
+между ними — HTTP-контракт из семи эндпоинтов.</p>
+<p>Здесь мы такой бэкенд и соберём. Это тот самый
 <a href="https://github.com/leo-need-more-coffee/stageflow-example">пример</a> из README
 этого репозитория, разобранный в том порядке, в каком его писали: бот
-поддержки, чьи стадии берут подготовленный тикет, ищут ответ в базе знаний и
-либо пишут ответ, либо отдают тикет человеку.</p>
-<p><img alt="Пятый пайплайн бота, на прогоне" src="../../img/be-map-run.png" /></p>
+поддержки, который берёт готовый тикет, ищет ответ в базе знаний и либо
+отвечает сам, либо отдаёт тикет человеку.</p>
+<p><img alt="Пятый пайплайн бота на прогоне" src="../../img/be-map-run.png" /></p>
 <h2 id="_2">Шаги<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Шаг</th>
-<th>Что добавляется</th>
-<th>На что отвечает</th>
+<th>Что добавляем</th>
+<th>На какой вопрос отвечает</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><a href="1-stages/">1. Ваши стадии</a></td>
 <td><code>register_stage</code>, спеки, события</td>
-<td>что пайплайн здесь умеет</td>
+<td>что пайплайн здесь вообще умеет</td>
 </tr>
 <tr>
 <td><a href="2-endpoints/">2. Эндпоинты</a></td>
@@ -1881,37 +1881,37 @@ JavaScript означала бы, что отладчик показывает �
 <td>как редактор до этого доберётся</td>
 </tr>
 <tr>
-<td><a href="3-policy/">3. Что можно собирать</a></td>
-<td><code>Policy</code> на вызывающего</td>
-<td>что может нарисовать <em>менее доверенный</em> автор</td>
+<td><a href="3-policy/">3. Что разрешено собирать</a></td>
+<td>своя <code>Policy</code> для каждого вызова</td>
+<td>что сможет нарисовать тот, кому вы не полностью доверяете</td>
 </tr>
 <tr>
 <td><a href="4-metering/">4. Во что обходится прогон</a></td>
 <td><code>reserve:</code> и <code>charge()</code></td>
-<td>сколько ему можно израсходовать</td>
+<td>сколько ему разрешено израсходовать</td>
 </tr>
 <tr>
-<td><a href="5-tenants/">5. Кто звонит</a></td>
-<td>тарифы и учётные данные</td>
+<td><a href="5-tenants/">5. Чей это запрос</a></td>
+<td>тарифы и ключ доступа</td>
 <td>к кому что из перечисленного относится</td>
 </tr>
 </tbody>
 </table>
-<p>Первых двух хватает на собственный бэкенд. Последние три превращают его в
-штуку, на которой можно дать собирать пайплайны кому-то ещё, — и читать их
-стоит, даже если второго тенанта не будет никогда: «реестр стадий глобальный»
-— это фраза с последствиями.</p>
+<p>Первых двух шагов достаточно, чтобы поднять свой бэкенд. Последние три
+превращают его в площадку, где пайплайны может собирать кто-то ещё, — и
+прочитать их стоит, даже если второго клиента у вас никогда не будет. У
+фразы «реестр стадий глобальный» есть последствия.</p>
 <h2 id="_3">Что понадобится<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"stageflow-framework&gt;=0.12"</span><span class="w"> </span>fastapi<span class="w"> </span>uvicorn
 </code></pre></div>
-<p>Чтобы смотреть на готовое:</p>
+<p>Если хочется сразу пощупать готовое:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/leo-need-more-coffee/stageflow-example
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span>stageflow-example<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>main.py
 </code></pre></div>
 <p>и редактор на
 <a href="https://leo-need-more-coffee.github.io/stageflow-ui/">leo-need-more-coffee.github.io/stageflow-ui</a>,
-наведённый на <code>http://127.0.0.1:8765</code>. Каждый скриншот на этих страницах —
-эта пара, запущенная локально.</p>
+с адресом <code>http://127.0.0.1:8765</code> в настройках подключения. Все скриншоты
+дальше сняты именно с этой пары, запущенной локально.</p>
 
 
 

@@ -31,7 +31,7 @@
     
     
       
-        <title>3. Что можно собирать - StageFlow</title>
+        <title>3. Что разрешено собирать - StageFlow</title>
       
     
     
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              3. Что можно собирать
+              3. Что разрешено собирать
             
           </span>
         </div>
@@ -927,7 +927,7 @@
   <span class="md-ellipsis">
     
   
-    3. Что можно собирать
+    3. Что разрешено собирать
   
 
     
@@ -945,7 +945,7 @@
   <span class="md-ellipsis">
     
   
-    3. Что можно собирать
+    3. Что разрешено собирать
   
 
     
@@ -974,7 +974,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Два слоя, один и тот же ответ
+        Два рубежа, один и тот же ответ
       
     </span>
   </a>
@@ -985,7 +985,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Сказать редактору, чтобы он сказал автору
+        Предупредить редактор, чтобы он предупредил автора
       
     </span>
   </a>
@@ -996,7 +996,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Что валидация проверяет и что отказывается угадывать
+        Что валидация проверяет, а что отказывается угадывать
       
     </span>
   </a>
@@ -1065,7 +1065,7 @@
   <span class="md-ellipsis">
     
   
-    5. Кто звонит
+    5. Чей это запрос
   
 
     
@@ -1313,7 +1313,7 @@
   <span class="md-ellipsis">
     
   
-    Параллельные ветки
+    Узел parallel
   
 
     
@@ -1823,7 +1823,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Два слоя, один и тот же ответ
+        Два рубежа, один и тот же ответ
       
     </span>
   </a>
@@ -1834,7 +1834,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Сказать редактору, чтобы он сказал автору
+        Предупредить редактор, чтобы он предупредил автора
       
     </span>
   </a>
@@ -1845,7 +1845,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Что валидация проверяет и что отказывается угадывать
+        Что валидация проверяет, а что отказывается угадывать
       
     </span>
   </a>
@@ -1888,16 +1888,17 @@
   
 
 
-<h1 id="3">3. Что можно собирать<a class="headerlink" href="#3" title="Permanent link">&para;</a></h1>
-<p>Вот фраза из <a href="../1-stages/">шага 1</a> вместе с её последствием:
-<code>register_stage</code> кладёт класс в <strong>глобальный на процесс</strong> реестр, поэтому
-каждая импортированная процессом стадия доступна каждому пайплайну в нём.</p>
-<p>Пока пайплайны ваши — нормально. Это перестаёт быть нормальным, как только
-они не ваши, — а «разработчик определяет блоки, кто-то менее доверенный их
-собирает» и есть та схема, ради которой StageFlow существует. Без чего-то
-ещё <code>ChargeCardStage</code> доступна любому JSON, который кто угодно запостил.</p>
-<p>Это «что-то ещё» — <a href="../../policy/"><code>Policy</code></a>: её задаёт хост, из пайплайна
-её не прочитать и уж точно не расширить.</p>
+<h1 id="3">3. Что разрешено собирать<a class="headerlink" href="#3" title="Permanent link">&para;</a></h1>
+<p>Вернёмся к фразе из <a href="../1-stages/">шага 1</a>, теперь уже с последствием:
+<code>register_stage</code> кладёт класс в реестр, общий на весь процесс, а значит любая
+импортированная стадия доступна любому пайплайну внутри него.</p>
+<p>Пока пайплайны ваши — это удобно. Как только они не ваши, это дыра. А
+«разработчик задаёт блоки, а собирает из них кто-то менее доверенный» — ровно
+та схема, ради которой StageFlow и существует. Без дополнительной защиты
+<code>ChargeCardStage</code> доступна любому JSON, который кто угодно отправил в
+<code>/api/run</code>.</p>
+<p>Такая защита — <a href="../../policy/"><code>Policy</code></a>. Её задаёт хост; из пайплайна её
+нельзя ни прочитать, ни тем более расширить.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">Limits</span><span class="p">,</span> <span class="n">Policy</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">BASIC</span> <span class="o">=</span> <span class="n">Policy</span><span class="p">(</span>
@@ -1912,28 +1913,28 @@
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="p">),</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
 </code></pre></div>
-<p>Три вещи, и <code>None</code> в любой из них означает «нет мнения», что не то же самое,
-что пустое множество: <code>Policy()</code> разрешает всё, <code>Policy(stages=set())</code> — ни
-одной стадии.</p>
-<h2 id="_1">Два слоя, один и тот же ответ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">pipeline</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">policy</span><span class="p">)</span>                       <span class="c1"># до: весь граф, сразу</span>
+<p>Три поля, и <code>None</code> в любом из них означает «ограничений нет» — это не то же
+самое, что пустое множество: <code>Policy()</code> разрешает всё, а
+<code>Policy(stages=set())</code> не разрешает ни одной стадии.</p>
+<h2 id="_1">Два рубежа, один и тот же ответ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">pipeline</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">policy</span><span class="p">)</span>                       <span class="c1"># до: весь граф целиком</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">Session</span><span class="p">(</span><span class="nb">id</span><span class="o">=...</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=...</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>    <span class="c1"># во время: каждый узел, когда до него дошли</span>
 </code></pre></div>
-<p>Валидация — то, по чему действует человек: она называет все проблемы разом,
-чтобы граф можно было починить, а не выяснять по узлу за прогон. Проверка в
-рантайме — то, что держит на самом деле, потому что граф может попасть в
-сессию, ни разу не пройдя валидацию. Одно не заменяет другое, и формулировки
-одинаковы в обоих случаях.</p>
-<p>Пример валидирует прямо в обработчике запроса, ещё до старта потока:</p>
+<p>Валидация нужна человеку: она перечисляет все проблемы разом, чтобы граф
+можно было починить, а не выяснять по одной ошибке за прогон. Проверка в
+рантайме — то, что держит защиту на самом деле, потому что граф может попасть
+в сессию, вообще не пройдя валидацию. Одно другое не заменяет, а формулировки
+ошибок в обоих случаях одинаковые.</p>
+<p>В примере валидация стоит прямо в обработчике запроса, ещё до запуска потока:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">policy</span><span class="p">:</span> <span class="n">Policy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Run</span><span class="p">:</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pipeline"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">pipeline</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">policy</span><span class="p">)</span>      <span class="c1"># отказ отвечает на POST, а не из потока через минуту</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">pipeline</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">policy</span><span class="p">)</span>      <span class="c1"># отказ придёт ответом на POST, а не через минуту из потока</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="o">...</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">policy</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="_2">Сказать редактору, чтобы он сказал автору<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p>Политика, о которой редактор не знает, — это политика, которую автор узнаёт
-через отказ. Поэтому оба читающих эндпоинта сужены ею:</p>
+<h2 id="_2">Предупредить редактор, чтобы он предупредил автора<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>Про политику, о которой редактор не знает, автор узнаёт только из отказа.
+Поэтому оба читающих эндпоинта сужены ею:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/stages"</span><span class="p">)</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stages</span><span class="p">(</span><span class="n">caller</span><span class="p">:</span> <span class="n">CallerPlan</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">policy</span> <span class="o">=</span> <span class="n">policy_for</span><span class="p">(</span><span class="n">caller</span><span class="p">)</span>
@@ -1947,19 +1948,20 @@
 <a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">policy</span> <span class="o">=</span> <span class="n">policy_for</span><span class="p">(</span><span class="n">caller</span><span class="p">)</span>
 <a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"api"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"plan"</span><span class="p">:</span> <span class="n">caller</span><span class="p">,</span> <span class="o">**</span><span class="n">capabilities</span><span class="p">(</span><span class="n">policy</span><span class="p">),</span> <span class="s2">"limits"</span><span class="p">:</span> <span class="n">_limits_of</span><span class="p">(</span><span class="n">policy</span><span class="p">)}</span>
 </code></pre></div>
-<p>Отдать спеку стадии, которую политика запрещает, — значит заставить редактор
-нарисовать её в палитре, а прогон — отвергнуть: ровно то расхождение, ради
-устранения которого политика и заведена, воспроизведённое одним эндпоинтом
+<p>Отдать спецификацию запрещённой стадии — значит заставить редактор нарисовать
+её в палитре, а прогон потом её отвергнуть. Ради устранения такого
+расхождения политику и завели — а здесь оно воспроизводится на один эндпоинт
 позже. <code>capabilities(policy)</code> делает то же самое для типов узлов.</p>
-<p>Что это даёт на дешёвом тарифе примера, если открыть пайплайн, которому нужен
-<code>map</code>:</p>
+<p>Вот что это даёт на дешёвом тарифе из примера, если открыть пайплайн,
+которому нужен <code>map</code>:</p>
 <p><img alt="Граф, который тариф не запустит, — сказано до запуска" src="../../../img/be-plan-refuses.png" /></p>
-<p>Четыре типа узлов в палитре погашены, на виноватом узле маркер, а в
-статус-баре написано <code>per_ticket: plan 'basic' does not include a 'map' node</code>
-— до того, как кто-нибудь нажал «Run».</p>
-<h2 id="_3">Что валидация проверяет и что отказывается угадывать<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>Против <code>limits</code> статическая валидация проверяет только то, что <strong>достоверно
-выводится из JSON</strong>:</p>
+<p>Четыре типа узлов в палитре погашены, на проблемном узле стоит метка, а
+в строке состояния написано
+<code>per_ticket: plan 'basic' does not include a 'map' node</code> — и всё это до того,
+как кто-нибудь нажал «Run».</p>
+<h2 id="_3">Что валидация проверяет, а что отказывается угадывать<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Из <code>limits</code> статическая валидация берёт только то, что <strong>достоверно следует
+из JSON</strong>:</p>
 <table>
 <thead>
 <tr>
@@ -1969,35 +1971,35 @@
 </thead>
 <tbody>
 <tr>
-<td>кратчайший путь через граф против <code>steps</code></td>
-<td>любой прогон проходит не меньше узлов, значит граф, чей самый дешёвый путь не влезает, не завершится вообще</td>
+<td>кратчайший путь по графу сверяется с <code>steps</code></td>
+<td>любой прогон проходит не меньше узлов, так что граф, у которого даже самая короткая дорога не влезает, не завершится вообще никогда</td>
 </tr>
 <tr>
-<td>глубина вложенности объявленных субпайплайнов против <code>depth</code></td>
-<td>вложенность записана, а не вычисляется</td>
+<td>глубина вложенности объявленных субпайплайнов — с <code>depth</code></td>
+<td>вложенность записана в JSON, её не нужно вычислять</td>
 </tr>
 <tr>
-<td>что просит каждый <code>retry</code> против <code>max_retries</code> и <code>max_delay_seconds</code></td>
-<td>числа лежат в JSON</td>
+<td>то, что запрашивает каждый <code>retry</code>, — с <code>max_retries</code> и <code>max_delay_seconds</code></td>
+<td>эти числа тоже лежат в JSON</td>
 </tr>
 </tbody>
 </table>
-<p>Стоимости цикла в этом списке нет и не будет: число проходов приходит из
-данных, а стоимость прохода — из его аргументов. Любое умножение здесь
-отвергало бы работающие графы, а ложный отказ рабочему графу хуже того
-потолка, ради которого он затевался.</p>
+<p>Стоимости цикла в списке нет и не будет: число проходов берётся из данных, а
+стоимость прохода — из его аргументов. Любое умножение здесь отвергало бы
+работоспособные графы, а ложный отказ рабочему графу хуже того потолка, ради
+которого его вводили.</p>
 <h2 id="_4">Потолок жёсткий<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p><code>BudgetExceeded</code> наследует <strong><code>BaseException</code></strong> и намеренно стоит вне иерархии
-<code>StageFlowError</code>: блоки <code>try</code> ловят <code>Exception</code>, и машинка <code>retry</code> тоже, — а
-тенант, способный обернуть граф в <code>try</code> и проглотить отказ, превратил бы
-любой лимит в украшение. Ловит его ровно одно место, <code>Session.run</code>, и
-заканчивает прогон так же, как это делает <code>stop</code>:</p>
+<p><code>BudgetExceeded</code> унаследован от <strong><code>BaseException</code></strong> и намеренно стоит вне
+иерархии <code>StageFlowError</code>. Блоки <code>try</code> ловят <code>Exception</code>, механизм <code>retry</code> —
+тоже, и если бы отказ по бюджету можно было поймать, любой тариф превращался
+бы в украшение: достаточно обернуть граф в <code>try</code>. Ловит его ровно одно место,
+<code>Session.run</code>, и завершает прогон так же, как это делает <code>stop</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">result</span><span class="o">.</span><span class="n">result</span>   <span class="c1"># {"status": "budget_exceeded", "meter": "kb_lookups", "limit": 20, "spent": 21}</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">result</span><span class="o">.</span><span class="n">meters</span>   <span class="c1"># всё потраченное — по нему и выставляется счёт</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">result</span><span class="o">.</span><span class="n">meters</span>   <span class="c1"># всё израсходованное — по нему и выставляется счёт</span>
 </code></pre></div>
 <hr />
-<p>Дальше: <a href="../4-metering/">во что обходится прогон</a> — как эти счётчики
-наполняются.</p>
+<p>Дальше: <a href="../4-metering/">во что обходится прогон</a> — откуда в этих
+счётчиках берутся числа.</p>
 
 
 

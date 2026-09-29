@@ -918,7 +918,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Маленькие, и про одно
+        Маленькие и об одном
       
     </span>
   </a>
@@ -940,7 +940,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ошибки — это дороги
+        Из ошибок получаются развилки
       
     </span>
   </a>
@@ -951,7 +951,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        События и текст по мере написания
+        События и потоковый текст
       
     </span>
   </a>
@@ -1020,7 +1020,7 @@
   <span class="md-ellipsis">
     
   
-    3. Что можно собирать
+    3. Что разрешено собирать
   
 
     
@@ -1076,7 +1076,7 @@
   <span class="md-ellipsis">
     
   
-    5. Кто звонит
+    5. Чей это запрос
   
 
     
@@ -1324,7 +1324,7 @@
   <span class="md-ellipsis">
     
   
-    Параллельные ветки
+    Узел parallel
   
 
     
@@ -1834,7 +1834,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Маленькие, и про одно
+        Маленькие и об одном
       
     </span>
   </a>
@@ -1856,7 +1856,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ошибки — это дороги
+        Из ошибок получаются развилки
       
     </span>
   </a>
@@ -1867,7 +1867,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        События и текст по мере написания
+        События и потоковый текст
       
     </span>
   </a>
@@ -1912,21 +1912,21 @@
 
 <h1 id="1">1. Ваши стадии<a class="headerlink" href="#1" title="Permanent link">&para;</a></h1>
 <p>Стадия — единственное место в StageFlow, где выполняется ваш код. Всё
-остальное — ветвления, циклы, обработка ошибок, фрейм — дело графа, а граф
+остальное — ветвления, циклы, обработка ошибок, фрейм — забота графа, а граф
 это JSON, который вполне мог нарисовать кто-то другой.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStage</span><span class="p">,</span> <span class="n">register_stage</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nd">@register_stage</span><span class="p">(</span><span class="s2">"LoadTicketStage"</span><span class="p">)</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">LoadTicketStage</span><span class="p">(</span><span class="n">BaseStage</span><span class="p">):</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="sd">"""</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="sd">    description: "Берёт подготовленный тикет из data/tickets.json"</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="sd">    description: "Берёт готовый тикет из data/tickets.json"</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="sd">    icon: "/icons/ticket.svg"</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="sd">    category: "support.data"</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="sd">    arguments:</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="sd">      ticket_id:</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="sd">        type: string</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="sd">        optional: true</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="sd">        description: "Идентификатор тикета (T-1001); пусто — первый в файле"</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="sd">        description: "Номер тикета (T-1001); пусто — первый в файле"</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="sd">    outputs:</span>
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="sd">      text:</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="sd">        type: string</span>
@@ -1941,23 +1941,24 @@
 <a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>        <span class="o">...</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">({</span><span class="s2">"text"</span><span class="p">:</span> <span class="n">ticket</span><span class="p">[</span><span class="s2">"text"</span><span class="p">],</span> <span class="s2">"customer_id"</span><span class="p">:</span> <span class="n">ticket</span><span class="p">[</span><span class="s2">"customer_id"</span><span class="p">]})</span>
 </code></pre></div>
-<p>Докстринг — не документация, которую заодно парсят, а <strong>и есть</strong> спека:
-редактор рисует по ней карточку — имя, иконку, цвет, какие порты есть и
-зачем каждый. Полная грамматика — на странице
-<a href="../../stage-specification/">Спецификация стадии</a>; здесь важно другое:
-записать это больше негде, поэтому оно не может разойтись с кодом под ним.</p>
-<p><img alt="Палитра, собранная из спек, которые отдал бэкенд" src="../../../img/be-plan-palette.png" width="240" /></p>
-<h2 id="_1">Маленькие, и про одно<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Стадии в примере намеренно крошечные: загрузить тикет, классифицировать,
-поискать в базе знаний, отрисовать ответ, отправить, эскалировать. Это не
-аккуратизм. <strong>Узел на холсте — это стадия</strong>, и стадия, которая и ищет что-то,
-и решает, что с найденным делать, превращается в узел, чей смысл приходится
-угадывать по имени. Решения место в графе, в виде <code>condition</code> или <code>switch</code>,
-где их видно и с ними можно спорить.</p>
-<p>Проверка простая: если в описании нужно слово «и», это две стадии.</p>
+<p>Докстринг здесь — не документация, которую заодно разбирают парсером. Это и
+есть спецификация: по ней редактор рисует карточку — имя, иконку, цвет, какие
+у узла порты и зачем каждый из них. Полная грамматика описана в
+<a href="../../stage-specification/">Спецификации стадии</a>; здесь важно другое —
+записать это больше негде, поэтому оно физически не может разойтись с кодом.</p>
+<p><img alt="Палитра собрана из спецификаций, которые отдал бэкенд" src="../../../img/be-plan-palette.png" width="240" /></p>
+<h2 id="_1">Маленькие и об одном<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Стадии в примере намеренно крошечные: загрузить тикет, определить тему,
+поискать в базе знаний, собрать ответ, отправить, эскалировать. И дело тут
+не в любви к порядку. <strong>Узел на холсте — это стадия</strong>, и стадия,
+которая и ищет что-то, и решает, что с найденным делать, превращается в узел,
+о смысле которого приходится догадываться по названию. Решениям место в
+графе — в <code>condition</code> или <code>switch</code>, где их видно и где с ними можно спорить.</p>
+<p>Проверить легко: если в описании стадии не обойтись без союза «и», перед вами
+две стадии.</p>
 <h2 id="_2">Аргументы приходят из фрейма<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p>Стадия никогда не читает фрейм. Ей передают аргументы, а откуда они взялись —
-говорит граф:</p>
+<p>Стадия никогда не читает фрейм сама. Ей передают аргументы, а откуда их взять
+— решает граф:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"classify"</span><span class="p">,</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"stage"</span><span class="p">,</span>
@@ -1968,26 +1969,27 @@
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
 </code></pre></div>
 <p><code>arguments.vars</code> связывает имя аргумента с переменной фрейма,
-<code>arguments.const</code> — с литералом, а ключ, оканчивающийся на <code>.</code>, делает
-значение <a href="../../expressions/">CEL-выражением</a>. <code>outputs</code> работает в обратную
-сторону. Стадия видит обычный словарь и возвращает обычный словарь — за счёт
-этого её можно тестировать вообще без пайплайна, и за счёт этого же одна
-стадия может стоять в графе дважды и читать разные переменные.</p>
-<h2 id="_3">Ошибки — это дороги<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>Упавшая стадия сообщает графу, что случилось, а граф решает. Работает это
-только если исключения различимы:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmAuthError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>      <span class="c1"># ключа нет — падаем на правила</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmRateLimited</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>    <span class="c1"># 429 — поможет retry с паузой</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmUnavailable</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>    <span class="c1"># 5xx — retry тоже поможет</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmBadAnswer</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>      <span class="c1"># модель ответила не тем</span>
+<code>arguments.const</code> — со значением прямо из JSON, а ключ с точкой на конце
+превращает значение в <a href="../../expressions/">CEL-выражение</a>. <code>outputs</code>
+работает в обратную сторону. Стадия получает обычный словарь и возвращает
+обычный словарь — поэтому её можно тестировать вообще без пайплайна, и
+поэтому же одна и та же стадия может стоять в графе дважды и читать при этом
+разные переменные.</p>
+<h2 id="_3">Из ошибок получаются развилки<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Упавшая стадия сообщает графу, что именно случилось, а граф решает, куда
+идти дальше. Работает это, только если исключения можно различить:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmAuthError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>      <span class="c1"># ключа нет — уходим на правила</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmRateLimited</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>    <span class="c1"># 429 — поможет повтор с паузой</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmUnavailable</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>    <span class="c1"># 5xx — повтор тоже поможет</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmBadAnswer</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>      <span class="c1"># модель ответила не то</span>
 </code></pre></div>
 <p>Четыре класса, а не один, потому что в графе это четыре разные дороги:
-<code>retry</code> на двух временных, <code>except</code> вниз на ключевые слова на первом, отдельная
-концовка на последнем. Единственный голый <code>Exception</code> не оставил бы автору
-пайплайна ничего, на чём ветвиться, — см.
+<code>retry</code> на двух временных сбоях; <code>except</code>, уводящий на поиск по ключевым
+словам, если ключа нет; отдельная концовка для испорченного ответа. Один голый
+<code>Exception</code> не оставил бы автору пайплайна ничего, на чём ветвиться, — см.
 <a href="../../errors/">Ошибки и повторы</a>.</p>
-<h2 id="_4">События и текст по мере написания<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>Стадия может испускать события, и они попадают в лог редактора по ходу
+<h2 id="_4">События и потоковый текст<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>Стадия может отправлять события, и они попадают в лог редактора прямо по ходу
 прогона:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">allowed_events</span> <span class="o">=</span> <span class="p">[</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">EventSpec</span><span class="p">(</span><span class="s2">"reply_sent"</span><span class="p">,</span> <span class="s2">"Ответ ушёл клиенту"</span><span class="p">,</span>
@@ -1996,31 +1998,34 @@
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">"reply_sent"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"ticket_id"</span><span class="p">:</span> <span class="n">ticket_id</span><span class="p">,</span> <span class="s2">"channel"</span><span class="p">:</span> <span class="s2">"email"</span><span class="p">,</span> <span class="s2">"chars"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">reply</span><span class="p">)})</span>
 </code></pre></div>
-<p>Объявить их стоит трёх строк: необъявленный тип отвергается, так что опечатка
-в имени события ловится, а не производит тихо событие, которого никто не ждёт.</p>
-<p>Одна форма payload — контракт, а не соглашение. Всё, что содержит
+<p>Три строки объявления стоят того: необъявленный тип отклоняется, так что
+опечатка в названии события всплывёт сразу, а не превратится в событие,
+которого никто не ждёт.</p>
+<p>Одна форма payload — это уже не соглашение, а контракт. Всё, в чём есть
 <code>{"stream": true, "text": "…"}</code>, редактор считает куском текста, который узел
-пишет прямо сейчас, и показывает в колонке отладочной панели по мере
+пишет прямо сейчас, и выводит в отдельной колонке отладочной панели по мере
 поступления:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">reply</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">):</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">"reply_chunk"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"stream"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">:</span> <span class="n">word</span> <span class="o">+</span> <span class="s2">" "</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">:</span> <span class="s2">"Reply"</span><span class="p">})</span>
 </code></pre></div>
-<p>Редактор ничего не знает здесь ни про ботов поддержки, ни про языковые модели
-— он знает форму payload. Стадия расшифровки речи или стадия сборочного лога
-получают то же самое бесплатно, а <code>label</code> — это как называется колонка.</p>
+<p>Никаких знаний про ботов поддержки и языковые модели у редактора при этом
+нет — он опознаёт форму payload, и только её. Стадия расшифровки речи или
+стадия, показывающая лог сборки, получат ровно то же поведение, ничего для
+этого не делая, а <code>label</code> задаёт заголовок колонки.</p>
 <h2 id="_5">Регистрация<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p><code>register_stage</code> кладёт класс в <strong>глобальный на процесс</strong> реестр — именно это
-и делает возможным <code>get_stages()</code>, а значит и <code>/api/stages</code>:</p>
+<p><code>register_stage</code> кладёт класс в реестр, <strong>общий на весь процесс</strong>, — именно
+поэтому и возможны <code>get_stages()</code>, а за ними и <code>/api/stages</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># app/stages/__init__.py</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">support</span><span class="p">,</span> <span class="n">llm</span>  <span class="c1"># noqa: F401 - импорт их и регистрирует</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">support</span><span class="p">,</span> <span class="n">llm</span>  <span class="c1"># noqa: F401 - сам импорт их и регистрирует</span>
 </code></pre></div>
-<p>Глобальный — это и есть та фраза с последствиями со
-<a href="../">вступления</a>: каждая импортированная процессом стадия доступна
-каждому пайплайну в нём. Пока пайплайны пишете вы, это нормально. Это
-перестаёт быть нормальным ровно в тот момент, когда их пишет кто-то другой, —
-о чём <a href="../3-policy/">шаг 3</a>.</p>
+<p>«Общий на весь процесс» — это и есть то самое, о чём предупреждало
+<a href="../">вступление</a>: любая стадия, которую процесс импортировал,
+доступна любому пайплайну внутри него. Пока пайплайны пишете вы — не
+страшно. Страшно становится ровно тогда, когда их пишет кто-то другой, и об
+этом <a href="../3-policy/">шаг 3</a>.</p>
 <hr />
-<p>Дальше: <a href="../2-endpoints/">эндпоинты</a> — как редактор до всего этого доберётся.</p>
+<p>Дальше: <a href="../2-endpoints/">эндпоинты</a> — как редактор до всего этого
+доберётся.</p>
 
 
 
