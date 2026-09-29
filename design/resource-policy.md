@@ -47,13 +47,13 @@ Not three systems for cost, time and limits — one, with two kinds of meter:
 
 | Kind | Behaviour | Examples | Checked |
 |---|---|---|---|
-| **counter** | grows, never falls | `seconds`, `steps`, `usd`, `tokens`, `llm_calls` | on every charge |
+| **counter** | grows, never falls | `seconds`, `steps`, `tokens`, `llm_calls`, `http_calls` | on every charge |
 | **gauge** | an instantaneous value | `concurrency`, `depth`, `frame_bytes` | on acquire |
 
 The runtime charges `seconds` and `steps` itself; stages charge the rest.
 Meter names are **not** fixed by the core: a platform counts what is scarce
 for it. One check, one line in the event stream, one row in the debug panel,
-for `usd` as much as for `crm_writes`.
+for `tokens` as much as for `crm_writes`.
 
 `seconds` is a hybrid, deliberately: it is reported as a counter so that it
 shows up in the same table as everything else, but it is *enforced* as a
@@ -89,11 +89,11 @@ class Policy:
 `Budget` is the mutable half — one object for the whole session tree:
 
 ```python
-budget.charge("usd", 0.002)        # counter; raises when it goes over
-budget.settle("usd", 0.0031)       # replaces a reservation with the real figure
+budget.charge("tokens", 512)       # counter; raises when it goes over
+budget.settle("tokens", 731)       # replaces a reservation with the real figure
 with budget.gauge("concurrency"):  # peak; raises on acquire
     ...
-budget.spent()                     # {"steps": 412, "usd": 0.31, ...}
+budget.spent()                     # {"steps": 412, "tokens": 5120, ...}
 budget.remaining("seconds")        # what a stage timeout is clamped to
 ```
 
@@ -102,7 +102,7 @@ budget.remaining("seconds")        # what a stage timeout is clamped to
 | Point | What happens | Why there |
 |---|---|---|
 | `Session.execute_node` | charge `steps`, check the deadline, gauge `depth` | 0.8.0 already made it the single path for every node, in `run`, `run_scope`, `run_subgraph` and `map` — the same choke point the debugger uses |
-| `Session.run_stage` | stage allowed? price → reserve → run under `min(stage.timeout, remaining)` → settle | the arguments are resolved by here, which the price formula needs |
+| `Session.run_stage` | stage allowed? reserve → run under `min(stage.timeout, remaining)` → settle | the arguments are resolved by here, which `reserve` reads |
 | `map` / `parallel` | gauge `concurrency` per iteration and branch, check `max_iterations` | the only places that fan out |
 | `Pipeline.validate(policy=…)` | stages, node types, node count, depth, declared `retry` attempts, meter cross-check | so the tenant is told at save time, not at run time |
 
@@ -110,20 +110,16 @@ A child session of a `subpipeline` gets **the same** `Budget` object, not a
 copy — otherwise nesting multiplies the allowance. The debugger is already
 threaded down this way.
 
-## Price: two slots, and the one that matters is the second
+## What a stage spends: units, not money
 
-The cost of a model call is decided by the answer, not by the question. So a
-price is not one formula evaluated up front; it is two optional slots, and
-they differ only in what they can see:
+A stage charges the **units it physically consumed** — `tokens`, `llm_calls`,
+`http_calls`, `rows`. Those are facts it knows. What a unit is worth is a
+property of a price list, it changes without any code changing, and it is the
+platform's business — the same boundary that keeps the words "tenant" and
+"subscription" out of the core. A framework that put dollars in stage
+docstrings would be pricing in the wrong place.
 
-| Slot | Evaluated | Sees | For |
-|---|---|---|---|
-| `reserve` | before the stage runs | `args` | may this be attempted at all |
-| `actual` | after it returns | `args` **and** `output` | what it really cost |
-
-`output` is the same namespace the `outputs` mapping already works over — the
-dict a stage returned, or its attributes, exactly as `apply_outputs` sees it.
-Nothing new to learn, and the number the vendor reports is right there:
+So a stage says one thing, once, in Python:
 
 ```python
 @register_stage("LlmTriageStage")
@@ -131,48 +127,54 @@ class LlmTriageStage(BaseStage):
     """
     description: "Classify a ticket with a model"
     timeout: 60
-    outputs:
-      topic: {type: string}
-      tokens_in: {type: int}
-      tokens_out: {type: int}
-    price:
-      usd:
-        reserve: 0.05                      # the worst this call may cost
-        actual: "0.000003 * output.tokens_in + 0.000015 * output.tokens_out"
+    reserve:                     # before the call, over args — admission only
       llm_calls: 1
+      tokens: "args.max_tokens + size(args.text) / 3"
     """
 
     async def run(self):
         answer = await self.client.chat(self.get_arguments()["text"])
-        self.set_outputs({"topic": answer.topic,
-                          "tokens_in": answer.usage.input,
-                          "tokens_out": answer.usage.output})
+        self.set_outputs({"topic": answer.topic})
+        self.charge(tokens=answer.usage.total, llm_calls=1)
 ```
 
-The stage does not mention money at all. It returns what it used; the price
-of those units is a property of the deployment, and it lives in the spec
-where the platform can read and show it.
+Two mechanisms, and they do not overlap:
 
-A fixed price is a bare number — it means both slots at once:
+| | Where | Sees | Answers |
+|---|---|---|---|
+| `reserve` | the spec, declarative | `args` | may this be attempted at all |
+| `charge()` | the stage, in code | everything the stage knows | what it actually spent |
 
-```yaml
-price:
-  usd: 0.001
-  http_calls: 1
-```
+`reserve` has to be declarative because it is read *before* anything runs:
+the editor can show "up to 4000 tokens a call" on the card, and the platform
+can refuse a graph without executing it. `charge()` has to be code because
+the truth is only known at the end, and by then a formula buys nothing — the
+result is not introspectable anyway.
 
-### When a formula is the wrong tool
+### Why there is no declarative price for the actual figure
 
-Per-model rate tables, vendor-reported totals, a price that depends on which
-branch the code took — these are not worth bending CEL around. The stage says
-so directly, and an explicit charge wins over whatever the spec computed:
+An earlier draft had a second slot, `actual`, evaluated over the stage's
+result. It was dropped, and the reason is worth keeping:
 
-```python
-self.charge(usd=answer.billed_usd, tokens=answer.usage.total)
-```
+- the justification for declaring things is that they can be read without
+  running. That holds for `reserve` and cannot hold for a figure computed
+  from a result — so the second slot paid the price of a second mechanism
+  and bought none of the benefit;
+- it tied money to output field names. Renaming an output would quietly
+  change the price: the formula either fails because of a docstring or
+  evaluates to zero and gives the work away. Neither is catchable by a test;
+- it needed a precedence rule against `charge()`, and the history of this
+  project is the opposite motion — per-node `catch` became the `try` node,
+  `config` collapsed into one argument channel, the `global` scope went. Two
+  channels for one thing have always been merged here, not added;
+- "the rates change without touching the code" does not survive contact: a
+  docstring *is* the stage's source.
 
-So: `reserve` gates admission, `actual` prices the common linear case
-declaratively, `charge()` is for everything a formula should not express.
+If a platform wants a money ceiling inside a run — because its models are
+priced differently and it will not wait for billing to find out — nothing
+stops it charging a meter of its own from its own stage:
+`self.charge(usd=self.rates[model] * tokens)`. Meter names are free-form. That
+is its decision, not a mechanism of the framework.
 
 ### The order, and what happens when it goes wrong
 
@@ -180,24 +182,24 @@ declaratively, `charge()` is for everything a formula should not express.
    **the stage never starts** and the run stops. An expensive operation is not
    begun, rather than cut off halfway.
 2. The stage runs.
-3. `actual` (or `charge()`) replaces the reservation for the meters it names
-   and adds the ones it does not. Without replacing, an amount both reserved
-   and charged would be counted twice.
+3. `charge()` **replaces** the reservation for the meters it names and adds
+   the ones it does not. Without replacing, an amount both reserved and
+   charged would be counted twice. A stage that charges nothing is settled at
+   what it reserved.
 
 **If the stage fails, the reservation stands.** A call that went out and then
-timed out still cost money; refunding it by default would be the optimistic
+timed out still spent tokens; refunding it by default would be the optimistic
 lie. A stage that knows better charges the truth from its own `except`.
 
-A stage with no `price` is free. Forgetting it therefore gives work away, so
-`validate()` warns when a pipeline uses a stage that declares no price while
-the policy limits meters.
+A stage that reserves nothing and charges nothing is free. Forgetting both
+therefore gives work away, so `validate()` warns when a pipeline uses a stage
+that declares no `reserve` while the policy limits meters that stages charge.
 
-**The unavoidable overshoot.** With an after-the-fact price the ceiling can be
-exceeded by one call: the model has already answered and the money is spent.
-The most that can be overshot is the difference between the priciest
-`reserve` in the plan and what it actually cost. A platform that cannot accept
-even that sets `reserve` to a true upper bound — which is what `max_tokens`
-on the call is for.
+**The unavoidable overshoot.** The truth arrives after the spending: the model
+has already answered. The ceiling can be exceeded by the difference between
+what a stage reserved and what it turned out to use. A platform that cannot
+accept even that makes `reserve` a true upper bound — which, for a model call,
+is exactly what `max_tokens` is for.
 
 ## Exceeding it
 
@@ -214,10 +216,10 @@ why:
 
 ```python
 result = await session.run()
-result.result    # {"status": "budget_exceeded", "meter": "usd",
-                 #  "limit": 1.0, "spent": 1.0031}
+result.result    # {"status": "budget_exceeded", "meter": "tokens",
+                 #  "limit": 400000, "spent": 400512}
 result.artifacts # whatever the run had already produced
-result.meters    # {"steps": 412, "seconds": 8.2, "usd": 1.0031, "tokens": 5120}
+result.meters    # {"steps": 412, "seconds": 8.2, "tokens": 400512, "llm_calls": 9}
 ```
 
 ## A platform wiring two plans
@@ -228,7 +230,7 @@ PLANS = {
         stages=frozenset({"LoadTicket", "ClassifyByRules", "Template", "SetValue"}),
         node_types=frozenset({"entry", "stage", "condition", "switch", "terminal"}),
         limits=Limits(
-            counters={"seconds": 30, "steps": 5_000, "usd": 0.0},
+            counters={"seconds": 30, "steps": 5_000, "llm_calls": 0},
             gauges={"concurrency": 4, "depth": 3},
             max_iterations=200,
         ),
@@ -238,7 +240,7 @@ PLANS = {
                           "LlmTriage", "LlmReply"}),
         node_types=None,                       # every type the core has
         limits=Limits(
-            counters={"seconds": 300, "steps": 100_000, "usd": 5.0, "llm_calls": 200},
+            counters={"seconds": 300, "steps": 100_000, "tokens": 400_000, "llm_calls": 200},
             gauges={"concurrency": 16, "depth": 8, "frame_bytes": 8_000_000},
             max_iterations=10_000,
         ),
@@ -253,7 +255,8 @@ async def run_for(tenant, pipeline_json, vars):
     session = Session(id=f"{tenant.id}:{uuid4()}", pipeline=pipeline,
                       context=Context(vars=vars), policy=policy)
     result = await session.run()
-    await billing.record(tenant, result.meters)   # the period quota lives here
+    await billing.record(tenant, result.meters)   # units -> money, and the
+                                                  # period quota, live here
     return result
 ```
 
@@ -288,18 +291,18 @@ server.
 
 ## Predictability, and why `map` changed it
 
-While a graph was a chain, a static cost estimate was a sum over reachable
-nodes. With `map` the iteration count comes from the data, so **the graph has
-no upper bound any more** — only a floor.
+While a graph was a chain, an estimate was a sum of `reserve` over the
+reachable nodes. With `map` the iteration count comes from the data, so
+**the graph has no upper bound any more** — only a floor.
 
-Hence: to sell "a pipeline up to 1000" and mean it *before* the run,
+Hence: to sell "a pipeline up to 400 000 tokens" and mean it *before* the run,
 `max_iterations` must be part of the plan. Otherwise the figure is not a
 promise but a place where the run gets cut. It is a required field of the
 policy for that reason, not an option.
 
-Also: an estimate can only be computed from literal arguments. An argument
-read from the frame is known at execution time, so the editor shows a price
-for constant nodes and "depends on the data" for the rest.
+Also: `reserve` can only be evaluated from literal arguments ahead of time. An
+argument read from the frame is known at execution time, so the editor shows
+a figure for constant nodes and "depends on the data" for the rest.
 
 ## What is deliberately not here
 
@@ -323,7 +326,7 @@ for constant nodes and "depends on the data" for the rest.
   can be thirty thousand calls;
 - a stage timeout is clamped by the remaining deadline, or the budget leaks by
   the length of the last stage;
-- a meter name typo (`usd` / `USD`) silently means "unlimited" unless
+- a meter name typo (`tokens` / `Tokens`) silently means "unlimited" unless
   `strict_meters` is on;
 - waiting for a human is not work: `wait_input` must not burn the deadline,
   and today it burns the stage's 30-second timeout instead.
@@ -334,8 +337,8 @@ for constant nodes and "depends on the data" for the rest.
    central claim, and the one a reader will poke at first.
 2. **Meters and `Limits`**: `seconds`/`steps`, gauges, one budget per session
    tree, the hard stop, `BudgetExceeded` outside the catchable tree.
-3. **Prices**: `price:` in the spec, `charge()`, reserve/settle,
-   `max_iterations`.
+3. **Spending**: `reserve:` in the spec, `charge()` in the stage,
+   reserve/settle, `max_iterations`.
 4. **Outward**: `/api/meta` describing the *caller* rather than the backend,
    the remaining budget in the debug panel, a documentation page.
 
