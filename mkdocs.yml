@@ -51,6 +51,13 @@ nav:
       - 5. When a node fails: tutorial/5-errors.md
       - 6. A graph inside a node: tutorial/6-subpipelines.md
       - 7. Watching it run: tutorial/7-debugger.md
+  - Building a backend:
+      - What a backend is: backend/index.md
+      - 1. Your stages: backend/1-stages.md
+      - 2. The endpoints: backend/2-endpoints.md
+      - 3. What may be composed: backend/3-policy.md
+      - 4. What a run costs: backend/4-metering.md
+      - 5. Who is calling: backend/5-tenants.md
   - Reference:
       - Nodes:
           - The entry node: entry-node.md
@@ -119,6 +126,13 @@ plugins:
             5. When a node fails: 5. Когда узел падает
             6. A graph inside a node: 6. Граф внутри узла
             7. Watching it run: 7. Смотрим, как он работает
+            Building a backend: Свой бэкенд
+            What a backend is: Что такое бэкенд
+            1. Your stages: 1. Ваши стадии
+            2. The endpoints: 2. Эндпоинты
+            3. What may be composed: 3. Что можно собирать
+            4. What a run costs: 4. Во что обходится прогон
+            5. Who is calling: 5. Кто звонит
             Reference: Справочник
             Nodes: Узлы
             The entry node: Узел entry

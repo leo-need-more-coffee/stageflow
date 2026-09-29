@@ -19,7 +19,10 @@ a separate web page that draws and debugs a graph, while the core executes it.
 ## Where to start
 
 New here? The [tutorial](tutorial/index.md) builds a working pipeline step by
-step, with screenshots from the editor.
+step, with screenshots from the editor. Once the pipelines are somebody
+else's, [Building a backend](backend/index.md) is the other half: your stages
+behind an HTTP contract, with a policy deciding what may be composed on them
+and how much it may spend.
 
 | Page | What it covers |
 |---|---|
@@ -27,6 +30,21 @@ step, with screenshots from the editor.
 | [Node types](node-types.md) | the nine node types and their fields |
 | [Data model](data-model.md) | the frame, argument buckets, outputs |
 | [Expressions](expressions.md) | CEL, the `.$` suffix, the `vars` namespace |
+
+## Building a backend
+
+The editor executes nothing: your stages live on a backend of your own. Five
+steps, taking the [example backend](https://github.com/leo-need-more-coffee/stageflow-example)
+apart in the order it was written.
+
+| Page | What it covers |
+|---|---|
+| [What a backend is](backend/index.md) | the division of labour, and what the track builds |
+| [1. Your stages](backend/1-stages.md) | `register_stage`, specs, arguments, events, streaming |
+| [2. The endpoints](backend/2-endpoints.md) | the seven endpoints, a real `Session`, SSE, CORS |
+| [3. What may be composed](backend/3-policy.md) | a `Policy` per caller, and telling the editor |
+| [4. What a run costs](backend/4-metering.md) | `reserve:`, `charge()`, meters of your own |
+| [5. Who is calling](backend/5-tenants.md) | plans, a credential, and where the check goes |
 
 ## Reference
 

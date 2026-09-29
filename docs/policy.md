@@ -1,5 +1,10 @@
 # Policy: what a pipeline may be made of
 
+!!! tip "Building one?"
+    [Step 3 of the backend track](backend/3-policy.md) puts this page to work
+    in a running backend: a policy per caller, both endpoints narrowed by it,
+    and what the editor then shows the author.
+
 The registry says what the **process** can execute. That is a different
 question from what a **given pipeline** may use. A platform that runs
 pipelines on behalf of several customers hands each of them a subset — these
