@@ -61,7 +61,7 @@
 | `StageOutputError` | `KeyError` | запрошенное выходное поле не вернули |
 | `ArtifactNotFoundError` | `KeyError` | субпайплайн не вернул артефакт |
 | `ExpressionError` | `RuntimeError` | CEL-выражение не вычислилось |
-| `BranchError` | `RuntimeError` | ветка parallel упала или две писали одно имя |
+| `BranchError` | `RuntimeError` | ветка `parallel` упала или две писали одно имя |
 | `TypeCheckError` | `TypeError` | значение не совпало с объявленным типом |
 | `TypeDeclarationError` | `ValueError` | сломаны сами объявления типов |
 | `PayloadValidationError` | `ValueError` | payload события или ввода не прошёл схему |

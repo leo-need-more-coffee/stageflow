@@ -64,7 +64,7 @@ nav:
           - The stage node: stage-node.md
           - The condition node: condition-node.md
           - The switch node: switch-node.md
-          - Parallel branches: parallel-branches.md
+          - The parallel node: parallel-branches.md
           - The try node: try-node.md
           - The map node: map-node.md
           - The subpipeline node: subpipeline-node.md
@@ -130,16 +130,16 @@ plugins:
             What a backend is: Что такое бэкенд
             1. Your stages: 1. Ваши стадии
             2. The endpoints: 2. Эндпоинты
-            3. What may be composed: 3. Что можно собирать
+            3. What may be composed: 3. Что разрешено собирать
             4. What a run costs: 4. Во что обходится прогон
-            5. Who is calling: 5. Кто звонит
+            5. Who is calling: 5. Чей это запрос
             Reference: Справочник
             Nodes: Узлы
             The entry node: Узел entry
             The stage node: Узел stage
             The condition node: Узел condition
             The switch node: Узел switch
-            Parallel branches: Параллельные ветки
+            The parallel node: Узел parallel
             The try node: Узел try
             The map node: Узел map
             The subpipeline node: Узел subpipeline

@@ -54,11 +54,11 @@ apart in the order it was written.
 | [The stage node](stage-node.md) | arguments, outputs, `consume` |
 | [The condition node](condition-node.md) | a fork on a CEL expression |
 | [The switch node](switch-node.md) | many roads, first matching case |
-| [Parallel branches](parallel-branches.md) | concurrency, merge rules, cancellation |
+| [The parallel node](parallel-branches.md) | concurrency, merge rules, cancellation |
 | [The try node](try-node.md) | a region of the graph under `except` |
 | [The map node](map-node.md) | a region of the graph run once per element |
 | [The subpipeline node](subpipeline-node.md) | a nested graph and its boundary |
-| [The terminal node](terminal-node.md) | the end of a run, result and artifacts |
+| [The terminal node](terminal-node.md) | the end of a run, `result` and artifacts |
 | [Errors](errors.md) | `retry`, how an error travels, the exceptions |
 | [Policy](policy.md) | restricting the stages and node types a pipeline may use |
 | [Limits](limits.md) | meters, budgets, what a stage spends |

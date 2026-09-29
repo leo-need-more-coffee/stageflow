@@ -1,4 +1,4 @@
-# Parallel branches
+# The parallel node
 
 ```json
 {
