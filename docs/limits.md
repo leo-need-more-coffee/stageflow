@@ -1,5 +1,10 @@
 # Limits: how much a pipeline may consume
 
+!!! tip "Building one?"
+    [Step 4 of the backend track](backend/4-metering.md) fills these meters in
+    from real stages — which ones reserve, which only charge, and what the
+    debug panel makes of it.
+
 [A policy](policy.md) answers what a pipeline may be made of. This answers how
 much of anything it may use, and the two are separate because a graph built
 entirely of allowed stages can still loop, fan out into thousands of tasks, or
