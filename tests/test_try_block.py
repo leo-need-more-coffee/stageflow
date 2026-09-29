@@ -73,6 +73,35 @@ class TryBlockTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts["m2"], "two")
         self.assertEqual(result.artifacts["err"]["message"], "deep failure")
         self.assertEqual(result.artifacts["err"]["type"], "RuntimeError")
+        # the node that failed, not the block: the handler hangs off the block
+        # already, so `guard` here would be the one thing it already knows
+        self.assertEqual(result.artifacts["err"]["node"], "step3")
+
+    async def test_error_from_a_nested_block_names_the_node_of_this_scope(self):
+        """A failure deeper than one scope is named by the node of THIS scope
+        that contained it — the nested block, not the stage inside it. The outer
+        handler reasons about its own graph, and `inner` is a node of it."""
+        data = {
+            "entry": "outer",
+            "nodes": [
+                {"id": "outer", "type": "try", "body": "inner", "next": "done",
+                 "except": [{"error_equals": ["*"], "next": "handler",
+                             "result_var": "err"}]},
+                {"id": "inner", "type": "try", "body": "boom", "next": "after_inner",
+                 "except": [{"error_equals": ["KeyError"], "next": "never"}]},
+                {"id": "boom", "type": "stage", "stage": "BoomStage",
+                 "arguments": {"const": {"message": "nested failure"}}},
+                {"id": "never", "type": "terminal", "result": {"status": "wrong"}},
+                {"id": "after_inner", "type": "terminal", "result": {"status": "wrong"}},
+                {"id": "handler", "type": "terminal", "result": {"status": "handled"},
+                 "artifacts": ["err"]},
+                {"id": "done", "type": "terminal", "result": {"status": "ok"}},
+            ],
+        }
+        result, _ = await self._run(data)
+        self.assertEqual(result.result, {"status": "handled"})
+        self.assertEqual(result.artifacts["err"]["message"], "nested failure")
+        self.assertEqual(result.artifacts["err"]["node"], "inner")
 
     async def test_handler_selected_by_error_type(self):
         data = {

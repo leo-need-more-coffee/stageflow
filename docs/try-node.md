@@ -38,7 +38,10 @@ one's region.
   enclosing block or out of the session.
 - `result_var` puts the error into the frame as an object with the fields
   `type`, `full_type`, `message` and `node` — the last one names the node that
-  actually failed, which is not the block itself.
+  failed, which is not the block itself. A failure deeper than one scope is
+  named by the node of *this* block's body that contained it: an error from
+  inside a nested `try` or a `map` body names that nested node, because that is
+  the node this handler's own graph has.
 
 A handler sees the frame as the **last successfully completed node of the
 body** left it: the writes made before the failure are there, the failing

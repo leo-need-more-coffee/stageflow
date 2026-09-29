@@ -33,6 +33,11 @@ EVENT_HISTORY = 10_000
 @dataclass(slots=True)
 class ScopeFrame:
     ctx: Context
+    #: the node of this scope that is running. Kept so that a handler catching
+    #: an error can name what failed: by the time the exception is caught the
+    #: walker has unwound, and `_current_node_id` only follows the top-level
+    #: one, so inside a block it is somebody else's node
+    node_id: str | None = None
 
 
 @dataclass(slots=True)
@@ -367,6 +372,10 @@ class Session:
         frame: "ScopeFrame | None" = None,
     ) -> tuple["Node | None", Context]:
         while node is not None and node.id in scope and not self.finished:
+            if frame is not None:
+                # before, not after: if this one raises, this is the answer to
+                # "which node failed"
+                frame.node_id = node.id
             node, ctx = await self.execute_node(node, ctx)
             if frame is not None:
                 frame.ctx = ctx

@@ -33,6 +33,9 @@ class ExceptHandler:
         return matches_error(self.error_equals, exc)
 
     def error_payload(self, exc: BaseException, node_id: str) -> dict:
+        """@param node_id the node that raised, as far as the enclosing scope
+        knows it: a failure deeper inside a nested block is named by the node of
+        this scope that contained it."""
         return {
             "type": error_name(exc),
             "full_type": error_full_name(exc),
@@ -135,7 +138,12 @@ class TryNode(Node):
                 {"error": str(exc), "type": error_name(exc), "next": handler.next},
             )
             if handler.result_var:
-                ctx = ctx.with_var(handler.result_var, handler.error_payload(exc, self.id))
+                # the node that failed, not this block: the handler is attached
+                # to the block already, so the block's own id tells it nothing
+                ctx = ctx.with_var(
+                    handler.result_var,
+                    handler.error_payload(exc, frame.node_id or self.id),
+                )
             node, ctx = await session.run_scope(
                 session.pipeline.get_node(handler.next),
                 ctx,
