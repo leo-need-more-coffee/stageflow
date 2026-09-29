@@ -99,6 +99,22 @@ The order is reserve → run → settle:
 
 A stage that reserves and charges nothing is free.
 
+!!! warning "A loop is not reserved as a whole"
+    Reservations are per stage, taken as that stage is about to run — nothing
+    sums up what a `map` will cost before entering it, because the
+    reservation of an iteration depends on its arguments, which depend on the
+    item, which comes from the data. What *is* checked up front is the
+    iteration count: `iterations` is charged before the first pass, so a loop
+    over a thousand items on a plan allowing fifty is refused without running
+    any of them.
+
+    A loop therefore stops as soon as it cannot afford the next stage, with
+    the passes it did make already paid for. In `parallel` mode the overshoot
+    is bounded by `concurrency` rather than by one stage: calls already in
+    flight have already been made. A host that needs a hard ceiling for the
+    whole loop gets it by arithmetic rather than prediction — cap
+    `iterations` so that the count times the worst case fits the budget.
+
 ## Running out
 
 The ceiling is hard. `BudgetExceeded` inherits **`BaseException`**,

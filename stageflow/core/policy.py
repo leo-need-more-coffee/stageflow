@@ -1,20 +1,3 @@
-"""What a pipeline is allowed to be made of.
-
-The registry answers what the *process* can execute. That is not the same
-question as what a given pipeline may use: a platform running pipelines on
-behalf of several tenants hands each of them a subset — these stages, these
-node types — and the subset is the boundary the tenant cannot argue with,
-because the tenant only writes the graph.
-
-Until now that subset could only be expressed by running a separate process
-per set of stages, since the registry is a module-level global. A `Policy`
-makes it a value: one process, one registry, a different allowance per
-session.
-
-Nothing here is read from the pipeline JSON, and nothing in the JSON can
-widen it. A policy is given to `Session` by the host, next to the debugger.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -30,7 +13,18 @@ def _freeze(names: Iterable[str] | None) -> frozenset[str] | None:
 
 @dataclass(frozen=True)
 class Policy:
-    """The allowance of one session.
+    """The allowance of one session: which blocks, and how much of anything.
+
+    The registry answers what the *process* can execute, which is not the
+    question a platform running pipelines for several tenants has. Each of
+    them gets a subset — these stages, these node types — and the subset is
+    the boundary the author of a graph cannot argue with, because they only
+    write the graph. Until this existed the subset could only be expressed by
+    running a separate process per set of stages, the registry being a
+    module-level global.
+
+    Given to `Session` by the host, next to the debugger. Nothing is read
+    from the pipeline JSON and nothing in it can widen a policy.
 
     `None` and the empty set mean opposite things, and the difference is the
     whole point: `None` is "no opinion, whatever the process has registered",

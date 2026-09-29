@@ -1,15 +1,3 @@
-"""What this build of StageFlow can do, in a form a client can read.
-
-A visual editor is written against one version of the core and then pointed at
-whatever backend the user has running. A version number alone does not answer
-the question it actually has — "can I offer a `map` node here?" — because the
-answer depends on the build, not on a range of releases someone has to keep a
-table of. So the core answers it directly: here are the node types I execute.
-
-A backend is expected to hand this to its clients (the example backend serves
-it at `GET /api/meta`); the shape is small and additive on purpose.
-"""
-
 from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version as _package_version
@@ -55,6 +43,12 @@ def capabilities(policy: Policy | None = None) -> dict[str, Any]:
     what a backend should serve to a client: an editor needs to know what
     *this* caller may draw, and the reason a node is unavailable — an older
     core or a narrower allowance — is not a distinction it has to make.
+
+    This exists because a version number cannot answer the question a client
+    actually has. An editor built against one version and pointed at whatever
+    backend is running needs to know whether it may offer a `map` node here,
+    and a build with a node type from a plugin belongs to no range of
+    releases. So the registry answers for itself.
     """
     node_types = sorted(get_node_types())
     stages = sorted(get_stages())

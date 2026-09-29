@@ -1,33 +1,3 @@
-"""How much a session may consume.
-
-`Policy` answers what a pipeline may be made of. This answers how much of
-anything it may use, and the two are separate for a reason: a graph built
-entirely of allowed stages can still loop forever, fan out into thousands of
-tasks, or run until the process dies.
-
-One mechanism, not three. Everything is a **meter**, and meters come in two
-kinds:
-
-- **counters** grow and never fall — `steps`, `iterations`, `tokens`,
-  `llm_calls`. Checked whenever something charges them.
-- **gauges** are instantaneous — `concurrency`, `depth`, `frame_bytes`.
-  Checked when something takes them up, released when it lets go.
-
-The runtime charges `steps` and `iterations` and holds the gauges; stages
-charge whatever they spent. Names are not fixed by the core: a host counts
-what is scarce for it, and a meter nobody limits simply accumulates and comes
-back in the result, which is what a bill is made of.
-
-`seconds` is the one hybrid, deliberately. It is reported like a counter so
-that it appears in the same table as everything else, but it is *enforced* as
-a deadline: a counter is only checked when something charges it, and a stage
-that hangs charges nothing.
-
-Nothing is measured unless it is limited. A meter absent from the limits is
-not computed at all, so the cost of the whole mechanism to a host that sets
-no limits is one `if`.
-"""
-
 from __future__ import annotations
 
 import time
@@ -66,7 +36,27 @@ class BudgetExceeded(BaseException):
 
 @dataclass(frozen=True)
 class Limits:
-    """What a session may spend. Given by the host, never by the pipeline."""
+    """What a session may spend. Given by the host, never by the pipeline.
+
+    A `Policy` says what a pipeline may be made of; this says how much of
+    anything it may use, and the two are separate because a graph built
+    entirely of allowed stages can still loop, fan out into thousands of
+    tasks, or run until the process dies.
+
+    One mechanism rather than three, with two kinds of meter. **Counters**
+    grow and never fall — `seconds`, `steps`, `iterations`, `tokens`.
+    **Gauges** are instantaneous — `concurrency`, `depth`, `frame_bytes`.
+    The runtime charges `steps` and `iterations` and holds the gauges;
+    stages charge whatever they spent.
+
+    Names are not fixed by the core: a host counts what is scarce for it, and
+    a meter nobody limits simply accumulates and comes back in the result,
+    which is what a bill is made of.
+
+    Nothing is measured unless it is limited. A meter absent from here is not
+    computed at all — `frame_bytes` means serialising the frame — so the cost
+    of the whole mechanism to a host that sets no limits is one `if`.
+    """
 
     #: cumulative: {"seconds": 30, "steps": 10_000, "tokens": 400_000}
     counters: dict[str, float] = field(default_factory=dict)
@@ -100,6 +90,11 @@ class Budget:
     the iterations of its `map` nodes and the child sessions of its
     subpipelines. A copy per child would multiply the allowance by the depth
     of nesting, which is the opposite of a limit.
+
+    `seconds` is the one hybrid: reported like a counter so that it lands in
+    the same table as everything else, enforced as a deadline because a
+    counter is only checked when something charges it, and a stage that hangs
+    charges nothing.
 
     Not thread-safe, and does not need to be: everything drawing on one budget
     runs in one event loop.
