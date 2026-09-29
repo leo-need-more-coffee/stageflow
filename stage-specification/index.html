@@ -1862,9 +1862,37 @@ monochrome sets (lucide, feather, tabler) that paint via <code>currentColor</cod
 Without <code>icon</code> the editor draws a monogram of the stage name
 (<code>IncrementStage</code> → <code>IS</code>); without <code>color</code> it picks a deterministic colour for
 the category.</p>
-<p>A stage may also declare <code>allowed_events</code> and <code>allowed_inputs</code> (<code>EventSpec</code> /
-<code>InputSpec</code> with a <code>payload_schema</code>), a <code>category</code> and a <code>timeout</code>. All of it
-ends up in <code>get_specs()</code>.</p>
+<p>Four more things end up in <code>get_specs()</code>, and those are <strong>class attributes,
+not docstring keys</strong>: <code>category</code>, <code>timeout</code>, <code>allowed_events</code> and
+<code>allowed_inputs</code> (<code>EventSpec</code> / <code>InputSpec</code> with a <code>payload_schema</code>).</p>
+<table>
+<thead>
+<tr>
+<th>In the docstring</th>
+<th>On the class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>description</code>, <code>icon</code>, <code>icon_mono</code>, <code>color</code></td>
+<td><code>category</code></td>
+</tr>
+<tr>
+<td><code>arguments</code>, <code>outputs</code>, <code>reserve</code></td>
+<td><code>timeout</code></td>
+</tr>
+<tr>
+<td></td>
+<td><code>allowed_events</code>, <code>allowed_inputs</code></td>
+</tr>
+</tbody>
+</table>
+<p>A <code>category:</code> or <code>timeout:</code> written in the docstring is parsed and then
+dropped, and nothing warns. <code>get_specs()</code> reports the class attribute, so the
+spec and the deadline the run enforces agree with each other and there is
+nothing to notice: a stage that asks for <code>timeout: 90</code> in its docstring alone
+runs under the <code>BaseStage</code> default of 30 seconds, and the editor is told 30 as
+well.</p>
 <h2 id="what-it-asks-to-reserve">What it asks to reserve<a class="headerlink" href="#what-it-asks-to-reserve" title="Permanent link">&para;</a></h2>
 <p><code>reserve</code> declares what a run of the stage may consume, in the
 <a href="../limits/">meters</a> the host counts. Values are numbers or CEL over <code>args</code>,

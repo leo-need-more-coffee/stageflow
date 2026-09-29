@@ -1861,9 +1861,37 @@
 (lucide, feather, tabler), использующих <code>currentColor</code>. Без <code>icon</code> редактор
 рисует монограмму из имени стадии (<code>IncrementStage</code> → <code>IS</code>), без <code>color</code> —
 детерминированный цвет категории.</p>
-<p>Стадия может объявить <code>allowed_events</code> и <code>allowed_inputs</code> (<code>EventSpec</code> /
-<code>InputSpec</code> с <code>payload_schema</code>), <code>category</code> и <code>timeout</code>. Всё это попадает в
-<code>get_specs()</code>.</p>
+<p>В <code>get_specs()</code> попадает ещё четыре вещи, и они задаются <strong>атрибутами
+класса, а не ключами докстринга</strong>: <code>category</code>, <code>timeout</code>, <code>allowed_events</code> и
+<code>allowed_inputs</code> (<code>EventSpec</code> / <code>InputSpec</code> с <code>payload_schema</code>).</p>
+<table>
+<thead>
+<tr>
+<th>В докстринге</th>
+<th>Атрибутом класса</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>description</code>, <code>icon</code>, <code>icon_mono</code>, <code>color</code></td>
+<td><code>category</code></td>
+</tr>
+<tr>
+<td><code>arguments</code>, <code>outputs</code>, <code>reserve</code></td>
+<td><code>timeout</code></td>
+</tr>
+<tr>
+<td></td>
+<td><code>allowed_events</code>, <code>allowed_inputs</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>category:</code> или <code>timeout:</code>, написанные в докстринге, разбираются и
+отбрасываются, и ничто об этом не предупреждает. <code>get_specs()</code> отдаёт
+значение атрибута, поэтому спека и дедлайн, который держит прогон, друг другу
+не противоречат — заметить нечего. Стадия, которая просит <code>timeout: 90</code> только
+в докстринге, работает с дефолтом <code>BaseStage</code>, тридцатью секундами, и
+редактору сообщают те же тридцать.</p>
 <h2 id="_2">Что стадия просит зарезервировать<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p><code>reserve</code> объявляет, сколько прогон стадии может израсходовать, в тех
 <a href="../limits/">счётчиках</a>, которые считает хост. Значения — числа или CEL по
