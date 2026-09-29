@@ -12,7 +12,6 @@ class LoadTicketStage(BaseStage):
     """
     description: "Берёт готовый тикет из data/tickets.json"
     icon: "/icons/ticket.svg"
-    category: "support.data"
     arguments:
       ticket_id:
         type: string
@@ -27,6 +26,8 @@ class LoadTicketStage(BaseStage):
         description: "Кто написал"
     """
 
+    category = "support.data"
+
     async def run(self):
         wanted = (self.get_arguments().get("ticket_id") or "").strip()
         ...
@@ -35,9 +36,11 @@ class LoadTicketStage(BaseStage):
 
 Докстринг здесь — не документация, которую заодно разбирают парсером. Это и
 есть спецификация: по ней редактор рисует карточку — имя, иконку, цвет, какие
-у узла порты и зачем каждый из них. Полная грамматика описана в
-[Спецификации стадии](../stage-specification.ru.md); здесь важно другое —
-записать это больше негде, поэтому оно физически не может разойтись с кодом.
+у узла порты и зачем каждый из них. Два поля этой карточки стоят рядом
+атрибутами класса, а не ключами докстринга, — `category` и `timeout`; полная
+грамматика с этим разделением описана в
+[Спецификации стадии](../stage-specification.ru.md). Здесь важно другое: всё
+это лежит в том же файле, который описывает, в нескольких строках от кода.
 
 ![Палитра собрана из спецификаций, которые отдал бэкенд](../img/be-plan-palette.png){ width="240" }
 

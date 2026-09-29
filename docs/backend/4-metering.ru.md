@@ -51,11 +51,12 @@ class SendReplyStage(BaseStage):
 class LlmReplyStage(BaseStage):
     """
     description: "Пишет ответ по статье базы знаний — потоком"
-    timeout: 90
     reserve:
       llm_calls: 1
       tokens: "(size(args.text) + size(args.article)) / 4 + 600"
     """
+
+    timeout = 120
 
     async def run(self):
         answer, usage = await self._chat(...)

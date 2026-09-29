@@ -70,11 +70,12 @@ it used, not what that costs.
 class LlmTriageStage(BaseStage):
     """
     description: "Classify a ticket with a model"
-    timeout: 60
     reserve:
       llm_calls: 1
       tokens: "args.max_tokens + size(args.text) / 3"
     """
+
+    timeout = 60
 
     async def run(self):
         answer = await self.client.chat(self.get_arguments()["text"])

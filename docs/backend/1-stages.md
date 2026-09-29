@@ -12,7 +12,6 @@ class LoadTicketStage(BaseStage):
     """
     description: "Takes a prepared ticket out of data/tickets.json"
     icon: "/icons/ticket.svg"
-    category: "support.data"
     arguments:
       ticket_id:
         type: string
@@ -27,6 +26,8 @@ class LoadTicketStage(BaseStage):
         description: "Who wrote it"
     """
 
+    category = "support.data"
+
     async def run(self):
         wanted = (self.get_arguments().get("ticket_id") or "").strip()
         ...
@@ -35,10 +36,11 @@ class LoadTicketStage(BaseStage):
 
 The docstring is not documentation that happens to be parsed — it *is* the
 spec, and the editor draws the card from it: the name, the icon, the colour,
-which ports exist and what each one is for. The full grammar is on
-[Stage specification](../stage-specification.md); what matters here is that
-there is nowhere else to write it down, so it cannot fall out of date with the
-code underneath it.
+which ports exist and what each one is for. Two of the card's fields sit
+beside it as class attributes rather than docstring keys — `category` and
+`timeout` — and [Stage specification](../stage-specification.md) has the full
+grammar with that split. What matters here is that all of it lives in the file
+it describes, a few lines from the code it is about.
 
 ![The palette, built from the specs the backend serves](../img/be-plan-palette.png){ width="240" }
 

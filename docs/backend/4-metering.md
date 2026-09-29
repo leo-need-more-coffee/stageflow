@@ -48,11 +48,12 @@ you can meter first and decide on ceilings later.
 class LlmReplyStage(BaseStage):
     """
     description: "Writes the reply from the knowledge base article — as a stream"
-    timeout: 90
     reserve:
       llm_calls: 1
       tokens: "(size(args.text) + size(args.article)) / 4 + 600"
     """
+
+    timeout = 120
 
     async def run(self):
         answer, usage = await self._chat(...)

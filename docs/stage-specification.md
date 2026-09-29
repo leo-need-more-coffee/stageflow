@@ -25,9 +25,22 @@ Without `icon` the editor draws a monogram of the stage name
 (`IncrementStage` → `IS`); without `color` it picks a deterministic colour for
 the category.
 
-A stage may also declare `allowed_events` and `allowed_inputs` (`EventSpec` /
-`InputSpec` with a `payload_schema`), a `category` and a `timeout`. All of it
-ends up in `get_specs()`.
+Four more things end up in `get_specs()`, and those are **class attributes,
+not docstring keys**: `category`, `timeout`, `allowed_events` and
+`allowed_inputs` (`EventSpec` / `InputSpec` with a `payload_schema`).
+
+| In the docstring | On the class |
+|---|---|
+| `description`, `icon`, `icon_mono`, `color` | `category` |
+| `arguments`, `outputs`, `reserve` | `timeout` |
+| | `allowed_events`, `allowed_inputs` |
+
+A `category:` or `timeout:` written in the docstring is parsed and then
+dropped, and nothing warns. `get_specs()` reports the class attribute, so the
+spec and the deadline the run enforces agree with each other and there is
+nothing to notice: a stage that asks for `timeout: 90` in its docstring alone
+runs under the `BaseStage` default of 30 seconds, and the editor is told 30 as
+well.
 
 ## What it asks to reserve
 

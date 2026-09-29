@@ -24,9 +24,22 @@ color: "#ff8800"    # акцент карточки (по умолчанию —
 рисует монограмму из имени стадии (`IncrementStage` → `IS`), без `color` —
 детерминированный цвет категории.
 
-Стадия может объявить `allowed_events` и `allowed_inputs` (`EventSpec` /
-`InputSpec` с `payload_schema`), `category` и `timeout`. Всё это попадает в
-`get_specs()`.
+В `get_specs()` попадает ещё четыре вещи, и они задаются **атрибутами
+класса, а не ключами докстринга**: `category`, `timeout`, `allowed_events` и
+`allowed_inputs` (`EventSpec` / `InputSpec` с `payload_schema`).
+
+| В докстринге | Атрибутом класса |
+|---|---|
+| `description`, `icon`, `icon_mono`, `color` | `category` |
+| `arguments`, `outputs`, `reserve` | `timeout` |
+| | `allowed_events`, `allowed_inputs` |
+
+`category:` или `timeout:`, написанные в докстринге, разбираются и
+отбрасываются, и ничто об этом не предупреждает. `get_specs()` отдаёт
+значение атрибута, поэтому спека и дедлайн, который держит прогон, друг другу
+не противоречат — заметить нечего. Стадия, которая просит `timeout: 90` только
+в докстринге, работает с дефолтом `BaseStage`, тридцатью секундами, и
+редактору сообщают те же тридцать.
 
 ## Что стадия просит зарезервировать
 

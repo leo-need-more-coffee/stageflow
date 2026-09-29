@@ -71,11 +71,12 @@ result.meters   # {"steps": 412, "seconds": 8.2, "tokens": 5120, "llm_calls": 9}
 class LlmTriageStage(BaseStage):
     """
     description: "Классификация тикета моделью"
-    timeout: 60
     reserve:
       llm_calls: 1
       tokens: "args.max_tokens + size(args.text) / 3"
     """
+
+    timeout = 60
 
     async def run(self):
         answer = await self.client.chat(self.get_arguments()["text"])
