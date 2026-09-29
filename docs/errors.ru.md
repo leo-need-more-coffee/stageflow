@@ -66,3 +66,10 @@
 | `TypeDeclarationError` | `ValueError` | сломаны сами объявления типов |
 | `PayloadValidationError` | `ValueError` | payload события или ввода не прошёл схему |
 | `RegistryError` | `ValueError` | неизвестная стадия или тип узла |
+| `PolicyViolationError` | `PermissionError` | стадия или тип узла, не разрешённые [политикой](policy.ru.md) |
+
+Одна ошибка намеренно **вне** этого дерева. `BudgetExceeded` наследует
+`BaseException`, поэтому `except Exception` его не видит, и блоки `try` с
+машинкой повторов тоже, — [бюджет](limits.ru.md), который пайплайн способен
+поймать, никакой не бюджет. Ловит его одно место, `Session.run`, и возвращает
+результатом, а не исключением.

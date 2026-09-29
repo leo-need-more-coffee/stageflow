@@ -71,6 +71,10 @@ it as an artifact.
   run is readable in the log without being confused with the outer one.
 - The [debugger](step-debugging.md) is inherited too: stepping walks into the
   child node by node, it is not one opaque jump.
+- So are the [policy](policy.md) and the [budget](limits.md), and they have
+  to be: a child with its own allowance would be a way out of both. The child
+  graph is validated against the policy when its session is built, and the
+  meters it moves are the parent's.
 - `retry` on the node repeats the whole child run.
 - The id must be a key of `subpipelines`, and it may not be the id of the
   root entry node — validation says so before the run.

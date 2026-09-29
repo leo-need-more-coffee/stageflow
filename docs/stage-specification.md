@@ -29,6 +29,24 @@ A stage may also declare `allowed_events` and `allowed_inputs` (`EventSpec` /
 `InputSpec` with a `payload_schema`), a `category` and a `timeout`. All of it
 ends up in `get_specs()`.
 
+## What it asks to reserve
+
+`reserve` declares what a run of the stage may consume, in the
+[meters](limits.md) the host counts. Values are numbers or CEL over `args`,
+the arguments as the stage will receive them:
+
+```yaml
+reserve:
+  llm_calls: 1
+  tokens: "args.max_tokens + size(args.text) / 3"
+```
+
+It is declared rather than computed because it is read **before** the stage
+runs: a host refuses a graph it cannot pay for without executing it, and an
+editor can show the figure on the card. What was actually spent is reported
+by the stage itself with `self.charge(...)`, which is code, because the truth
+is only known at the end.
+
 This is what the specification above turns into on the canvas: the icon, the
 description, the arguments it reads and the outputs it writes.
 

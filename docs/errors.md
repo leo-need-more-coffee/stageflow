@@ -66,3 +66,10 @@ package:
 | `TypeDeclarationError` | `ValueError` | the type declarations themselves are broken |
 | `PayloadValidationError` | `ValueError` | an event or input payload failed its schema |
 | `RegistryError` | `ValueError` | an unknown stage or node type |
+| `PolicyViolationError` | `PermissionError` | a stage or node type the [policy](policy.md) does not allow |
+
+One error is deliberately **not** in that tree. `BudgetExceeded` inherits
+`BaseException`, so `except Exception` does not see it and neither do `try`
+blocks or the retry machinery — a [budget](limits.md) a pipeline could catch
+would be no budget. It is caught in one place, `Session.run`, and comes back
+as a result rather than as an exception.

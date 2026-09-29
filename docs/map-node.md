@@ -70,6 +70,11 @@ in the `map_item_failed` event.
 `retry` on the map node itself repeats the whole loop, not the element that
 failed — it is a property of the node, as everywhere else.
 
+How many passes a loop may make is not something the graph can settle: the
+count comes from the data. It is a [meter](limits.md) instead — `iterations`
+is charged before the first pass, so a loop wider than the host allows is
+refused having run none of it.
+
 ## The body must be closed
 
 Every road inside the body has to end inside it. A road out of the region is a

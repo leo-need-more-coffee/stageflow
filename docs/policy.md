@@ -79,7 +79,7 @@ answer to it:
 
 ```python
 capabilities(basic)
-# {"stageflow": "0.11.0",
+# {"stageflow": "0.12.0",
 #  "node_types": ["condition", "entry", "stage", "switch", "terminal"],
 #  "stages": 3}
 ```
