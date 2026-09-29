@@ -71,18 +71,46 @@ class Policy:
 
         Collected rather than raised one at a time: a tenant saving a graph
         wants the list of what to change, not the first thing that offended.
+
+        Subpipelines are walked too, and they have to be. A child graph
+        becomes a `Pipeline` only when it runs, so without this the answer to
+        "may I save this" would be yes and the answer to "may I run it" no —
+        the same refusal, hours apart, at the worst moment.
         """
+        if self.unrestricted:
+            return []
+        errors = [
+            message
+            for node in pipeline.nodes
+            for message in self._node_errors(node.type, node.id, getattr(node, "stage", None))
+        ]
+        for sub_id, graph in (getattr(pipeline, "subpipelines", None) or {}).items():
+            errors.extend(self._graph_errors(graph, f"[{sub_id}] "))
+        return errors
+
+    def _graph_errors(self, graph: dict, where: str) -> list[str]:
+        """The same check over a graph that is still raw JSON."""
         errors: list[str] = []
-        for node in pipeline.nodes:
-            if not self.allows_node_type(node.type):
-                errors.append(
-                    f"{node.id}: node type '{node.type}' is not allowed by the policy"
-                )
-            name = getattr(node, "stage", None)
-            if name is not None and not self.allows_stage(name):
-                errors.append(
-                    f"{node.id}: stage '{name}' is not allowed by the policy"
-                )
+        for node in graph.get("nodes") or []:
+            errors.extend(self._node_errors(
+                node.get("type"), node.get("id", "?"), node.get("stage"), where
+            ))
+        for sub_id, nested in (graph.get("subpipelines") or {}).items():
+            errors.extend(self._graph_errors(nested, f"{where}[{sub_id}] "))
+        return errors
+
+    def _node_errors(
+        self, type_: str | None, node_id: str, stage: str | None, where: str = ""
+    ) -> list[str]:
+        errors: list[str] = []
+        if type_ is not None and not self.allows_node_type(type_):
+            errors.append(
+                f"{where}{node_id}: node type '{type_}' is not allowed by the policy"
+            )
+        if stage is not None and not self.allows_stage(stage):
+            errors.append(
+                f"{where}{node_id}: stage '{stage}' is not allowed by the policy"
+            )
         return errors
 
 

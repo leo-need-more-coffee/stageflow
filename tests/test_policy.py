@@ -108,6 +108,49 @@ class PolicyValidationTests(unittest.TestCase):
         self.assertIn("work: stage 'PriceyStage' is not allowed by the policy", errors)
         self.assertIn("branch: node type 'parallel' is not allowed by the policy", errors)
 
+    def test_a_subpipeline_is_checked_at_save_time_too(self):
+        """Without this the answer to "may I save this" is yes and the answer
+        to "may I run it" is no — the same refusal, hours apart."""
+        data = {
+            "entry": "start",
+            "nodes": [
+                {"id": "start", "type": "entry", "next": "nested"},
+                {"id": "nested", "type": "subpipeline", "subpipeline_id": "inner",
+                 "next": "done"},
+                {"id": "done", "type": "terminal", "result": {}},
+            ],
+            "subpipelines": {"inner": {"entry": "w", "nodes": [
+                {"id": "w", "type": "stage", "stage": "PriceyStage", "next": "e"},
+                {"id": "e", "type": "terminal", "result": {}},
+            ]}},
+        }
+        policy = Policy(stages={"CheapStage"},
+                        node_types={"entry", "stage", "subpipeline", "terminal"})
+        self.assertIn(
+            "[inner] w: stage 'PriceyStage' is not allowed by the policy",
+            Pipeline.from_dict(data).collect_errors(policy),
+        )
+
+    def test_a_subpipeline_inside_a_subpipeline_is_checked(self):
+        data = {
+            "entry": "start",
+            "nodes": [
+                {"id": "start", "type": "entry", "next": "done"},
+                {"id": "done", "type": "terminal", "result": {}},
+            ],
+            "subpipelines": {"outer": {
+                "entry": "a", "nodes": [{"id": "a", "type": "terminal", "result": {}}],
+                "subpipelines": {"deep": {"entry": "b", "nodes": [
+                    {"id": "b", "type": "stage", "stage": "PriceyStage", "next": "c"},
+                    {"id": "c", "type": "terminal", "result": {}},
+                ]}},
+            }},
+        }
+        self.assertIn(
+            "[outer] [deep] b: stage 'PriceyStage' is not allowed by the policy",
+            Pipeline.from_dict(data).collect_errors(CHEAP_ONLY),
+        )
+
     def test_without_a_policy_nothing_is_refused(self):
         self.assertEqual(Pipeline.from_dict(_pipeline("PriceyStage")).collect_errors(), [])
 
@@ -177,10 +220,9 @@ class PolicyAtRunTests(unittest.IsolatedAsyncioTestCase):
         }
         policy = Policy(stages={"CheapStage"},
                         node_types={"entry", "stage", "subpipeline", "terminal"})
-        session = Session(id="nest", pipeline=Pipeline.from_dict(data),
-                          context=Context(), policy=policy)
         with self.assertRaises(PipelineValidationError) as caught:
-            await session.run()
+            Session(id="nest", pipeline=Pipeline.from_dict(data),
+                    context=Context(), policy=policy)
         self.assertIn("PriceyStage", str(caught.exception))
         self.assertEqual(PriceyStage.ran, 0)
 

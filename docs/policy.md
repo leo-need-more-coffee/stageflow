@@ -59,10 +59,18 @@ as well as a `StageFlowError`.
 
 ## A subpipeline is not a way out
 
-The child graph of a [`subpipeline`](subpipeline-node.md) node is turned into
-a pipeline only when it runs, so it is validated when the child session is
-built — with the parent's policy, which travels down exactly as the debugger
-does. A nested graph cannot use a stage the outer one may not.
+The child graph of a [`subpipeline`](subpipeline-node.md) node is checked
+twice, for different reasons. Validation walks the declared `subpipelines` in
+the JSON, nested ones included, and says where the trouble is:
+
+```
+[inner] w: stage 'LlmReply' is not allowed by the policy
+```
+
+Without that, "you may save this" and "you may not run it" would be hours
+apart. At run time the child graph becomes a `Pipeline` of its own and is
+validated again, with the parent's policy, which travels down exactly as the
+debugger does — so a nested graph is not a way out at either moment.
 
 ## Telling a client what it may use
 
