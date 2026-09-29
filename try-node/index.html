@@ -1922,7 +1922,10 @@ one's region.</p>
   enclosing block or out of the session.</li>
 <li><code>result_var</code> puts the error into the frame as an object with the fields
   <code>type</code>, <code>full_type</code>, <code>message</code> and <code>node</code> — the last one names the node that
-  actually failed, which is not the block itself.</li>
+  failed, which is not the block itself. A failure deeper than one scope is
+  named by the node of <em>this</em> block's body that contained it: an error from
+  inside a nested <code>try</code> or a <code>map</code> body names that nested node, because that is
+  the node this handler's own graph has.</li>
 </ul>
 <p>A handler sees the frame as the <strong>last successfully completed node of the
 body</strong> left it: the writes made before the failure are there, the failing
