@@ -16,7 +16,7 @@
         <link rel="prev" href="../terminal-node/">
       
       
-        <link rel="next" href="../variable-typing/">
+        <link rel="next" href="../policy/">
       
       
         
@@ -1244,6 +1244,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Политика
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Лимиты
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../variable-typing/" class="md-nav__link">
         
   
@@ -1720,8 +1776,18 @@
 <td><code>ValueError</code></td>
 <td>неизвестная стадия или тип узла</td>
 </tr>
+<tr>
+<td><code>PolicyViolationError</code></td>
+<td><code>PermissionError</code></td>
+<td>стадия или тип узла, не разрешённые <a href="../policy/">политикой</a></td>
+</tr>
 </tbody>
 </table>
+<p>Одна ошибка намеренно <strong>вне</strong> этого дерева. <code>BudgetExceeded</code> наследует
+<code>BaseException</code>, поэтому <code>except Exception</code> его не видит, и блоки <code>try</code> с
+машинкой повторов тоже, — <a href="../limits/">бюджет</a>, который пайплайн способен
+поймать, никакой не бюджет. Ловит его одно место, <code>Session.run</code>, и возвращает
+результатом, а не исключением.</p>
 
 
 

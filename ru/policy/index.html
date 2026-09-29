@@ -10,17 +10,17 @@
       
       
       
-        <link rel="canonical" href="https://leo-need-more-coffee.github.io/stageflow/ru/variable-typing/">
+        <link rel="canonical" href="https://leo-need-more-coffee.github.io/stageflow/ru/policy/">
       
       
-        <link rel="prev" href="../limits/">
+        <link rel="prev" href="../errors/">
       
       
-        <link rel="next" href="../session-control/">
+        <link rel="next" href="../limits/">
       
       
         
-          <link rel="alternate" href="../../variable-typing/" hreflang="en">
+          <link rel="alternate" href="../../policy/" hreflang="en">
         
           <link rel="alternate" href="./" hreflang="ru">
         
@@ -31,7 +31,7 @@
     
     
       
-        <title>Типизация переменных - StageFlow</title>
+        <title>Политика - StageFlow</title>
       
     
     
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Типизация переменных
+              Политика
             
           </span>
         </div>
@@ -165,7 +165,7 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../variable-typing/" hreflang="en" class="md-select__link">
+            <a href="../../policy/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -1161,10 +1161,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../policy/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Политика
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1180,6 +1207,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        None — это не пустое множество
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Отказ дважды: при валидации и на исполнении
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Субпайплайн — не лазейка
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Как сказать клиенту, что ему доступно
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Чего политика не делает
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1217,19 +1319,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../variable-typing/" class="md-nav__link">
         
   
   
@@ -1245,7 +1338,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1505,6 +1597,69 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        None — это не пустое множество
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Отказ дважды: при валидации и на исполнении
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Субпайплайн — не лазейка
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Как сказать клиенту, что ему доступно
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Чего политика не делает
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1520,7 +1675,7 @@
 
 
   
-    <a href="https://github.com/leo-need-more-coffee/stageflow/edit/main/docs/variable-typing.ru.md" title="Редактировать страницу" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/leo-need-more-coffee/stageflow/edit/main/docs/policy.ru.md" title="Редактировать страницу" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1528,43 +1683,96 @@
   
 
 
-<h1 id="_1">Типизация переменных<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>Типизация постепенная: необъявленная переменная не проверяется, секции типов
-необязательны.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">"types"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">"UserId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">"User"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"UserId"</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">      </span><span class="nt">"email?"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="nt">"settings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"theme"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">"Point"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"x"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"y"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nt">"strict"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">"Tree"</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"children"</span><span class="p">:</span><span class="w"> </span><span class="s2">"list&lt;Tree&gt;"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="nt">"variables"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User"</span><span class="p">,</span><span class="w"> </span><span class="nt">"attempts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="s2">"list&lt;string&gt;"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+<h1 id="_1">Политика: из чего пайплайну можно состоять<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p>Реестр говорит, что умеет исполнять <strong>процесс</strong>. Это другой вопрос, чем то,
+чем разрешено пользоваться <strong>конкретному пайплайну</strong>. Платформа, исполняющая
+пайплайны от имени нескольких клиентов, выдаёт каждому подмножество — вот эти
+стадии, вот эти типы узлов, — и это подмножество автор графа оспорить не
+может, потому что он пишет только граф.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">Policy</span><span class="p">,</span> <span class="n">Session</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">basic</span> <span class="o">=</span> <span class="n">Policy</span><span class="p">(</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">stages</span><span class="o">=</span><span class="p">{</span><span class="s2">"LoadTicket"</span><span class="p">,</span> <span class="s2">"ClassifyByRules"</span><span class="p">,</span> <span class="s2">"Template"</span><span class="p">},</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">node_types</span><span class="o">=</span><span class="p">{</span><span class="s2">"entry"</span><span class="p">,</span> <span class="s2">"stage"</span><span class="p">,</span> <span class="s2">"condition"</span><span class="p">,</span> <span class="s2">"switch"</span><span class="p">,</span> <span class="s2">"terminal"</span><span class="p">},</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"run-1"</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">Context</span><span class="p">(</span><span class="nb">vars</span><span class="o">=</span><span class="nb">vars</span><span class="p">),</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                  <span class="n">policy</span><span class="o">=</span><span class="n">basic</span><span class="p">)</span>
 </code></pre></div>
-<p>Язык типов: примитивы <code>string</code>, <code>int</code>, <code>float</code>, <code>number</code> (int|float), <code>bool</code>,
-<code>any</code>, <code>null</code>; контейнеры <code>list&lt;T&gt;</code> и <code>map&lt;T&gt;</code> (ключи строковые); объединения
-<code>T|U</code>; сокращение <code>T?</code> = <code>T|null</code>; имена из секции <code>types</code>. Структуры
-поддерживают опциональные поля (суффикс <code>?</code> у имени), вложенные анонимные
-структуры, рекурсию и строгий режим (<code>strict</code> запрещает лишние поля).</p>
-<p>Проверки двухслойные:</p>
-<ul>
-<li>статически, при валидации графа: объявленный тип переменной сверяется с
-  хинтами из спецификации стадии, <code>expose</code> требует совместимости источника и
-  назначения; несовместимость — ошибка <code>Pipeline.validate()</code> до запуска;</li>
-<li>динамически, при исполнении: каждая запись в объявленную переменную
-  (<code>entry</code>, <code>outputs</code>, <code>expose</code>, <code>except.result_var</code>, артефакты субпайплайна) и
-  входной контекст сессии проверяются по полной структуре значения; ошибка —
-  <code>TypeCheckError</code> с узлом и путём до несовпадения.</li>
-</ul>
-<p>Субпайплайн наследует именованные типы родителя и может объявить свои; типы
-переменных у него собственные.</p>
-<p>Обе секции правятся в редакторе, «File» → «Pipeline settings…»:</p>
-<p><img alt="Именованные типы и типы переменных в редакторе" src="../../img/ref-pipeline-settings.png" width="560" /></p>
+<p>Политику сессии даёт <strong>хост</strong>, рядом с отладчиком. Из JSON пайплайна она не
+читается, и ничто в JSON не может её расширить: разрешение, которое граф
+способен себе поднять, — не разрешение.</p>
+<h2 id="none"><code>None</code> — это не пустое множество<a class="headerlink" href="#none" title="Permanent link">&para;</a></h2>
+<p>Они означают противоположное, и в этом весь смысл:</p>
+<table>
+<thead>
+<tr>
+<th>Записано</th>
+<th>Значит</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Policy()</code></td>
+<td>мнения нет — всё, что зарегистрировано в процессе</td>
+</tr>
+<tr>
+<td><code>Policy(stages=set())</code></td>
+<td>ничего</td>
+</tr>
+<tr>
+<td><code>Policy(stages={"A"})</code></td>
+<td>стадия <code>A</code> и никакая другая</td>
+</tr>
+</tbody>
+</table>
+<p>Политика, забывшая перечислить стадии, не должна молча выдать все стадии,
+которые процесс случайно наимпортировал, — поэтому по умолчанию в каждом поле
+<code>None</code>, а пустое множество понимается буквально.</p>
+<h2 id="_2">Отказ дважды: при валидации и на исполнении<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">pipeline</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">basic</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># PipelineValidationError: Pipeline validation failed:</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">#   work: stage 'LlmReply' is not allowed by the policy</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">#   loop: node type 'map' is not allowed by the policy</span>
+</code></pre></div>
+<p>Валидация собирает <strong>всё</strong>, что политика отвергает, а не останавливается на
+первом: тому, кто сохраняет граф, нужен список того, что менять. <code>Session</code>
+валидирует при создании, поэтому пайплайн с запрещённой стадией даже не
+начинается — до стадии не доходит, а не обрывается на полпути.</p>
+<p>Сессия проверяет и на ходу — на каждом узле и перед каждой стадией. Вторая
+линия нужна графу, собранному в Python и ни разу не провалидированному, а
+стоит она одного поиска по множеству, который вовсе не делается, если поле
+<code>None</code>.</p>
+<p>Отказ во время исполнения — это <code>PolicyViolationError</code>, он же
+<code>PermissionError</code> и <code>StageFlowError</code>.</p>
+<h2 id="_3">Субпайплайн — не лазейка<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Дочерний граф узла <a href="../subpipeline-node/"><code>subpipeline</code></a> проверяется
+дважды, и по разным причинам. При валидации политика обходит объявленные
+<code>subpipelines</code> прямо в JSON, включая вложенные, и называет место в ошибке:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[inner] w: stage 'LlmReply' is not allowed by the policy
+</code></pre></div>
+<p>Без этого «сохранить можно» и «запустить нельзя» расходились бы на часы. А
+на исполнении дочерний граф становится <code>Pipeline</code> и валидируется ещё раз,
+уже с политикой родителя, которая едет вниз так же, как отладчик, — поэтому
+вложенный граф не лазейка ни в какой момент.</p>
+<h2 id="_4">Как сказать клиенту, что ему доступно<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p><a href="../schema-and-stage-specs/"><code>capabilities()</code></a> принимает политику и сужает
+ответ до неё:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">capabilities</span><span class="p">(</span><span class="n">basic</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># {"stageflow": "0.12.0",</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1">#  "node_types": ["condition", "entry", "stage", "switch", "terminal"],</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1">#  "stages": 3}</span>
+</code></pre></div>
+<p>Именно это бэкенду и стоит отдавать редактору: редактору нужно знать, что
+может рисовать <strong>этот</strong> вызывающий, а недоступен тип узла из-за старого ядра
+или из-за узкого разрешения — различие, которое ему проводить незачем.</p>
+<h2 id="_5">Чего политика не делает<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>Она ограничивает, <strong>из чего пайплайн состоит</strong>, а не <strong>сколько он потребляет</strong>.
+Граф из разрешённых стадий по-прежнему может зациклиться, развернуться веером
+или работать долго — <code>retry</code>, <code>map</code> по большому списку, ветки <code>parallel</code>.</p>
+<p>Это вторая половина, и живёт она в том же объекте: <code>Policy(limits=...)</code>,
+см. <a href="../limits/">Лимиты</a>. Тариф — это одно значение: какие блоки и сколько
+чего.</p>
 
 
 

@@ -1164,6 +1164,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Политика
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Лимиты
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../variable-typing/" class="md-nav__link">
         
   
@@ -1285,6 +1341,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Спецификация стадии
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1301,6 +1375,36 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Что стадия просит зарезервировать
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1449,6 +1553,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Что стадия просит зарезервировать
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1514,6 +1637,19 @@
 <p>Стадия может объявить <code>allowed_events</code> и <code>allowed_inputs</code> (<code>EventSpec</code> /
 <code>InputSpec</code> с <code>payload_schema</code>), <code>category</code> и <code>timeout</code>. Всё это попадает в
 <code>get_specs()</code>.</p>
+<h2 id="_2">Что стадия просит зарезервировать<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p><code>reserve</code> объявляет, сколько прогон стадии может израсходовать, в тех
+<a href="../limits/">счётчиках</a>, которые считает хост. Значения — числа или CEL по
+<code>args</code>, то есть по аргументам в том виде, в каком их получит стадия:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">reserve</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">llm_calls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">tokens</span><span class="p">:</span><span class="w"> </span><span class="s">"args.max_tokens</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">size(args.text)</span><span class="nv"> </span><span class="s">/</span><span class="nv"> </span><span class="s">3"</span>
+</code></pre></div>
+<p>Это объявлено, а не вычислено, потому что читается <strong>до</strong> запуска стадии:
+хост отказывает графу, который не может оплатить, не исполняя его, а
+редактор показывает цифру на карточке. Сколько потрачено на самом деле,
+сообщает сама стадия через <code>self.charge(...)</code> — и это уже код, потому что
+правда известна только в конце.</p>
 <p>Вот во что спецификация выше превращается на холсте: иконка, описание,
 аргументы, которые узел читает, и выходы, которые он пишет.</p>
 <p><img alt="Карточка стадии, нарисованная по спецификации" src="../../img/ref-hello-card.png" width="278" /></p>

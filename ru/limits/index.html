@@ -10,17 +10,17 @@
       
       
       
-        <link rel="canonical" href="https://leo-need-more-coffee.github.io/stageflow/ru/variable-typing/">
+        <link rel="canonical" href="https://leo-need-more-coffee.github.io/stageflow/ru/limits/">
       
       
-        <link rel="prev" href="../limits/">
+        <link rel="prev" href="../policy/">
       
       
-        <link rel="next" href="../session-control/">
+        <link rel="next" href="../variable-typing/">
       
       
         
-          <link rel="alternate" href="../../variable-typing/" hreflang="en">
+          <link rel="alternate" href="../../limits/" hreflang="en">
         
           <link rel="alternate" href="./" hreflang="ru">
         
@@ -31,7 +31,7 @@
     
     
       
-        <title>Типизация переменных - StageFlow</title>
+        <title>Лимиты - StageFlow</title>
       
     
     
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Типизация переменных
+              Лимиты
             
           </span>
         </div>
@@ -165,7 +165,7 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../variable-typing/" hreflang="en" class="md-select__link">
+            <a href="../../limits/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -1189,10 +1189,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../limits/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Лимиты
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1208,6 +1235,103 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Один механизм: счётчики
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Что тратит стадия
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Что валидация отвергает до запуска
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Когда бюджет кончился
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ручки тенанта — это просьбы
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ожидание человека — не работа
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Чего лимиты не делают
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1217,19 +1341,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../variable-typing/" class="md-nav__link">
         
   
   
@@ -1245,7 +1360,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1505,6 +1619,91 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Один механизм: счётчики
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Что тратит стадия
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Что валидация отвергает до запуска
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Когда бюджет кончился
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ручки тенанта — это просьбы
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ожидание человека — не работа
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Чего лимиты не делают
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1520,7 +1719,7 @@
 
 
   
-    <a href="https://github.com/leo-need-more-coffee/stageflow/edit/main/docs/variable-typing.ru.md" title="Редактировать страницу" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/leo-need-more-coffee/stageflow/edit/main/docs/limits.ru.md" title="Редактировать страницу" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1528,43 +1727,224 @@
   
 
 
-<h1 id="_1">Типизация переменных<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>Типизация постепенная: необъявленная переменная не проверяется, секции типов
-необязательны.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">"types"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">"UserId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">"User"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"UserId"</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">      </span><span class="nt">"email?"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="nt">"settings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"theme"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">"Point"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"x"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"y"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nt">"strict"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">"Tree"</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"children"</span><span class="p">:</span><span class="w"> </span><span class="s2">"list&lt;Tree&gt;"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="nt">"variables"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User"</span><span class="p">,</span><span class="w"> </span><span class="nt">"attempts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="s2">"list&lt;string&gt;"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+<h1 id="_1">Лимиты: сколько пайплайну можно потратить<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p><a href="../policy/">Политика</a> отвечает, из чего пайплайн состоит. Эта страница — о
+том, сколько он может израсходовать, и одно от другого отделено потому, что
+граф целиком из разрешённых стадий всё равно умеет зациклиться, развернуться
+веером в тысячи задач или работать, пока не умрёт процесс.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">Limits</span><span class="p">,</span> <span class="n">Policy</span><span class="p">,</span> <span class="n">Session</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">plan</span> <span class="o">=</span> <span class="n">Policy</span><span class="p">(</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">stages</span><span class="o">=</span><span class="p">{</span><span class="s2">"LoadTicket"</span><span class="p">,</span> <span class="s2">"ClassifyByRules"</span><span class="p">,</span> <span class="s2">"LlmReply"</span><span class="p">},</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">limits</span><span class="o">=</span><span class="n">Limits</span><span class="p">(</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="n">counters</span><span class="o">=</span><span class="p">{</span><span class="s2">"seconds"</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span> <span class="s2">"steps"</span><span class="p">:</span> <span class="mi">5_000</span><span class="p">,</span> <span class="s2">"iterations"</span><span class="p">:</span> <span class="mi">2_000</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                  <span class="s2">"tokens"</span><span class="p">:</span> <span class="mi">200_000</span><span class="p">,</span> <span class="s2">"llm_calls"</span><span class="p">:</span> <span class="mi">100</span><span class="p">},</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="n">gauges</span><span class="o">=</span><span class="p">{</span><span class="s2">"concurrency"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">"frame_bytes"</span><span class="p">:</span> <span class="mi">4_000_000</span><span class="p">},</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="n">max_delay_seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="p">),</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"run-1"</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">plan</span><span class="p">)</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">result</span><span class="o">.</span><span class="n">meters</span>   <span class="c1"># {"steps": 412, "seconds": 8.2, "tokens": 5120, "llm_calls": 9}</span>
 </code></pre></div>
-<p>Язык типов: примитивы <code>string</code>, <code>int</code>, <code>float</code>, <code>number</code> (int|float), <code>bool</code>,
-<code>any</code>, <code>null</code>; контейнеры <code>list&lt;T&gt;</code> и <code>map&lt;T&gt;</code> (ключи строковые); объединения
-<code>T|U</code>; сокращение <code>T?</code> = <code>T|null</code>; имена из секции <code>types</code>. Структуры
-поддерживают опциональные поля (суффикс <code>?</code> у имени), вложенные анонимные
-структуры, рекурсию и строгий режим (<code>strict</code> запрещает лишние поля).</p>
-<p>Проверки двухслойные:</p>
-<ul>
-<li>статически, при валидации графа: объявленный тип переменной сверяется с
-  хинтами из спецификации стадии, <code>expose</code> требует совместимости источника и
-  назначения; несовместимость — ошибка <code>Pipeline.validate()</code> до запуска;</li>
-<li>динамически, при исполнении: каждая запись в объявленную переменную
-  (<code>entry</code>, <code>outputs</code>, <code>expose</code>, <code>except.result_var</code>, артефакты субпайплайна) и
-  входной контекст сессии проверяются по полной структуре значения; ошибка —
-  <code>TypeCheckError</code> с узлом и путём до несовпадения.</li>
-</ul>
-<p>Субпайплайн наследует именованные типы родителя и может объявить свои; типы
-переменных у него собственные.</p>
-<p>Обе секции правятся в редакторе, «File» → «Pipeline settings…»:</p>
-<p><img alt="Именованные типы и типы переменных в редакторе" src="../../img/ref-pipeline-settings.png" width="560" /></p>
+<h2 id="_2">Один механизм: счётчики<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>Не три системы для времени, стоимости и размера, а одна, с двумя видами
+счётчиков:</p>
+<table>
+<thead>
+<tr>
+<th>Вид</th>
+<th>Поведение</th>
+<th>Примеры</th>
+<th>Когда проверяется</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>counter</strong></td>
+<td>растёт и не убывает</td>
+<td><code>seconds</code>, <code>steps</code>, <code>iterations</code>, <code>tokens</code></td>
+<td>при каждом начислении</td>
+</tr>
+<tr>
+<td><strong>gauge</strong></td>
+<td>мгновенное значение</td>
+<td><code>concurrency</code>, <code>depth</code>, <code>frame_bytes</code></td>
+<td>когда его занимают</td>
+</tr>
+</tbody>
+</table>
+<p><code>steps</code> и <code>iterations</code> начисляет рантайм, пики держит он же; стадии начисляют
+то, что израсходовали. <code>concurrency</code> — единственный пиковый счётчик, который
+<strong>придерживает</strong>, а не роняет: сто элементов на обработку это хороший
+пайплайн, которому просто не надо держать сто вызовов в воздухе разом, и
+отказ ему за ширину был бы отказом работе, а не её ограничением. Глубина и
+размер именно роняют — слишком глубоко это слишком глубоко, ожидание тут не
+поможет. <strong>Имена счётчиков ядро не фиксирует.</strong> Хост считает
+то, что дефицитно у него, а счётчик, который никто не ограничил, просто
+копится и приезжает в <code>result.meters</code> — из этого и собирается счёт.</p>
+<p><code>seconds</code> — единственный гибрид, намеренно. Он показывается как счётчик,
+чтобы попадать в ту же таблицу, что и всё остальное, но <strong>проверяется
+дедлайном</strong>: счётчик смотрят только когда в него начисляют, а висящая стадия
+не начисляет ничего.</p>
+<div class="admonition note">
+<p class="admonition-title">Что не ограничено, то не измеряется</p>
+<p>Любая проверка чего-то стоит, а <code>frame_bytes</code> дороже всех: измерить его —
+значит сериализовать фрейм. Счётчика нет в лимитах — он не вычисляется
+вовсе, так что вся эта механика обходится хосту без лимитов в один <code>if</code>.</p>
+</div>
+<h2 id="_3">Что тратит стадия<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Стадия начисляет <strong>единицы, которые израсходовала</strong>: <code>tokens</code>, <code>llm_calls</code>,
+<code>http_calls</code>, <code>rows</code>. Сколько единица стоит — это прайс-лист; прайс-листы
+меняются без правки кода и принадлежат хосту. Стадия знает, сколько
+использовала, а не во что это обошлось.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@register_stage</span><span class="p">(</span><span class="s2">"LlmTriageStage"</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmTriageStage</span><span class="p">(</span><span class="n">BaseStage</span><span class="p">):</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="sd">"""</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="sd">    description: "Классификация тикета моделью"</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="sd">    timeout: 60</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="sd">    reserve:</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="sd">      llm_calls: 1</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="sd">      tokens: "args.max_tokens + size(args.text) / 3"</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="sd">    """</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="n">answer</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_arguments</span><span class="p">()[</span><span class="s2">"text"</span><span class="p">])</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">({</span><span class="s2">"topic"</span><span class="p">:</span> <span class="n">answer</span><span class="o">.</span><span class="n">topic</span><span class="p">})</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">(</span><span class="n">tokens</span><span class="o">=</span><span class="n">answer</span><span class="o">.</span><span class="n">usage</span><span class="o">.</span><span class="n">total</span><span class="p">,</span> <span class="n">llm_calls</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<p>Механизма два, и они не пересекаются:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Где</th>
+<th>Что видит</th>
+<th>На что отвечает</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reserve</code></td>
+<td>спека, декларативно</td>
+<td><code>args</code></td>
+<td>можно ли вообще пытаться</td>
+</tr>
+<tr>
+<td><code>charge()</code></td>
+<td>код стадии</td>
+<td>всё, что стадия знает</td>
+<td>сколько потрачено на самом деле</td>
+</tr>
+</tbody>
+</table>
+<p><code>reserve</code> декларативен потому, что читается <strong>до</strong> запуска: редактор покажет
+«до 4000 токенов за вызов», хост откажет графу не исполняя его. Значения —
+числа или <a href="../expressions/">CEL</a> по <code>args</code>, то есть по аргументам в том
+виде, в каком их получит стадия.</p>
+<p>Порядок — резерв → прогон → расчёт:</p>
+<ol>
+<li>резерв вычисляется и удерживается. Не влезает в остаток — <strong>стадия не
+   запускается вовсе</strong>: дорогой вызов лучше не начинать, чем обрывать, когда
+   деньги уже ушли;</li>
+<li>стадия работает;</li>
+<li><code>charge()</code> <strong>замещает</strong> резерв по названным счётчикам и добавляет
+   неназванные — сумма, и зарезервированная, и начисленная, не считается
+   дважды. Стадия, ничего не начислившая, рассчитывается по резерву, и при
+   падении тоже: вызов, который ушёл и отвалился по таймауту, всё равно
+   потратил то, что потратил.</li>
+</ol>
+<p>Стадия, которая ничего не резервирует и не начисляет, бесплатна.</p>
+<div class="admonition warning">
+<p class="admonition-title">Цикл целиком не резервируется</p>
+<p>Резерв берётся по стадиям, в момент запуска каждой: сумма того, во что
+обойдётся <code>map</code>, перед входом в цикл не считается — резерв итерации
+зависит от её аргументов, аргументы от элемента, а элемент приходит из
+данных. Что проверяется заранее, так это <strong>число итераций</strong>: <code>iterations</code>
+начисляется до первого прохода, поэтому цикл на тысячу элементов на
+тарифе с полусотней отвергается, не выполнив ни одного.</p>
+<p>То есть цикл останавливается, как только не может оплатить следующую
+стадию, а сделанные проходы уже оплачены. В режиме <code>parallel</code> перелёт
+ограничен не одной стадией, а <code>concurrency</code>: вызовы, которые уже в
+полёте, уже сделаны. Хосту, которому нужен жёсткий потолок на весь цикл,
+его даёт арифметика, а не предсказание: ограничить <code>iterations</code> так,
+чтобы их число на худший случай влезало в бюджет.</p>
+</div>
+<h2 id="_4">Что валидация отвергает до запуска<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p><code>Pipeline.validate(policy)</code> проверяет то, что <strong>достоверно выводится из
+JSON</strong>, — чтобы сохраняющий граф узнал, что менять, а не выяснял это на
+десятом элементе:</p>
+<table>
+<thead>
+<tr>
+<th>Что проверяется</th>
+<th>Почему это честно</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>кратчайший путь через граф против <code>steps</code></td>
+<td>любой прогон проходит не меньше узлов, значит граф, чей самый дешёвый путь не влезает, не завершится вообще</td>
+</tr>
+<tr>
+<td>глубина вложенности объявленных субпайплайнов против <code>depth</code></td>
+<td>вложенность записана, а не вычисляется</td>
+</tr>
+<tr>
+<td>что просит каждый <code>retry</code> против <code>max_retries</code> и <code>max_delay_seconds</code></td>
+<td>числа лежат в JSON</td>
+</tr>
+</tbody>
+</table>
+<p>Оценка шагов — <strong>нижняя</strong> граница, и именно поэтому по ней можно отказывать:
+граф с длинной дорогой и короткой судится по короткой.</p>
+<p>Не проверяется всё, что пришлось бы угадывать. Стоимость цикла до запуска
+неизвестна — число проходов приходит из данных, а резерв прохода из его
+аргументов, — и любое умножение здесь отвергало бы работающие пайплайны.
+Ложный отказ рабочему графу хуже того потолка, ради которого он затевался.</p>
+<h2 id="_5">Когда бюджет кончился<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>Потолок жёсткий. <code>BudgetExceeded</code> наследует <strong><code>BaseException</code></strong> и намеренно
+стоит вне иерархии <code>StageFlowError</code>: блоки <code>try</code> ловят <code>Exception</code>, и машинка
+<code>retry</code> тоже, — тенант, способный обернуть граф в <code>try</code> и проглотить это,
+превратил бы любой лимит в украшение.</p>
+<p>Ловит его ровно одно место, <code>Session.run</code>, и заканчивает прогон так же, как
+останавливает <code>stop</code>, а не швыряет исключение сквозь работу, которая
+действительно была сделана:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">result</span><span class="o">.</span><span class="n">result</span>   <span class="c1"># {"status": "budget_exceeded", "meter": "tokens",</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                <span class="c1">#  "limit": 200000, "spent": 200512}</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">result</span><span class="o">.</span><span class="n">meters</span>   <span class="c1"># всё потраченное — по нему хост и выставляет счёт</span>
+</code></pre></div>
+<p>Дочерняя сессия субпайплайна пользуется бюджетом родителя — свежий бюджет на
+каждого ребёнка умножал бы квоту на глубину вложенности — и пропускает
+остановку наверх, а не проглатывает её.</p>
+<h2 id="_6">Ручки тенанта — это просьбы<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<p><code>retry</code> и паузы между попытками приходят из пайплайна, то есть с менее
+доверенной стороны, поэтому <code>max_retries</code> и <code>max_delay_seconds</code> разбираются с
+ними дважды.</p>
+<p>Узел, <strong>объявивший</strong> больше, чем разрешает тариф, отвергается на валидации,
+как и всё остальное, записанное в JSON: тенанту говорят, что менять, а не
+тихо выдают не то, что он просил. Retry, попавший в сессию другим путём —
+граф, собранный в Python и не проходивший валидацию, — <strong>зажимается</strong>:
+пятьдесят попыток на тарифе с тремя отработают три раза, и в событии будет
+написано три.</p>
+<h2 id="_7">Ожидание человека — не работа<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>Пайплайн, который задал вопрос и ждёт, ничего у хоста не занимает, поэтому
+дедлайн на время ожидания не тикает. Иначе дедлайн был бы ограничением на
+скорость чтения.</p>
+<p>Заодно это чинит давнюю ловушку: стадия, ждущая ввода, раньше умирала на
+собственном 30-секундном таймауте. Теперь таймаут стадии тоже меряется
+рабочим временем и вдобавок зажимается остатком дедлайна — иначе стадия с
+шестьюдесятью секундами, начатая когда осталось две, отработала бы все
+шестьдесят, и бюджет протекал бы на длину последней стадии.</p>
+<h2 id="_8">Чего лимиты не делают<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<p><code>concurrency: 8</code> ограничивает <strong>один прогон</strong>. Сто прогонов — это восемьсот
+задач: ядро не может знать, сколько прогонов существует, поэтому <strong>допуск к
+запуску — дело хоста</strong>, очередь и пул на тенанта. Так же и месячная квота:
+ядро держит потолок одного прогона и сообщает, сколько он потратил, а
+вычитать это из месячного лимита и переводить единицы в деньги — бухгалтерия
+платформы.</p>
 
 
 

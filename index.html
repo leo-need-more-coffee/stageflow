@@ -1240,6 +1240,62 @@
   
   
     <li class="md-nav__item">
+      <a href="policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="variable-typing/" class="md-nav__link">
         
   
@@ -1583,7 +1639,7 @@
 <p>A framework for describing and running JSON-defined pipelines: a graph of
 nodes, user-defined stages, an immutable data frame, CEL expressions, retry
 and block-scoped <code>try/except</code>, parallel branches, loops over a list,
-nested pipelines.</p>
+nested pipelines, and per-tenant limits on all of it.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>stageflow-framework
 </code></pre></div>
 <p>Requires Python 3.11+ (the <code>common-expression-language</code> CEL binding does).</p>
@@ -1667,6 +1723,14 @@ step, with screenshots from the editor.</p>
 <tr>
 <td><a href="errors/">Errors</a></td>
 <td><code>retry</code>, how an error travels, the exceptions</td>
+</tr>
+<tr>
+<td><a href="policy/">Policy</a></td>
+<td>restricting the stages and node types a pipeline may use</td>
+</tr>
+<tr>
+<td><a href="limits/">Limits</a></td>
+<td>meters, budgets, what a stage spends</td>
 </tr>
 <tr>
 <td><a href="variable-typing/">Variable typing</a></td>

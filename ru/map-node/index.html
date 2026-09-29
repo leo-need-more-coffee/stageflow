@@ -1268,6 +1268,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Политика
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Лимиты
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../variable-typing/" class="md-nav__link">
         
   
@@ -1681,6 +1737,10 @@
 Индекс элемента — в событии <code>map_item_failed</code>.</p>
 <p><code>retry</code> на самом узле map повторяет цикл целиком, а не упавший элемент: это
 свойство узла, как и везде.</p>
+<p>Сколько проходов циклу позволено — не то, что граф может решить: число
+приходит из данных. Поэтому это <a href="../limits/">счётчик</a>: <code>iterations</code>
+начисляется до первого прохода, так что цикл шире разрешённого отвергается,
+не выполнив ничего.</p>
 <h2 id="_4">Тело должно быть замкнуто<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>Любая дорога внутри тела обязана заканчиваться внутри него. Дорога наружу —
 ошибка валидации:</p>

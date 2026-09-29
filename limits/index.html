@@ -1,44 +1,44 @@
 
 <!doctype html>
-<html lang="ru" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Фреймворк описания и исполнения JSON-пайплайнов">
+        <meta name="description" content="A framework for describing and running JSON-defined pipelines">
       
       
       
-        <link rel="canonical" href="https://leo-need-more-coffee.github.io/stageflow/ru/variable-typing/">
+        <link rel="canonical" href="https://leo-need-more-coffee.github.io/stageflow/limits/">
       
       
-        <link rel="prev" href="../limits/">
+        <link rel="prev" href="../policy/">
       
       
-        <link rel="next" href="../session-control/">
+        <link rel="next" href="../variable-typing/">
       
       
         
-          <link rel="alternate" href="../../variable-typing/" hreflang="en">
+          <link rel="alternate" href="./" hreflang="en">
         
-          <link rel="alternate" href="./" hreflang="ru">
+          <link rel="alternate" href="../ru/limits/" hreflang="ru">
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Типизация переменных - StageFlow</title>
+        <title>Limits - StageFlow</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -57,7 +57,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -82,8 +82,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
-          Перейти к содержанию
+        <a href="#limits-how-much-a-pipeline-may-consume" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -97,8 +97,8 @@
   
 
 <header class="md-header md-header--shadow" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Верхний колонтитул">
-    <a href="../" title="StageFlow" class="md-header__button md-logo" aria-label="StageFlow" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="StageFlow" class="md-header__button md-logo" aria-label="StageFlow" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Типизация переменных
+              Limits
             
           </span>
         </div>
@@ -158,20 +158,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Выберите язык">
+    <button class="md-header__button md-icon" aria-label="Select language">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../variable-typing/" hreflang="en" class="md-select__link">
+            <a href="./" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="./" hreflang="ru" class="md-select__link">
+            <a href="../ru/limits/" hreflang="ru" class="md-select__link">
               Русский
             </a>
           </li>
@@ -192,16 +192,16 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Поиск" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Поиск">
+      <nav class="md-search__options" aria-label="Search">
         
-        <button type="reset" class="md-search__icon md-icon" title="Очистить" aria-label="Очистить" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -214,7 +214,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Инициализация поиска
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -226,7 +226,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/leo-need-more-coffee/stageflow" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+        <a href="https://github.com/leo-need-more-coffee/stageflow" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
@@ -260,9 +260,9 @@
 
 
 
-<nav class="md-nav md-nav--primary" aria-label="Навигация" data-md-level="0">
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../" title="StageFlow" class="md-nav__button md-logo" aria-label="StageFlow" data-md-component="logo">
+    <a href=".." title="StageFlow" class="md-nav__button md-logo" aria-label="StageFlow" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -272,7 +272,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/leo-need-more-coffee/stageflow" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+      <a href="https://github.com/leo-need-more-coffee/stageflow" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
@@ -292,14 +292,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Главная
+    Home
   
 
     
@@ -342,7 +342,7 @@
   <span class="md-ellipsis">
     
   
-    Начало работы
+    Getting started
   
 
     
@@ -358,7 +358,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Начало работы
+    Getting started
   
 
           </label>
@@ -378,7 +378,7 @@
   <span class="md-ellipsis">
     
   
-    Быстрый старт
+    Quick start
   
 
     
@@ -406,7 +406,7 @@
   <span class="md-ellipsis">
     
   
-    Типы узлов
+    Node types
   
 
     
@@ -434,7 +434,7 @@
   <span class="md-ellipsis">
     
   
-    Модель данных
+    Data model
   
 
     
@@ -462,7 +462,7 @@
   <span class="md-ellipsis">
     
   
-    Выражения
+    Expressions
   
 
     
@@ -513,7 +513,7 @@
   <span class="md-ellipsis">
     
   
-    Туториал
+    Tutorial
   
 
     
@@ -529,7 +529,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Туториал
+    Tutorial
   
 
           </label>
@@ -549,7 +549,7 @@
   <span class="md-ellipsis">
     
   
-    Что собираем
+    What we build
   
 
     
@@ -577,7 +577,7 @@
   <span class="md-ellipsis">
     
   
-    1. Первый запуск
+    1. A pipeline that runs
   
 
     
@@ -605,7 +605,7 @@
   <span class="md-ellipsis">
     
   
-    2. Данные между узлами
+    2. Data between nodes
   
 
     
@@ -633,7 +633,7 @@
   <span class="md-ellipsis">
     
   
-    3. Выбор дороги
+    3. Choosing the road
   
 
     
@@ -661,7 +661,7 @@
   <span class="md-ellipsis">
     
   
-    4. Два дела сразу
+    4. Two things at once
   
 
     
@@ -689,7 +689,7 @@
   <span class="md-ellipsis">
     
   
-    5. Когда узел падает
+    5. When a node fails
   
 
     
@@ -717,7 +717,7 @@
   <span class="md-ellipsis">
     
   
-    6. Граф внутри узла
+    6. A graph inside a node
   
 
     
@@ -745,7 +745,7 @@
   <span class="md-ellipsis">
     
   
-    7. Смотрим, как он работает
+    7. Watching it run
   
 
     
@@ -798,7 +798,7 @@
   <span class="md-ellipsis">
     
   
-    Справочник
+    Reference
   
 
     
@@ -814,7 +814,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Справочник
+    Reference
   
 
           </label>
@@ -847,7 +847,7 @@
   <span class="md-ellipsis">
     
   
-    Узлы
+    Nodes
   
 
     
@@ -863,7 +863,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Узлы
+    Nodes
   
 
           </label>
@@ -883,7 +883,7 @@
   <span class="md-ellipsis">
     
   
-    Узел entry
+    The entry node
   
 
     
@@ -911,7 +911,7 @@
   <span class="md-ellipsis">
     
   
-    Узел stage
+    The stage node
   
 
     
@@ -939,7 +939,7 @@
   <span class="md-ellipsis">
     
   
-    Узел condition
+    The condition node
   
 
     
@@ -967,7 +967,7 @@
   <span class="md-ellipsis">
     
   
-    Узел switch
+    The switch node
   
 
     
@@ -995,7 +995,7 @@
   <span class="md-ellipsis">
     
   
-    Параллельные ветки
+    Parallel branches
   
 
     
@@ -1023,7 +1023,7 @@
   <span class="md-ellipsis">
     
   
-    Узел try
+    The try node
   
 
     
@@ -1051,7 +1051,7 @@
   <span class="md-ellipsis">
     
   
-    Узел map
+    The map node
   
 
     
@@ -1079,7 +1079,7 @@
   <span class="md-ellipsis">
     
   
-    Узел subpipeline
+    The subpipeline node
   
 
     
@@ -1107,7 +1107,7 @@
   <span class="md-ellipsis">
     
   
-    Узел terminal
+    The terminal node
   
 
     
@@ -1143,7 +1143,7 @@
   <span class="md-ellipsis">
     
   
-    Ошибки
+    Errors
   
 
     
@@ -1171,35 +1171,7 @@
   <span class="md-ellipsis">
     
   
-    Политика
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../limits/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Лимиты
+    Policy
   
 
     
@@ -1229,6 +1201,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limits
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1236,7 +1226,7 @@
   <span class="md-ellipsis">
     
   
-    Типизация переменных
+    Limits
   
 
     
@@ -1246,6 +1236,130 @@
 
       </a>
       
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#one-mechanism-meters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One mechanism: meters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-stage-spends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a stage spends
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-validation-refuses-before-the-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What validation refuses before the run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running out
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tenants-knobs-are-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The tenant's knobs are requests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#waiting-for-a-person-is-not-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Waiting for a person is not work
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-limits-do-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What limits do not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../variable-typing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Variable typing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1265,7 +1379,7 @@
   <span class="md-ellipsis">
     
   
-    Управление сессией
+    Session control
   
 
     
@@ -1293,7 +1407,7 @@
   <span class="md-ellipsis">
     
   
-    Пошаговая отладка
+    Step debugging
   
 
     
@@ -1321,7 +1435,7 @@
   <span class="md-ellipsis">
     
   
-    Встроенные стадии
+    Built-in stages
   
 
     
@@ -1349,7 +1463,7 @@
   <span class="md-ellipsis">
     
   
-    Спецификация стадии
+    Stage specification
   
 
     
@@ -1377,7 +1491,7 @@
   <span class="md-ellipsis">
     
   
-    Схема и спецификации
+    Schema and stage specs
   
 
     
@@ -1428,7 +1542,7 @@
   <span class="md-ellipsis">
     
   
-    Разработка
+    Development
   
 
     
@@ -1444,7 +1558,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Разработка
+    Development
   
 
           </label>
@@ -1464,7 +1578,7 @@
   <span class="md-ellipsis">
     
   
-    Релизы
+    Releasing
   
 
     
@@ -1498,12 +1612,97 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
     
   
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#one-mechanism-meters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One mechanism: meters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-stage-spends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a stage spends
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-validation-refuses-before-the-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What validation refuses before the run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running out
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tenants-knobs-are-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The tenant's knobs are requests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#waiting-for-a-person-is-not-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Waiting for a person is not work
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-limits-do-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What limits do not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1520,7 +1719,7 @@
 
 
   
-    <a href="https://github.com/leo-need-more-coffee/stageflow/edit/main/docs/variable-typing.ru.md" title="Редактировать страницу" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/leo-need-more-coffee/stageflow/edit/main/docs/limits.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1528,43 +1727,224 @@
   
 
 
-<h1 id="_1">Типизация переменных<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>Типизация постепенная: необъявленная переменная не проверяется, секции типов
-необязательны.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">"types"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">"UserId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">"User"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"UserId"</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">      </span><span class="nt">"email?"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="nt">"settings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"theme"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">"Point"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"x"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"y"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nt">"strict"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">"Tree"</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"children"</span><span class="p">:</span><span class="w"> </span><span class="s2">"list&lt;Tree&gt;"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="nt">"variables"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User"</span><span class="p">,</span><span class="w"> </span><span class="nt">"attempts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="s2">"list&lt;string&gt;"</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+<h1 id="limits-how-much-a-pipeline-may-consume">Limits: how much a pipeline may consume<a class="headerlink" href="#limits-how-much-a-pipeline-may-consume" title="Permanent link">&para;</a></h1>
+<p><a href="../policy/">A policy</a> answers what a pipeline may be made of. This answers how
+much of anything it may use, and the two are separate because a graph built
+entirely of allowed stages can still loop, fan out into thousands of tasks, or
+run until the process dies.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">Limits</span><span class="p">,</span> <span class="n">Policy</span><span class="p">,</span> <span class="n">Session</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">plan</span> <span class="o">=</span> <span class="n">Policy</span><span class="p">(</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">stages</span><span class="o">=</span><span class="p">{</span><span class="s2">"LoadTicket"</span><span class="p">,</span> <span class="s2">"ClassifyByRules"</span><span class="p">,</span> <span class="s2">"LlmReply"</span><span class="p">},</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">limits</span><span class="o">=</span><span class="n">Limits</span><span class="p">(</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="n">counters</span><span class="o">=</span><span class="p">{</span><span class="s2">"seconds"</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span> <span class="s2">"steps"</span><span class="p">:</span> <span class="mi">5_000</span><span class="p">,</span> <span class="s2">"iterations"</span><span class="p">:</span> <span class="mi">2_000</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                  <span class="s2">"tokens"</span><span class="p">:</span> <span class="mi">200_000</span><span class="p">,</span> <span class="s2">"llm_calls"</span><span class="p">:</span> <span class="mi">100</span><span class="p">},</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="n">gauges</span><span class="o">=</span><span class="p">{</span><span class="s2">"concurrency"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">"frame_bytes"</span><span class="p">:</span> <span class="mi">4_000_000</span><span class="p">},</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="n">max_delay_seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="p">),</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"run-1"</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">plan</span><span class="p">)</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">result</span><span class="o">.</span><span class="n">meters</span>   <span class="c1"># {"steps": 412, "seconds": 8.2, "tokens": 5120, "llm_calls": 9}</span>
 </code></pre></div>
-<p>Язык типов: примитивы <code>string</code>, <code>int</code>, <code>float</code>, <code>number</code> (int|float), <code>bool</code>,
-<code>any</code>, <code>null</code>; контейнеры <code>list&lt;T&gt;</code> и <code>map&lt;T&gt;</code> (ключи строковые); объединения
-<code>T|U</code>; сокращение <code>T?</code> = <code>T|null</code>; имена из секции <code>types</code>. Структуры
-поддерживают опциональные поля (суффикс <code>?</code> у имени), вложенные анонимные
-структуры, рекурсию и строгий режим (<code>strict</code> запрещает лишние поля).</p>
-<p>Проверки двухслойные:</p>
-<ul>
-<li>статически, при валидации графа: объявленный тип переменной сверяется с
-  хинтами из спецификации стадии, <code>expose</code> требует совместимости источника и
-  назначения; несовместимость — ошибка <code>Pipeline.validate()</code> до запуска;</li>
-<li>динамически, при исполнении: каждая запись в объявленную переменную
-  (<code>entry</code>, <code>outputs</code>, <code>expose</code>, <code>except.result_var</code>, артефакты субпайплайна) и
-  входной контекст сессии проверяются по полной структуре значения; ошибка —
-  <code>TypeCheckError</code> с узлом и путём до несовпадения.</li>
-</ul>
-<p>Субпайплайн наследует именованные типы родителя и может объявить свои; типы
-переменных у него собственные.</p>
-<p>Обе секции правятся в редакторе, «File» → «Pipeline settings…»:</p>
-<p><img alt="Именованные типы и типы переменных в редакторе" src="../../img/ref-pipeline-settings.png" width="560" /></p>
+<h2 id="one-mechanism-meters">One mechanism: meters<a class="headerlink" href="#one-mechanism-meters" title="Permanent link">&para;</a></h2>
+<p>Not three systems for time, cost and size — one, with two kinds of meter:</p>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Behaviour</th>
+<th>Examples</th>
+<th>Checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>counter</strong></td>
+<td>grows, never falls</td>
+<td><code>seconds</code>, <code>steps</code>, <code>iterations</code>, <code>tokens</code></td>
+<td>on every charge</td>
+</tr>
+<tr>
+<td><strong>gauge</strong></td>
+<td>an instantaneous value</td>
+<td><code>concurrency</code>, <code>depth</code>, <code>frame_bytes</code></td>
+<td>when it is taken up</td>
+</tr>
+</tbody>
+</table>
+<p>The runtime charges <code>steps</code> and <code>iterations</code> and holds the gauges; stages
+charge whatever they spent. <code>concurrency</code> is the one gauge that <strong>waits</strong>
+rather than failing: a hundred items to process is a good pipeline that may
+not have a hundred calls in the air at once, and refusing it for being wide
+would be refusing the work rather than bounding it. Depth and size do fail —
+too deep is too deep, and waiting would not help. <strong>Meter names are not fixed by the core.</strong> A host
+counts what is scarce for it, and a meter nobody limits simply accumulates and
+comes back in <code>result.meters</code>, which is what a bill is made of.</p>
+<p><code>seconds</code> is the one hybrid, deliberately. It is reported like a counter so
+that it shows up in the same table as everything else, but it is <em>enforced</em> as
+a deadline — a counter is only checked when something charges it, and a stage
+that hangs charges nothing.</p>
+<div class="admonition note">
+<p class="admonition-title">Nothing is measured unless it is limited</p>
+<p>Every check costs something and <code>frame_bytes</code> costs the most: measuring it
+means serialising the frame. A meter absent from the limits is not
+computed at all, so the price of all this to a host that sets no limits is
+one <code>if</code>.</p>
+</div>
+<h2 id="what-a-stage-spends">What a stage spends<a class="headerlink" href="#what-a-stage-spends" title="Permanent link">&para;</a></h2>
+<p>A stage charges the <strong>units it consumed</strong> — <code>tokens</code>, <code>llm_calls</code>,
+<code>http_calls</code>, <code>rows</code>. What a unit is worth is a price list; price lists change
+without any code changing, and they belong to the host. A stage knows how much
+it used, not what that costs.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@register_stage</span><span class="p">(</span><span class="s2">"LlmTriageStage"</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">LlmTriageStage</span><span class="p">(</span><span class="n">BaseStage</span><span class="p">):</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="sd">"""</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="sd">    description: "Classify a ticket with a model"</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="sd">    timeout: 60</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="sd">    reserve:</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="sd">      llm_calls: 1</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="sd">      tokens: "args.max_tokens + size(args.text) / 3"</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="sd">    """</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="n">answer</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_arguments</span><span class="p">()[</span><span class="s2">"text"</span><span class="p">])</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">({</span><span class="s2">"topic"</span><span class="p">:</span> <span class="n">answer</span><span class="o">.</span><span class="n">topic</span><span class="p">})</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">(</span><span class="n">tokens</span><span class="o">=</span><span class="n">answer</span><span class="o">.</span><span class="n">usage</span><span class="o">.</span><span class="n">total</span><span class="p">,</span> <span class="n">llm_calls</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<p>Two mechanisms, and they do not overlap:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Where</th>
+<th>Sees</th>
+<th>Answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reserve</code></td>
+<td>the spec, declarative</td>
+<td><code>args</code></td>
+<td>may this be attempted at all</td>
+</tr>
+<tr>
+<td><code>charge()</code></td>
+<td>the stage, in code</td>
+<td>everything the stage knows</td>
+<td>what it actually spent</td>
+</tr>
+</tbody>
+</table>
+<p><code>reserve</code> is declarative because it is read <strong>before</strong> anything runs: an
+editor can show "up to 4000 tokens a call", and a host can refuse a graph
+without executing it. Its values are numbers or <a href="../expressions/">CEL</a> over
+<code>args</code>, the arguments as the stage will receive them.</p>
+<p>The order is reserve → run → settle:</p>
+<ol>
+<li>the reservation is evaluated and held. It does not fit what is left →
+   <strong>the stage never starts</strong>. An expensive call is better not begun than cut
+   off after the money is gone;</li>
+<li>the stage runs;</li>
+<li><code>charge()</code> <strong>replaces</strong> the reservation for the meters it names and adds
+   the ones it does not — an amount both reserved and charged is not counted
+   twice. A stage that charges nothing is settled at what it reserved, and
+   that is true of a failure too: a call that went out and then timed out
+   still spent what it spent.</li>
+</ol>
+<p>A stage that reserves and charges nothing is free.</p>
+<div class="admonition warning">
+<p class="admonition-title">A loop is not reserved as a whole</p>
+<p>Reservations are per stage, taken as that stage is about to run — nothing
+sums up what a <code>map</code> will cost before entering it, because the
+reservation of an iteration depends on its arguments, which depend on the
+item, which comes from the data. What <em>is</em> checked up front is the
+iteration count: <code>iterations</code> is charged before the first pass, so a loop
+over a thousand items on a plan allowing fifty is refused without running
+any of them.</p>
+<p>A loop therefore stops as soon as it cannot afford the next stage, with
+the passes it did make already paid for. In <code>parallel</code> mode the overshoot
+is bounded by <code>concurrency</code> rather than by one stage: calls already in
+flight have already been made. A host that needs a hard ceiling for the
+whole loop gets it by arithmetic rather than prediction — cap
+<code>iterations</code> so that the count times the worst case fits the budget.</p>
+</div>
+<h2 id="what-validation-refuses-before-the-run">What validation refuses before the run<a class="headerlink" href="#what-validation-refuses-before-the-run" title="Permanent link">&para;</a></h2>
+<p><code>Pipeline.validate(policy)</code> checks what is <strong>soundly knowable from the JSON</strong>,
+so that a tenant saving a graph is told what to change rather than finding out
+on the tenth element:</p>
+<table>
+<thead>
+<tr>
+<th>Checked</th>
+<th>Because</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the shortest way through the graph against <code>steps</code></td>
+<td>every run passes at least that many nodes, so a graph whose cheapest path does not fit cannot finish at all</td>
+</tr>
+<tr>
+<td>how deep the declared subpipelines nest against <code>depth</code></td>
+<td>the nesting is written down, not computed</td>
+</tr>
+<tr>
+<td>what each <code>retry</code> asks for against <code>max_retries</code> and <code>max_delay_seconds</code></td>
+<td>the numbers are in the JSON</td>
+</tr>
+</tbody>
+</table>
+<p>The bound on steps is a <strong>lower</strong> one, which is what makes it safe to refuse
+by: a graph with a long road and a short one is judged by the short one.</p>
+<p>What is <em>not</em> checked is anything that would have to be guessed. A loop's cost
+is unknowable before the run — the number of passes comes from the data and
+the reservation of a pass from its arguments — and multiplying something here
+would refuse pipelines that fit. A false refusal on a working graph is worse
+than the ceiling it was meant to save.</p>
+<h2 id="running-out">Running out<a class="headerlink" href="#running-out" title="Permanent link">&para;</a></h2>
+<p>The ceiling is hard. <code>BudgetExceeded</code> inherits <strong><code>BaseException</code></strong>,
+deliberately outside the <code>StageFlowError</code> tree, because <code>try</code> blocks catch
+<code>Exception</code> and so does the <code>retry</code> machinery — a tenant able to wrap a graph
+in <code>try</code> and swallow this would make every limit decoration.</p>
+<p><code>Session.run</code> is the one place that catches it, and it ends the run the way a
+stop does, rather than throwing an exception through work that did happen:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">result</span><span class="o">.</span><span class="n">result</span>   <span class="c1"># {"status": "budget_exceeded", "meter": "tokens",</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                <span class="c1">#  "limit": 200000, "spent": 200512}</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">result</span><span class="o">.</span><span class="n">meters</span>   <span class="c1"># everything spent, for the host to bill by</span>
+</code></pre></div>
+<p>A child session of a <code>subpipeline</code> shares the parent's budget — a fresh one
+per child would multiply the allowance by the depth of nesting — and lets the
+stop travel up rather than swallowing it.</p>
+<h2 id="the-tenants-knobs-are-requests">The tenant's knobs are requests<a class="headerlink" href="#the-tenants-knobs-are-requests" title="Permanent link">&para;</a></h2>
+<p><code>retry</code> and the pauses between attempts come from the pipeline, which is to
+say from the less-trusted side, so <code>max_retries</code> and <code>max_delay_seconds</code> deal
+with them twice.</p>
+<p>A node <strong>declaring</strong> more than the plan allows is refused at validation, like
+anything else written in the JSON: the tenant is told what to change rather
+than quietly given something other than what they asked for. A retry that
+reaches a session another way — a graph assembled in Python and never
+validated — is <strong>clamped</strong> instead: fifty attempts on a plan allowing three
+run three times, and the event says three.</p>
+<h2 id="waiting-for-a-person-is-not-work">Waiting for a person is not work<a class="headerlink" href="#waiting-for-a-person-is-not-work" title="Permanent link">&para;</a></h2>
+<p>A pipeline that asks a question and waits is not consuming the host, so the
+deadline does not tick while it waits. Without that, a deadline would be a
+limit on how fast somebody reads.</p>
+<p>This also fixes an older trap: a stage that waits for input used to die at its
+own 30-second timeout. A stage timeout is now measured in busy time as well,
+and clamped by what is left of the deadline — otherwise a stage allowed sixty
+seconds and started with two left would run for sixty, and the budget would
+leak by the length of its last stage.</p>
+<h2 id="what-limits-do-not-do">What limits do not do<a class="headerlink" href="#what-limits-do-not-do" title="Permanent link">&para;</a></h2>
+<p><code>concurrency: 8</code> bounds <strong>one run</strong>. A hundred runs are eight hundred tasks:
+the core cannot know how many runs exist, so <strong>admission control is the
+host's</strong> — a queue and a pool per tenant. Likewise a monthly quota: the core
+enforces the ceiling of one run and reports what it spent; subtracting that
+from an allowance for the month, and turning units into money, is the
+platform's accounting.</p>
 
 
 
@@ -1588,7 +1968,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  К началу
+  Back to top
 </button>
         
       </main>
@@ -1624,10 +2004,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "search.highlight", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440", "clipboard.copy": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u0431\u0443\u0444\u0435\u0440", "search.result.more.one": "\u0415\u0449\u0451 1 \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.more.other": "\u0415\u0449\u0451 # \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.none": "\u0421\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e", "search.result.one": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e 1 \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0435", "search.result.other": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439: #", "search.result.placeholder": "\u041d\u0430\u0447\u043d\u0438\u0442\u0435 \u043f\u0435\u0447\u0430\u0442\u0430\u0442\u044c \u0434\u043b\u044f \u043f\u043e\u0438\u0441\u043a\u0430", "search.result.term.missing": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442", "select.version": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u0435\u0440\u0441\u0438\u044e"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "search.highlight", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

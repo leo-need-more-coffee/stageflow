@@ -16,7 +16,7 @@
         <link rel="prev" href="../terminal-node/">
       
       
-        <link rel="next" href="../variable-typing/">
+        <link rel="next" href="../policy/">
       
       
         
@@ -1244,6 +1244,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../variable-typing/" class="md-nav__link">
         
   
@@ -1720,8 +1776,18 @@ package:</p>
 <td><code>ValueError</code></td>
 <td>an unknown stage or node type</td>
 </tr>
+<tr>
+<td><code>PolicyViolationError</code></td>
+<td><code>PermissionError</code></td>
+<td>a stage or node type the <a href="../policy/">policy</a> does not allow</td>
+</tr>
 </tbody>
 </table>
+<p>One error is deliberately <strong>not</strong> in that tree. <code>BudgetExceeded</code> inherits
+<code>BaseException</code>, so <code>except Exception</code> does not see it and neither do <code>try</code>
+blocks or the retry machinery — a <a href="../limits/">budget</a> a pipeline could catch
+would be no budget. It is caught in one place, <code>Session.run</code>, and comes back
+as a result rather than as an exception.</p>
 
 
 

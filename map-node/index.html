@@ -1268,6 +1268,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../variable-typing/" class="md-nav__link">
         
   
@@ -1682,6 +1738,10 @@ matching on <code>ValueError</code> catches the <code>ValueError</code> the body
 in the <code>map_item_failed</code> event.</p>
 <p><code>retry</code> on the map node itself repeats the whole loop, not the element that
 failed — it is a property of the node, as everywhere else.</p>
+<p>How many passes a loop may make is not something the graph can settle: the
+count comes from the data. It is a <a href="../limits/">meter</a> instead — <code>iterations</code>
+is charged before the first pass, so a loop wider than the host allows is
+refused having run none of it.</p>
 <h2 id="the-body-must-be-closed">The body must be closed<a class="headerlink" href="#the-body-must-be-closed" title="Permanent link">&para;</a></h2>
 <p>Every road inside the body has to end inside it. A road out of the region is a
 validation error:</p>

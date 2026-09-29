@@ -1240,6 +1240,62 @@
   
   
     <li class="md-nav__item">
+      <a href="policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Политика
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Лимиты
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="variable-typing/" class="md-nav__link">
         
   
@@ -1583,7 +1639,7 @@
 <p>Фреймворк описания и исполнения пайплайнов, заданных JSON: граф узлов,
 пользовательские стадии, иммутабельный фрейм данных, CEL-выражения, retry
 и блочный <code>try/except</code>, параллельные ветки, циклы по списку,
-вложенные пайплайны.</p>
+вложенные пайплайны и лимиты на всё это для каждого тенанта.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>stageflow-framework
 </code></pre></div>
 <p>Требуется Python 3.11+ (его требует CEL-байндинг <code>common-expression-language</code>).</p>
@@ -1668,6 +1724,14 @@
 <tr>
 <td><a href="errors/">Ошибки</a></td>
 <td><code>retry</code>, путь ошибки, исключения ядра</td>
+</tr>
+<tr>
+<td><a href="policy/">Политика</a></td>
+<td>ограничение стадий и типов узлов для пайплайна</td>
+</tr>
+<tr>
+<td><a href="limits/">Лимиты</a></td>
+<td>счётчики, бюджет, что тратит стадия</td>
 </tr>
 <tr>
 <td><a href="variable-typing/">Типизация переменных</a></td>

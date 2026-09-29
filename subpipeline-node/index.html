@@ -1235,6 +1235,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../variable-typing/" class="md-nav__link">
         
   
@@ -1645,6 +1701,10 @@ it as an artifact.</p>
   run is readable in the log without being confused with the outer one.</li>
 <li>The <a href="../step-debugging/">debugger</a> is inherited too: stepping walks into the
   child node by node, it is not one opaque jump.</li>
+<li>So are the <a href="../policy/">policy</a> and the <a href="../limits/">budget</a>, and they have
+  to be: a child with its own allowance would be a way out of both. The child
+  graph is validated against the policy when its session is built, and the
+  meters it moves are the parent's.</li>
 <li><code>retry</code> on the node repeats the whole child run.</li>
 <li>The id must be a key of <code>subpipelines</code>, and it may not be the id of the
   root entry node — validation says so before the run.</li>
