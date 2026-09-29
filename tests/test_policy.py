@@ -336,3 +336,133 @@ class StaticLimitTests(unittest.TestCase):
         data = _pipeline("PriceyStage")
         self.assertEqual(
             Pipeline.from_dict(data).collect_errors(Policy(limits=Limits())), [])
+
+
+class StaticLimitEdgeTests(unittest.TestCase):
+    """The shapes that make a static check crash or lie if it is careless."""
+
+    def test_a_self_referencing_subpipeline_does_not_spin_the_depth_walk(self):
+        data = {
+            "entry": "start",
+            "nodes": [
+                {"id": "start", "type": "entry", "next": "one"},
+                {"id": "one", "type": "subpipeline", "subpipeline_id": "loop",
+                 "next": "done"},
+                {"id": "done", "type": "terminal", "result": {}},
+            ],
+            "subpipelines": {"loop": {"entry": "again", "nodes": [
+                {"id": "again", "type": "subpipeline", "subpipeline_id": "loop",
+                 "next": "end"},
+                {"id": "end", "type": "terminal", "result": {}},
+            ]}},
+        }
+        errors = Pipeline.from_dict(data).collect_errors(
+            Policy(limits=Limits(gauges={"depth": 8})))
+        self.assertIsInstance(errors, list)  # it returned at all
+
+    def test_a_subpipeline_that_is_not_declared_still_counts_one_level(self):
+        data = {
+            "entry": "start",
+            "nodes": [
+                {"id": "start", "type": "entry", "next": "one"},
+                {"id": "one", "type": "subpipeline", "subpipeline_id": "missing",
+                 "next": "done"},
+                {"id": "done", "type": "terminal", "result": {}},
+            ],
+        }
+        errors = Pipeline.from_dict(data).collect_errors(
+            Policy(limits=Limits(gauges={"depth": 0})))
+        self.assertIn("subpipelines nest 1 deep, and the policy allows 0", errors)
+
+    def test_a_graph_with_no_subpipelines_is_zero_deep(self):
+        self.assertEqual(
+            Pipeline.from_dict(_pipeline()).collect_errors(
+                Policy(limits=Limits(gauges={"depth": 0}))),
+            [],
+        )
+
+    def test_every_retrier_on_a_node_is_checked_not_just_the_first(self):
+        data = _pipeline()
+        data["nodes"][1]["retry"] = [
+            {"error_equals": ["TimeoutError"], "max_attempts": 2},
+            {"error_equals": ["*"], "max_attempts": 40},
+        ]
+        errors = Pipeline.from_dict(data).collect_errors(
+            Policy(limits=Limits(max_retries=3)))
+        self.assertEqual(errors,
+                         ["work: retry asks for 40 attempts, and the policy allows 3"])
+
+    def test_a_retry_within_the_allowance_says_nothing(self):
+        data = _pipeline()
+        data["nodes"][1]["retry"] = [{"error_equals": ["*"], "max_attempts": 3,
+                                      "interval_seconds": 1}]
+        self.assertEqual(
+            Pipeline.from_dict(data).collect_errors(
+                Policy(limits=Limits(max_retries=3, max_delay_seconds=1))),
+            [],
+        )
+
+    def test_the_shortest_run_counts_a_map_body_once(self):
+        """A loop's passes come from the data; the shape says one."""
+        data = {"entry": "start", "nodes": [
+            {"id": "start", "type": "entry", "next": "loop"},
+            {"id": "loop", "type": "map", "items": "vars.xs", "body": "work",
+             "item_var": "x", "next": "done"},
+            {"id": "work", "type": "stage", "stage": "CheapStage",
+             "outputs": {"value": "v"}},
+            {"id": "done", "type": "terminal", "result": {}},
+        ]}
+        errors = Pipeline.from_dict(data).collect_errors(
+            Policy(limits=Limits(counters={"steps": 3})))
+        self.assertEqual(errors, [])
+
+    def test_a_graph_that_ends_without_a_terminal_still_has_a_length(self):
+        data = {"entry": "start", "nodes": [
+            {"id": "start", "type": "entry", "next": "work"},
+            {"id": "work", "type": "stage", "stage": "CheapStage",
+             "outputs": {"value": "v"}},
+        ]}
+        errors = Pipeline.from_dict(data).collect_errors(
+            Policy(limits=Limits(counters={"steps": 1})))
+        self.assertIn("the shortest way through this graph is 2 nodes, "
+                      "and the policy allows 1 steps", errors)
+
+    def test_no_steps_limit_means_no_walk_and_no_complaint(self):
+        nodes = [{"id": "start", "type": "entry", "next": "s0"}]
+        for i in range(50):
+            nodes.append({"id": f"s{i}", "type": "stage", "stage": "CheapStage",
+                          "outputs": {"value": "v"},
+                          "next": f"s{i + 1}" if i < 49 else "done"})
+        nodes.append({"id": "done", "type": "terminal", "result": {}})
+        self.assertEqual(
+            Pipeline.from_dict({"entry": "start", "nodes": nodes}).collect_errors(
+                Policy(limits=Limits(counters={"tokens": 5}))),
+            [],
+        )
+
+
+class PolicyRefusalTests(unittest.TestCase):
+    """The runtime guards, in isolation from a session."""
+
+    def test_check_stage_names_the_node_and_the_stage(self):
+        with self.assertRaises(PolicyViolationError) as caught:
+            CHEAP_ONLY.check_stage("PriceyStage", "work")
+        self.assertEqual(str(caught.exception),
+                         "work: stage 'PriceyStage' is not allowed by the policy")
+
+    def test_check_node_type_names_the_node_and_the_type(self):
+        with self.assertRaises(PolicyViolationError) as caught:
+            CHEAP_ONLY.check_node_type("map", "loop")
+        self.assertEqual(str(caught.exception),
+                         "loop: node type 'map' is not allowed by the policy")
+
+    def test_an_allowed_thing_passes_quietly(self):
+        CHEAP_ONLY.check_stage("CheapStage", "work")
+        CHEAP_ONLY.check_node_type("stage", "work")
+
+    def test_a_policy_that_allows_nothing_allows_nothing(self):
+        nothing = Policy(stages=set(), node_types=set())
+        self.assertFalse(nothing.allows_stage("CheapStage"))
+        self.assertFalse(nothing.allows_node_type("entry"))
+        self.assertEqual(capabilities(nothing)["node_types"], [])
+        self.assertEqual(capabilities(nothing)["stages"], 0)

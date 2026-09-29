@@ -65,20 +65,26 @@ class Session:
         policy: Policy | None = None,
         limits: Limits | None = None,
         budget: Budget | None = None,
+        reports_budget: bool = True,
     ):
         # what this session may be made of, and how much it may spend. Both
         # given by the host, never by the pipeline: a graph that could widen
         # its own allowance has none. `budget` is how a child session shares
         # the parent's running total instead of getting a fresh one
-        self.policy = policy or OPEN
         # a plan is one object, so the limits usually arrive inside the
         # policy; the separate argument is for a host with nothing to
-        # restrict but something to bound
-        self.budget = budget or Budget(limits or self.policy.limits)
-        # whoever created the budget is the one that reports on it. A child
-        # session shares its parent's, and must let the stop travel up: a
-        # subpipeline that swallowed it would carry on with the money gone
-        self._owns_budget = budget is None
+        # restrict but something to bound, and it wins where both are given —
+        # including for validation, or the static checks and the running
+        # totals would answer to different numbers
+        self.policy = policy or OPEN
+        if limits is not None:
+            self.policy = replace(self.policy, limits=limits)
+        self.budget = budget or Budget(self.policy.limits)
+        # a child session of a subpipeline shares the budget and must let a
+        # ceiling travel up rather than answering for it. Said outright
+        # rather than inferred from "was a budget passed in", which gets a
+        # host handing its own budget to a top-level session backwards
+        self._owns_budget = reports_budget
         pipeline.validate(self.policy)
         self.id = id
         self.pipeline = pipeline
@@ -136,11 +142,11 @@ class Session:
         anything. Counting that time would make the deadline a limit on how
         fast the user reads.
         """
-        waiting_from = time.monotonic()
+        self.budget.begin_idle()
         try:
             return await self.inputs.finish_wait(type_, fut, timeout=timeout)
         finally:
-            self.budget.add_idle(time.monotonic() - waiting_from)
+            self.budget.end_idle()
 
     async def wait_input(
         self, type_: str, timeout: float | None = None
@@ -348,6 +354,7 @@ class Session:
             # is not a way out of it, and neither is it a fresh budget
             policy=self.policy,
             budget=self.budget,
+            reports_budget=False,
         )
         with self.budget.gauge("depth"):
             return await child.run()

@@ -110,6 +110,8 @@ class Budget:
         self._started: float | None = None
         self._stopped: float | None = None
         self._idle: float = 0.0
+        self._idle_since: float | None = None
+        self._idle_depth = 0
 
     # ------------------------------------------------------------- the clock
 
@@ -135,14 +137,37 @@ class Budget:
         if self._started is None:
             return 0.0
         until = self._stopped if self._stopped is not None else time.monotonic()
-        return until - self._started - self._idle
+        return until - self._started - self.idle_seconds
 
-    def add_idle(self, seconds: float) -> None:
-        self._idle += max(0.0, seconds)
+    def begin_idle(self) -> None:
+        """Stop the clock: from here the session is waiting, not working.
+
+        Nested waits are one idle period, not several. Counting each waiter
+        separately would credit back more time than passed, and a session
+        that is waiting at all is usually waiting for the only thing it has
+        to do.
+        """
+        if self._idle_depth == 0:
+            self._idle_since = time.monotonic()
+        self._idle_depth += 1
+
+    def end_idle(self) -> None:
+        self._idle_depth = max(0, self._idle_depth - 1)
+        if self._idle_depth == 0 and self._idle_since is not None:
+            self._idle += time.monotonic() - self._idle_since
+            self._idle_since = None
 
     @property
     def idle_seconds(self) -> float:
-        return self._idle
+        """Time spent waiting, including a wait that is still going on.
+
+        Crediting it only once the wait ends would be too late for the thing
+        it exists for: a deadline checked *during* the wait would already
+        have fired.
+        """
+        if self._idle_since is None:
+            return self._idle
+        return self._idle + (time.monotonic() - self._idle_since)
 
     @property
     def deadline_seconds(self) -> float | None:
@@ -227,23 +252,35 @@ class Budget:
         """
         limit = self.limits.gauges.get(meter)
         if limit is None:
-            with self.gauge(meter):
+            with self._hold(meter):
                 yield
             return
         slot = self._slots.get(meter)
         if slot is None:
+            # a throttle of nothing would deadlock, so nonsense serialises
             slot = self._slots[meter] = asyncio.Semaphore(max(1, int(limit)))
         async with slot:
-            with self.gauge(meter):
+            # the semaphore is the enforcement here; holding only records the
+            # peak, or the two would have to agree about the boundary twice
+            with self._hold(meter):
                 yield
 
     @contextmanager
     def gauge(self, meter: str, amount: float = 1) -> Iterator[None]:
-        """Take up an instantaneous quantity for as long as the block runs."""
+        """Take up an instantaneous quantity, refusing if it does not fit.
+
+        For what should wait rather than fail — concurrency — use `slot`.
+        """
         limit = self.limits.gauges.get(meter)
+        if limit is not None and self._held.get(meter, 0.0) + amount > limit:
+            raise BudgetExceeded(meter, limit, self._held.get(meter, 0.0) + amount)
+        with self._hold(meter, amount):
+            yield
+
+    @contextmanager
+    def _hold(self, meter: str, amount: float = 1) -> Iterator[None]:
+        """Take the quantity up and remember the peak, checking nothing."""
         held = self._held.get(meter, 0.0) + amount
-        if limit is not None and held > limit:
-            raise BudgetExceeded(meter, limit, held)
         self._held[meter] = held
         self.peaks[meter] = max(self.peaks.get(meter, 0.0), held)
         try:

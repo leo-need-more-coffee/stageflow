@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Iterable
 
 from ..exceptions import PolicyViolationError
-from .budget import UNLIMITED, Limits
+from .budget import Limits
 
 
 def _freeze(names: Iterable[str] | None) -> frozenset[str] | None:
@@ -35,8 +35,10 @@ class Policy:
     stages: frozenset[str] | None = None
     node_types: frozenset[str] | None = None
     #: how much a session under this policy may spend. A plan is one object:
-    #: which blocks, and how many of anything
-    limits: Limits = field(default=UNLIMITED)
+    #: which blocks, and how many of anything. Built fresh rather than shared
+    #: with every other default policy — one `Limits` handed round and then
+    #: written into would change the allowance of everything at once
+    limits: Limits = field(default_factory=Limits)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "stages", _freeze(self.stages))

@@ -163,9 +163,15 @@ stop travel up rather than swallowing it.
 ## The tenant's knobs are requests
 
 `retry` and the pauses between attempts come from the pipeline, which is to
-say from the less-trusted side. `max_retries` and `max_delay_seconds` clamp
-them: a node asking for fifty attempts on a plan that allows three gets three,
-and the event says three.
+say from the less-trusted side, so `max_retries` and `max_delay_seconds` deal
+with them twice.
+
+A node **declaring** more than the plan allows is refused at validation, like
+anything else written in the JSON: the tenant is told what to change rather
+than quietly given something other than what they asked for. A retry that
+reaches a session another way — a graph assembled in Python and never
+validated — is **clamped** instead: fifty attempts on a plan allowing three
+run three times, and the event says three.
 
 ## Waiting for a person is not work
 
