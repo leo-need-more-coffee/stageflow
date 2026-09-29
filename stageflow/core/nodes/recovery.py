@@ -63,6 +63,7 @@ async def run_with_retry(
     ctx: Context,
     body: NodeStep,
 ) -> tuple["Node | None", Context]:
+    limits = session.budget.limits
     attempts: dict[int, int] = {}
     while True:
         try:
@@ -75,8 +76,13 @@ async def run_with_retry(
             )
             if retrier is None:
                 raise
+            # what the pipeline asked for is a request; the host's limits
+            # are what it gets. A policy with no opinion changes nothing
+            allowed = retrier.max_attempts
+            if limits.max_retries is not None:
+                allowed = min(allowed, limits.max_retries)
             attempt = attempts.get(index, 0) + 1
-            if attempt >= retrier.max_attempts:
+            if attempt >= allowed:
                 raise
             attempts[index] = attempt
             session.emit_node_event(
@@ -84,9 +90,12 @@ async def run_with_retry(
                 node,
                 {
                     "attempt": attempt,
-                    "of": retrier.max_attempts,
+                    "of": allowed,
                     "error": str(exc),
                     "type": error_name(exc),
                 },
             )
-            await asyncio.sleep(retrier.delay_for(attempt - 1))
+            delay = retrier.delay_for(attempt - 1)
+            if limits.max_delay_seconds is not None:
+                delay = min(delay, limits.max_delay_seconds)
+            await asyncio.sleep(delay)

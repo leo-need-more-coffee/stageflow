@@ -4,6 +4,7 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from ...exceptions import BranchError
+from ..budget import BudgetExceeded
 from ..context import Context
 from .base import Node, register_node
 from .recovery import run_with_retry
@@ -75,7 +76,7 @@ class ParallelNode(Node):
 
             tasks = {
                 branch["id"]: asyncio.create_task(
-                    session.run_subgraph(branch["entry"], ctx)
+                    self._branch(session, branch["entry"], ctx)
                 )
                 for branch in self.branches
             }
@@ -91,6 +92,11 @@ class ParallelNode(Node):
             )
             if failure is not None:
                 branch_id, exc = failure
+                # BranchError is an ordinary exception and a `try` block can
+                # catch it. Wrapping the budget in one would hand the tenant
+                # the way out the budget exists to close
+                if isinstance(exc, BudgetExceeded):
+                    raise exc
                 raise BranchError(f"branch '{branch_id}' failed: {exc}") from exc
 
             merged = self._merge(
@@ -110,6 +116,12 @@ class ParallelNode(Node):
             return self._goto(session, self.next), merged
 
         return await run_with_retry(self, session, ctx, body)
+
+    @staticmethod
+    async def _branch(session: "Session", entry: str, ctx: Context) -> Context:
+        """One branch, holding a unit of whatever concurrency is allowed."""
+        with session.budget.gauge("concurrency"):
+            return await session.run_subgraph(entry, ctx)
 
     async def _wait_branches(self, session: "Session", tasks: dict[str, asyncio.Task]) -> None:
         mode = asyncio.FIRST_EXCEPTION if self.cancel_on_error else asyncio.ALL_COMPLETED

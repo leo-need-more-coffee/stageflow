@@ -1,3 +1,4 @@
+from .budget import UNLIMITED, Budget, BudgetExceeded, Limits
 from .cel import CelEngine, CelError
 from .context import Context
 from .debug import RUN, STEP, StepDebugger
@@ -59,6 +60,10 @@ __all__ = [
     "Pipeline",
     "Policy",
     "OPEN",
+    "Limits",
+    "Budget",
+    "BudgetExceeded",
+    "UNLIMITED",
     "Session",
     "SessionResult",
     "BaseStage",

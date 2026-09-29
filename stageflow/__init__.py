@@ -2,6 +2,8 @@ from . import builtins  # noqa: F401
 from .capabilities import __version__, capabilities
 from .core import (
     BaseStage,
+    Budget,
+    BudgetExceeded,
     CelEngine,
     CelError,
     ConditionNode,
@@ -13,6 +15,7 @@ from .core import (
     MapNode,
     Node,
     ParallelNode,
+    Limits,
     Pipeline,
     Policy,
     Retrier,
@@ -57,6 +60,9 @@ __all__ = [
     "capabilities",
     "Pipeline",
     "Policy",
+    "Limits",
+    "Budget",
+    "BudgetExceeded",
     "Session",
     "SessionResult",
     "StepDebugger",

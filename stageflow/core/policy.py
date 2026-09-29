@@ -17,10 +17,11 @@ widen it. A policy is given to `Session` by the host, next to the debugger.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Iterable
 
 from ..exceptions import PolicyViolationError
+from .budget import UNLIMITED, Limits
 
 
 def _freeze(names: Iterable[str] | None) -> frozenset[str] | None:
@@ -39,6 +40,9 @@ class Policy:
 
     stages: frozenset[str] | None = None
     node_types: frozenset[str] | None = None
+    #: how much a session under this policy may spend. A plan is one object:
+    #: which blocks, and how many of anything
+    limits: Limits = field(default=UNLIMITED)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "stages", _freeze(self.stages))
@@ -46,7 +50,8 @@ class Policy:
 
     @property
     def unrestricted(self) -> bool:
-        return self.stages is None and self.node_types is None
+        return (self.stages is None and self.node_types is None
+                and self.limits.unlimited)
 
     def allows_stage(self, name: str) -> bool:
         return self.stages is None or name in self.stages
@@ -77,8 +82,8 @@ class Policy:
         "may I save this" would be yes and the answer to "may I run it" no —
         the same refusal, hours apart, at the worst moment.
         """
-        if self.unrestricted:
-            return []
+        if self.stages is None and self.node_types is None:
+            return []  # nothing is restricted about composition
         errors = [
             message
             for node in pipeline.nodes

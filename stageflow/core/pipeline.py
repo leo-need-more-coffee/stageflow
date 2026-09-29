@@ -136,7 +136,42 @@ class Pipeline:
                 errors.append(f"Duplicate node id: '{node.id}'")
             seen.add(node.id)
             errors.extend(node.validate(self))
+        errors.extend(self._cycle_errors())
         return errors
+
+    def _cycle_errors(self) -> list[str]:
+        """A road that comes back to where it has been.
+
+        The language has a loop of its own — the `map` node — and it is
+        bounded by a list. A cycle in the order edges is not: it spins for as
+        long as the process lives, at tens of thousands of nodes a second,
+        and it is almost always a `next` pointed at the wrong id. Saying so
+        at validation costs one walk of the graph and saves finding out by
+        watching a server fall over.
+        """
+        colour: dict[str, int] = {}  # 0 — on the current path, 1 — done with
+        found: list[str] = []
+
+        def walk(node_id: str, path: list[str]) -> None:
+            state = colour.get(node_id)
+            if state == 1:
+                return
+            if state == 0:
+                cycle = path[path.index(node_id):] + [node_id]
+                found.append(" -> ".join(cycle))
+                return
+            colour[node_id] = 0
+            path.append(node_id)
+            for target in self.get_node(node_id).order_targets():
+                if self.has_node(target):
+                    walk(target, path)
+            path.pop()
+            colour[node_id] = 1
+
+        for node in self.nodes:
+            if node.id not in colour:
+                walk(node.id, [])
+        return [f"cycle in the graph: {cycle}" for cycle in dict.fromkeys(found)]
 
     def validate(self, policy: "Policy | None" = None) -> None:
         """Everything wrong with this pipeline, as one error.

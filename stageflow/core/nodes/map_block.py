@@ -139,6 +139,9 @@ class MapNode(Node):
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
         async def body() -> tuple[Node | None, Context]:
             items = self._items_of(session, ctx)
+            # how many times a graph goes round is decided by the data, so
+            # this is the meter that makes a loop's cost knowable at all
+            session.budget.charge("iterations", len(items))
             scope = self.scope(session.pipeline)
             session.emit_node_event(
                 "map_started",
@@ -240,7 +243,12 @@ class MapNode(Node):
             ctx = ctx.with_var(self.index_var, index)
 
         session.emit_node_event("map_item_started", self, {"index": index})
-        _, ctx = await session.run_scope(session.pipeline.get_node(self.body), ctx, scope)
+        # one unit of concurrency per iteration: in parallel mode this is
+        # what stands between a list of ten thousand and ten thousand tasks
+        with session.budget.gauge("concurrency"):
+            _, ctx = await session.run_scope(
+                session.pipeline.get_node(self.body), ctx, scope
+            )
         session.emit_node_event("map_item_completed", self, {"index": index})
         return ctx
 

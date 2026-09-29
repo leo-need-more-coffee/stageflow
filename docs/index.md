@@ -3,7 +3,7 @@
 A framework for describing and running JSON-defined pipelines: a graph of
 nodes, user-defined stages, an immutable data frame, CEL expressions, retry
 and block-scoped `try/except`, parallel branches, loops over a list,
-nested pipelines.
+nested pipelines, and per-tenant limits on all of it.
 
 ```bash
 pip install stageflow-framework
@@ -43,6 +43,7 @@ step, with screenshots from the editor.
 | [The terminal node](terminal-node.md) | the end of a run, result and artifacts |
 | [Errors](errors.md) | `retry`, how an error travels, the exceptions |
 | [Policy](policy.md) | restricting the stages and node types a pipeline may use |
+| [Limits](limits.md) | meters, budgets, what a stage spends |
 | [Variable typing](variable-typing.md) | gradual typing, static and runtime checks |
 | [Session control](session-control.md) | stop/pause/resume, user input, snapshots |
 | [Step debugging](step-debugging.md) | stopping between nodes, editing the frame |

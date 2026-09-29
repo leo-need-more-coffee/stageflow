@@ -57,10 +57,13 @@ class CelEngine:
         output: dict | None = None,
         error: dict | None = None,
         item: Any = None,
+        args: dict | None = None,
     ) -> Any:
         activation: dict[str, Any] = {"vars": dict(ctx.vars)}
         if output is not None:
             activation["output"] = output
+        if args is not None:
+            activation["args"] = args
         if error is not None:
             activation["error"] = error
         if item is not None:

@@ -92,6 +92,8 @@ against it, so a wrong argument name is an error before anything runs.
 | **Real concurrency** | `parallel` branches with their own frames and explicit merge rules |
 | **Loops over data** | `map` runs a region of the graph once per element, sequentially or at once |
 | **Nested graphs** | a `subpipeline` starts with a fresh frame and returns artifacts |
+| **A policy per tenant** | the stages and node types one session may use — a subset of the registry, not a subset of the process |
+| **Budgets that hold** | counters and gauges for time, steps, tokens, fan-out and depth; a ceiling a `try` block cannot catch |
 | **Gradual typing** | declare the variables that matter; checked at validation and on every write |
 | **Step debugging** | stop between nodes, read and edit the frame, replay the event stream |
 
@@ -106,6 +108,8 @@ The reference covers the rest:
 [Data model](https://leo-need-more-coffee.github.io/stageflow/data-model/) ·
 [Expressions](https://leo-need-more-coffee.github.io/stageflow/expressions/) ·
 [Errors](https://leo-need-more-coffee.github.io/stageflow/errors/) ·
+[Policy](https://leo-need-more-coffee.github.io/stageflow/policy/) ·
+[Limits](https://leo-need-more-coffee.github.io/stageflow/limits/) ·
 [Variable typing](https://leo-need-more-coffee.github.io/stageflow/variable-typing/) ·
 [Session control](https://leo-need-more-coffee.github.io/stageflow/session-control/) ·
 [Step debugging](https://leo-need-more-coffee.github.io/stageflow/step-debugging/)

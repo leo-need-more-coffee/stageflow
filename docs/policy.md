@@ -93,6 +93,8 @@ has to make.
 
 It restricts **what a pipeline is made of**, not **how much it consumes**. A
 graph of allowed stages can still loop, fan out or run for a long time —
-`retry`, `map` over a large list, `parallel` branches. Bounding consumption is
-a separate mechanism and a separate decision for the host; until it exists,
-treat a policy as the answer to "which blocks", not "how many".
+`retry`, `map` over a large list, `parallel` branches.
+
+That is the other half, and it lives in the same object: `Policy(limits=...)`,
+described in [Limits](limits.md). A plan is one value — which blocks, and how
+much of anything.

@@ -58,7 +58,21 @@ def parse_fields(raw: Any) -> list[FieldSpec]:
 
 
 def parse_docstring_spec(doc: str | None) -> dict[str, Any]:
-    parsed = yaml.safe_load(doc) if doc else None
+    """The spec a stage declares in its docstring, or nothing.
+
+    A docstring is first of all a docstring: plenty of them are prose, and
+    prose is rarely valid YAML. That is not an error — the stage simply
+    declares no spec. Raising here would make `get_specs()` unusable on any
+    stage documented in sentences, which is why every caller used to wrap it
+    in `except Exception` and swallow the difference between "no spec" and
+    "the parser fell over".
+    """
+    if not doc:
+        return {}
+    try:
+        parsed = yaml.safe_load(doc)
+    except yaml.YAMLError:
+        return {}
     return parsed if isinstance(parsed, dict) else {}
 
 
@@ -76,4 +90,10 @@ def build_stage_spec(stage_cls: type) -> dict[str, Any]:
         "description": doc.get("description", ""),
         "arguments": [f.to_dict() for f in parse_fields(doc.get("arguments"))],
         "outputs": [f.to_dict() for f in parse_fields(doc.get("outputs"))],
+        # what the stage asks to be held before it runs: {meter: number or CEL
+        # over `args`}. Read before anything executes, which is why it is
+        # declared rather than computed — an editor can show it, and a host
+        # can refuse a graph without running it
+        "reserve": dict(doc.get("reserve") or {}),
+        "timeout": stage_cls.timeout,
     }

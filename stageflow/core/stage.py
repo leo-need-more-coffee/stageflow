@@ -52,6 +52,23 @@ class BaseStage:
         self.arguments = arguments or {}
         self.session = session
         self.collected_outputs: dict[str, Any] = {}
+        #: what this run actually spent, by meter — see `charge`
+        self.charged: dict[str, float] = {}
+
+    def charge(self, **meters: float) -> None:
+        """Report what this run of the stage actually consumed.
+
+        Units, not money: `tokens`, `llm_calls`, `http_calls`, `rows`. What a
+        unit is worth is a price list, price lists change without any code
+        changing, and they belong to the host — a stage knows how much it
+        used, not what that costs.
+
+        The figure replaces whatever the spec's `reserve` held for the same
+        meter, so an amount both reserved and charged is not counted twice.
+        Call it as many times as you like; the amounts add up within one run.
+        """
+        for meter, amount in meters.items():
+            self.charged[meter] = self.charged.get(meter, 0.0) + float(amount)
 
     def get_arguments(self) -> dict[str, Any]:
         return dict(self.arguments)
