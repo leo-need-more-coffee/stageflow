@@ -192,21 +192,50 @@ class UncatchableTests(unittest.IsolatedAsyncioTestCase):
 
 
 class GaugeTests(unittest.IsolatedAsyncioTestCase):
-    async def test_concurrency_caps_the_fan_out_of_a_map(self):
+    async def test_concurrency_throttles_a_map_rather_than_failing_it(self):
+        """A long list is wide, not wrong: the iterations take turns.
+
+        Failing here would refuse a legitimate pipeline for the size of its
+        data, which is the opposite of what the limit is for — the limit is
+        on what is in the air at once.
+        """
         data = {"entry": "start", "nodes": [
             {"id": "start", "type": "entry", "next": "loop"},
             {"id": "loop", "type": "map", "items": "vars.xs", "body": "work",
              "item_var": "x", "mode": "parallel", "next": "done"},
             {"id": "work", "type": "stage", "stage": "SlowlyStage",
-             "arguments": {"const": {"seconds": 0.01}}},
+             "arguments": {"const": {"seconds": 0.05}}},
             {"id": "done", "type": "terminal", "result": {"status": "ok"}},
         ]}
         session = Session(id="g", pipeline=Pipeline.from_dict(data),
-                          context=Context(vars={"xs": list(range(20))}),
+                          context=Context(vars={"xs": list(range(8))}),
                           limits=Limits(gauges={"concurrency": 4}))
+        started = asyncio.get_running_loop().time()
         result = await session.run()
-        self.assertEqual(result.result["status"], "budget_exceeded")
-        self.assertEqual(result.result["meter"], "concurrency")
+        elapsed = asyncio.get_running_loop().time() - started
+
+        self.assertEqual(result.result, {"status": "ok"})
+        self.assertLessEqual(result.meters["peak_concurrency"], 4)
+        # eight items of 50ms, four at a time: two rounds, not one and not eight
+        self.assertGreater(elapsed, 0.09)
+        self.assertLess(elapsed, 0.3)
+
+    async def test_the_peak_is_reported_even_when_nothing_waits(self):
+        data = {"entry": "start", "nodes": [
+            {"id": "start", "type": "entry", "next": "fan"},
+            {"id": "fan", "type": "parallel",
+             "branches": [{"id": "l", "entry": "a"}, {"id": "r", "entry": "b"}],
+             "next": "done"},
+            {"id": "a", "type": "stage", "stage": "SlowlyStage",
+             "arguments": {"const": {"seconds": 0.02}}},
+            {"id": "b", "type": "stage", "stage": "SlowlyStage",
+             "arguments": {"const": {"seconds": 0.02}}},
+            {"id": "done", "type": "terminal", "result": {"status": "ok"}},
+        ]}
+        session = Session(id="pk", pipeline=Pipeline.from_dict(data),
+                          context=Context(), limits=Limits(gauges={"concurrency": 8}))
+        result = await session.run()
+        self.assertEqual(result.meters["peak_concurrency"], 2)
 
     async def test_iterations_are_a_counter_so_nested_loops_add_up(self):
         data = {"entry": "start", "nodes": [

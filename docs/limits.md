@@ -34,7 +34,11 @@ Not three systems for time, cost and size — one, with two kinds of meter:
 | **gauge** | an instantaneous value | `concurrency`, `depth`, `frame_bytes` | when it is taken up |
 
 The runtime charges `steps` and `iterations` and holds the gauges; stages
-charge whatever they spent. **Meter names are not fixed by the core.** A host
+charge whatever they spent. `concurrency` is the one gauge that **waits**
+rather than failing: a hundred items to process is a good pipeline that may
+not have a hundred calls in the air at once, and refusing it for being wide
+would be refusing the work rather than bounding it. Depth and size do fail —
+too deep is too deep, and waiting would not help. **Meter names are not fixed by the core.** A host
 counts what is scarce for it, and a meter nobody limits simply accumulates and
 comes back in `result.meters`, which is what a bill is made of.
 
@@ -114,6 +118,27 @@ A stage that reserves and charges nothing is free.
     flight have already been made. A host that needs a hard ceiling for the
     whole loop gets it by arithmetic rather than prediction — cap
     `iterations` so that the count times the worst case fits the budget.
+
+## What validation refuses before the run
+
+`Pipeline.validate(policy)` checks what is **soundly knowable from the JSON**,
+so that a tenant saving a graph is told what to change rather than finding out
+on the tenth element:
+
+| Checked | Because |
+|---|---|
+| the shortest way through the graph against `steps` | every run passes at least that many nodes, so a graph whose cheapest path does not fit cannot finish at all |
+| how deep the declared subpipelines nest against `depth` | the nesting is written down, not computed |
+| what each `retry` asks for against `max_retries` and `max_delay_seconds` | the numbers are in the JSON |
+
+The bound on steps is a **lower** one, which is what makes it safe to refuse
+by: a graph with a long road and a short one is judged by the short one.
+
+What is *not* checked is anything that would have to be guessed. A loop's cost
+is unknowable before the run — the number of passes comes from the data and
+the reservation of a pass from its arguments — and multiplying something here
+would refuse pipelines that fit. A false refusal on a working graph is worse
+than the ceiling it was meant to save.
 
 ## Running out
 

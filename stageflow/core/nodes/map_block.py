@@ -244,8 +244,10 @@ class MapNode(Node):
 
         session.emit_node_event("map_item_started", self, {"index": index})
         # one unit of concurrency per iteration: in parallel mode this is
-        # what stands between a list of ten thousand and ten thousand tasks
-        with session.budget.gauge("concurrency"):
+        # what stands between a list of ten thousand and ten thousand calls
+        # in the air. A list that is longer than the allowance waits its turn
+        # rather than failing — it is wide, not wrong
+        async with session.budget.slot("concurrency"):
             _, ctx = await session.run_scope(
                 session.pipeline.get_node(self.body), ctx, scope
             )

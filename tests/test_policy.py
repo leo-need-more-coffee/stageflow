@@ -2,6 +2,7 @@ import unittest
 
 from stageflow import (
     BaseStage,
+    Limits,
     Context,
     Pipeline,
     Policy,
@@ -248,3 +249,90 @@ class PolicyCapabilitiesTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StaticLimitTests(unittest.TestCase):
+    """What the limits can refuse before anything runs.
+
+    Only what is soundly knowable from the JSON: a loop's cost is not, so
+    nothing here multiplies anything by a number that comes from the data.
+    """
+
+    def test_a_graph_too_long_to_ever_finish_is_refused(self):
+        nodes = [{"id": "start", "type": "entry", "next": "s0"}]
+        for i in range(10):
+            nodes.append({"id": f"s{i}", "type": "stage", "stage": "CheapStage",
+                          "outputs": {"value": "v"},
+                          "next": f"s{i + 1}" if i < 9 else "done"})
+        nodes.append({"id": "done", "type": "terminal", "result": {}})
+        errors = Pipeline.from_dict({"entry": "start", "nodes": nodes}).collect_errors(
+            Policy(limits=Limits(counters={"steps": 5})))
+        self.assertIn("the shortest way through this graph is 12 nodes, "
+                      "and the policy allows 5 steps", errors)
+
+    def test_a_long_graph_with_a_short_way_out_is_not_refused(self):
+        """The check is a lower bound, so a branch that ends early saves it."""
+        nodes = [
+            {"id": "start", "type": "entry", "next": "pick"},
+            {"id": "pick", "type": "condition", "condition": "vars.quick",
+             "then": "done", "else": "s0"},
+            {"id": "done", "type": "terminal", "result": {}},
+        ]
+        for i in range(10):
+            nodes.append({"id": f"s{i}", "type": "stage", "stage": "CheapStage",
+                          "outputs": {"value": "v"},
+                          "next": f"s{i + 1}" if i < 9 else "done"})
+        errors = Pipeline.from_dict({"entry": "start", "nodes": nodes}).collect_errors(
+            Policy(limits=Limits(counters={"steps": 5})))
+        self.assertEqual(errors, [])
+
+    def test_subpipelines_nested_deeper_than_allowed(self):
+        data = {
+            "entry": "start",
+            "nodes": [
+                {"id": "start", "type": "entry", "next": "one"},
+                {"id": "one", "type": "subpipeline", "subpipeline_id": "a", "next": "done"},
+                {"id": "done", "type": "terminal", "result": {}},
+            ],
+            "subpipelines": {
+                "a": {"entry": "x", "nodes": [
+                    {"id": "x", "type": "subpipeline", "subpipeline_id": "b", "next": "y"},
+                    {"id": "y", "type": "terminal", "result": {}}]},
+                "b": {"entry": "z", "nodes": [
+                    {"id": "z", "type": "terminal", "result": {}}]},
+            },
+        }
+        errors = Pipeline.from_dict(data).collect_errors(
+            Policy(limits=Limits(gauges={"depth": 1})))
+        self.assertIn("subpipelines nest 2 deep, and the policy allows 1", errors)
+
+    def test_a_retry_asking_for_more_than_the_plan_allows(self):
+        data = _pipeline()
+        data["nodes"][1]["retry"] = [{"error_equals": ["*"], "max_attempts": 50,
+                                      "interval_seconds": 120}]
+        errors = Pipeline.from_dict(data).collect_errors(
+            Policy(limits=Limits(max_retries=3, max_delay_seconds=10)))
+        self.assertIn("work: retry asks for 50 attempts, and the policy allows 3",
+                      errors)
+        self.assertIn("work: retry waits 120s between attempts, "
+                      "and the policy allows 10s", errors)
+
+    def test_nothing_is_refused_for_a_cost_that_cannot_be_known(self):
+        """A loop over data has no static cost, and guessing one would refuse
+        graphs that fit."""
+        data = {"entry": "start", "nodes": [
+            {"id": "start", "type": "entry", "next": "loop"},
+            {"id": "loop", "type": "map", "items": "vars.xs", "body": "work",
+             "item_var": "x", "next": "done"},
+            {"id": "work", "type": "stage", "stage": "CheapStage",
+             "outputs": {"value": "v"}},
+            {"id": "done", "type": "terminal", "result": {}},
+        ]}
+        errors = Pipeline.from_dict(data).collect_errors(
+            Policy(limits=Limits(counters={"iterations": 1, "steps": 100})))
+        self.assertEqual(errors, [])
+
+    def test_limits_alone_need_no_stage_or_node_restrictions(self):
+        data = _pipeline("PriceyStage")
+        self.assertEqual(
+            Pipeline.from_dict(data).collect_errors(Policy(limits=Limits())), [])

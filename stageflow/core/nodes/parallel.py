@@ -119,8 +119,11 @@ class ParallelNode(Node):
 
     @staticmethod
     async def _branch(session: "Session", entry: str, ctx: Context) -> Context:
-        """One branch, holding a unit of whatever concurrency is allowed."""
-        with session.budget.gauge("concurrency"):
+        """One branch, holding a unit of whatever concurrency is allowed.
+
+        More branches than the allowance is not an error: they take turns.
+        """
+        async with session.budget.slot("concurrency"):
             return await session.run_subgraph(entry, ctx)
 
     async def _wait_branches(self, session: "Session", tasks: dict[str, asyncio.Task]) -> None:

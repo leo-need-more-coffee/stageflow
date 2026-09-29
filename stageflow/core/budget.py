@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import time
-from contextlib import contextmanager
+from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
-from typing import Iterator
+from typing import AsyncIterator, Iterator
 
 
 class BudgetExceeded(BaseException):
@@ -105,6 +106,7 @@ class Budget:
         self.counters: dict[str, float] = {}
         self.peaks: dict[str, float] = {}
         self._held: dict[str, float] = {}
+        self._slots: dict[str, asyncio.Semaphore] = {}
         self._started: float | None = None
         self._stopped: float | None = None
         self._idle: float = 0.0
@@ -210,6 +212,30 @@ class Budget:
         return None
 
     # ------------------------------------------------------------- gauges
+
+    @asynccontextmanager
+    async def slot(self, meter: str = "concurrency") -> AsyncIterator[None]:
+        """Hold one unit of a gauge, waiting for a turn rather than failing.
+
+        The difference from `gauge` is deliberate and it is about what the
+        limit means. Depth is a property of the graph: too deep is too deep,
+        and waiting would not help. Concurrency is a property of the moment —
+        a hundred items to process is a perfectly good pipeline, it just may
+        not have a hundred calls in the air at once. Failing it would refuse
+        legitimate work for being wide; holding it back runs the same work
+        within the allowance.
+        """
+        limit = self.limits.gauges.get(meter)
+        if limit is None:
+            with self.gauge(meter):
+                yield
+            return
+        slot = self._slots.get(meter)
+        if slot is None:
+            slot = self._slots[meter] = asyncio.Semaphore(max(1, int(limit)))
+        async with slot:
+            with self.gauge(meter):
+                yield
 
     @contextmanager
     def gauge(self, meter: str, amount: float = 1) -> Iterator[None]:

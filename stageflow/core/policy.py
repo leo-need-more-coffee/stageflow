@@ -76,15 +76,63 @@ class Policy:
         "may I save this" would be yes and the answer to "may I run it" no —
         the same refusal, hours apart, at the worst moment.
         """
+        errors = self._limit_errors(pipeline)
         if self.stages is None and self.node_types is None:
-            return []  # nothing is restricted about composition
-        errors = [
+            return errors  # nothing is restricted about composition
+        errors += [
             message
             for node in pipeline.nodes
             for message in self._node_errors(node.type, node.id, getattr(node, "stage", None))
         ]
         for sub_id, graph in (getattr(pipeline, "subpipelines", None) or {}).items():
             errors.extend(self._graph_errors(graph, f"[{sub_id}] "))
+        return errors
+
+    def _limit_errors(self, pipeline) -> list[str]:
+        """What the limits refuse about a graph before it runs.
+
+        Only what is soundly knowable from the JSON. A loop's cost is not:
+        the number of passes comes from the data and the reservation of a
+        pass from its arguments, so multiplying anything here would refuse
+        graphs that fit. What *is* knowable is the shape — how many nodes a
+        run must pass at the very least, how deep the subpipelines go, and
+        what the retries ask for.
+        """
+        limits = self.limits
+        errors: list[str] = []
+
+        floor = limits.counters.get("steps")
+        if floor is not None:
+            least = _shortest_run(pipeline)
+            if least is not None and least > floor:
+                errors.append(
+                    f"the shortest way through this graph is {least} nodes, "
+                    f"and the policy allows {floor:g} steps"
+                )
+
+        deepest = limits.gauges.get("depth")
+        if deepest is not None:
+            depth = _subpipeline_depth(pipeline)
+            if depth > deepest:
+                errors.append(
+                    f"subpipelines nest {depth} deep, "
+                    f"and the policy allows {deepest:g}"
+                )
+
+        for node in pipeline.nodes:
+            for retrier in getattr(node, "retry", None) or []:
+                if (limits.max_retries is not None
+                        and retrier.max_attempts > limits.max_retries):
+                    errors.append(
+                        f"{node.id}: retry asks for {retrier.max_attempts} attempts, "
+                        f"and the policy allows {limits.max_retries}"
+                    )
+                if (limits.max_delay_seconds is not None
+                        and retrier.interval_seconds > limits.max_delay_seconds):
+                    errors.append(
+                        f"{node.id}: retry waits {retrier.interval_seconds:g}s between "
+                        f"attempts, and the policy allows {limits.max_delay_seconds:g}s"
+                    )
         return errors
 
     def _graph_errors(self, graph: dict, where: str) -> list[str]:
@@ -116,3 +164,55 @@ class Policy:
 #: Everything the process has registered — the default, and what a host that
 #: has no tenants to separate should keep using.
 OPEN = Policy()
+
+
+def _shortest_run(pipeline) -> int | None:
+    """The fewest nodes a run can pass before it can end.
+
+    A lower bound, and that is what makes it safe to refuse by: every real
+    run does at least this much, so a graph whose cheapest path does not fit
+    cannot finish at all. Ending means a terminal or a road that stops.
+    """
+    entry = pipeline.entry
+    if not entry or not pipeline.has_node(entry):
+        return None
+    seen = {entry}
+    frontier = [entry]
+    steps = 1
+    while frontier:
+        nxt: list[str] = []
+        for node_id in frontier:
+            node = pipeline.get_node(node_id)
+            targets = [t for t in node.order_targets() if pipeline.has_node(t)]
+            if node.type == "terminal" or not targets:
+                return steps
+            for target in targets:
+                if target not in seen:
+                    seen.add(target)
+                    nxt.append(target)
+        frontier = nxt
+        steps += 1
+    return None
+
+
+def _subpipeline_depth(pipeline) -> int:
+    """How deep the declared subpipelines nest, counting from the root as 0."""
+
+    def depth_of(graph: dict, seen: frozenset[str]) -> int:
+        declared = graph.get("subpipelines") or {}
+        best = 0
+        for node in graph.get("nodes") or []:
+            if node.get("type") != "subpipeline":
+                continue
+            child_id = node.get("subpipeline_id")
+            if child_id in seen:
+                continue  # a self-reference is caught elsewhere; do not spin here
+            child = declared.get(child_id)
+            inner = 1 if child is None else 1 + depth_of(
+                {**child, "subpipelines": {**declared, **(child.get("subpipelines") or {})}},
+                seen | {child_id},
+            )
+            best = max(best, inner)
+        return best
+
+    return depth_of(pipeline.raw_json, frozenset())
