@@ -10,6 +10,7 @@ from ..exceptions import (
     PipelineValidationError,
     TypeDeclarationError,
 )
+from ..i18n import _
 from .nodes import EntryNode, Node
 from .policy import Policy
 from .typesys import TypeSystem
@@ -36,16 +37,18 @@ class Pipeline:
     @classmethod
     def from_dict(cls, data: dict) -> "Pipeline":
         schema = load_pipeline_schema()
-        cls._check_schema(data, schema, "Pipeline")
+        cls._check_schema(data, schema)
 
         subpipelines = data.get("subpipelines", {})
         for sub_id, sub_data in subpipelines.items():
-            cls._check_schema(sub_data, schema, f"Subpipeline '{sub_id}'")
+            cls._check_schema(sub_data, schema, sub_id)
 
         try:
             typesystem = TypeSystem.from_dict(data.get("types"), data.get("variables"))
         except TypeDeclarationError as exc:
-            raise PipelineDefinitionError(f"Invalid type declarations: {exc}") from exc
+            raise PipelineDefinitionError(
+                _("Invalid type declarations: {reason}", reason=exc)
+            ) from exc
 
         nodes = [Node.from_dict(node) for node in data.get("nodes", [])]
         return cls(
@@ -58,13 +61,19 @@ class Pipeline:
         )
 
     @staticmethod
-    def _check_schema(data: dict, schema: dict, what: str) -> None:
+    def _check_schema(data: dict, schema: dict, sub_id: str | None = None) -> None:
         try:
             _json_validate(instance=data, schema=schema)
         except _SchemaError as exc:
-            raise PipelineDefinitionError(
-                f"{what} schema validation failed: {exc.message}"
-            ) from exc
+            # a whole sentence per case rather than a noun filled into one —
+            # the reason is in `registry.py`
+            if sub_id is None:
+                message = _("Pipeline schema validation failed: {reason}",
+                            reason=exc.message)
+            else:
+                message = _("Subpipeline '{name}' schema validation failed: {reason}",
+                            name=sub_id, reason=exc.message)
+            raise PipelineDefinitionError(message) from exc
 
     def has_node(self, node_id: str) -> bool:
         return node_id in self._nodes_map
@@ -74,7 +83,7 @@ class Pipeline:
             return self._nodes_map[node_id]
         except KeyError:
             raise PipelineDefinitionError(
-                f"Node with id '{node_id}' not found in pipeline"
+                _("Node with id '{node}' not found in pipeline", node=node_id)
             ) from None
 
     def get_entry_node(self) -> Node:
@@ -104,16 +113,21 @@ class Pipeline:
         errors: list[str] = []
         if len(entries) > 1:
             ids = ", ".join(sorted(node.id for node in entries))
-            errors.append(f"more than one entry node: {ids} — there must be exactly one")
+            errors.append(
+                _("more than one entry node: {nodes} — there must be exactly one", nodes=ids)
+            )
         for node in entries:
             if self.entry and self.entry != node.id:
                 errors.append(
-                    f"{node.id}: this entry node is not the pipeline entry point "
-                    f"(entry = '{self.entry}')"
+                    _("{node}: this entry node is not the pipeline entry point "
+                      "(entry = '{entry}')", node=node.id, entry=self.entry)
                 )
             for other in self.nodes:
                 if other.id != node.id and node.id in other.order_targets():
-                    errors.append(f"{other.id}: jumping into the entry node '{node.id}' is not allowed")
+                    errors.append(
+                        _("{node}: jumping into the entry node '{entry}' is not allowed",
+                          node=other.id, entry=node.id)
+                    )
         return errors
 
     def collect_errors(self, policy: "Policy | None" = None) -> list[str]:
@@ -123,9 +137,11 @@ class Pipeline:
         entry_nodes = self.entry_nodes()
         if not self.entry:
             if not entry_nodes:
-                errors.append("The pipeline has no entry")
+                errors.append(_("The pipeline has no entry"))
         elif self.entry not in self._nodes_map:
-            errors.append(f"Entry node '{self.entry}' not found in the graph")
+            errors.append(
+                _("Entry node '{entry}' not found in the graph", entry=self.entry)
+            )
 
         errors.extend(self.typesystem.collect_errors())
         errors.extend(self._entry_node_errors())
@@ -133,7 +149,7 @@ class Pipeline:
         seen: set[str] = set()
         for node in self.nodes:
             if node.id in seen:
-                errors.append(f"Duplicate node id: '{node.id}'")
+                errors.append(_("Duplicate node id: '{node}'", node=node.id))
             seen.add(node.id)
             errors.extend(node.validate(self))
         errors.extend(self._cycle_errors())
@@ -171,7 +187,8 @@ class Pipeline:
         for node in self.nodes:
             if node.id not in colour:
                 walk(node.id, [])
-        return [f"cycle in the graph: {cycle}" for cycle in dict.fromkeys(found)]
+        return [_("cycle in the graph: {cycle}", cycle=cycle)
+                for cycle in dict.fromkeys(found)]
 
     def validate(self, policy: "Policy | None" = None) -> None:
         """Everything wrong with this pipeline, as one error.

@@ -1,0 +1,935 @@
+# Russian translations for StageFlow.
+# This file is distributed under the same license as the StageFlow project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: StageFlow VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-09-29 23:42+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: StageFlow\n"
+"Language: ru\n"
+"Language-Team: ru <https://github.com/leo-need-more-coffee/stageflow/issues>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && "
+"(n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: stageflow/exceptions.py:31
+#, python-brace-format
+msgid "Pipeline validation failed: {errors}"
+msgstr "Пайплайн не прошёл проверку: {errors}"
+
+#: stageflow/builtins/_args.py:12 stageflow/builtins/lists.py:71
+#, python-brace-format
+msgid "{stage}: '{field}' must be a list, got {got}"
+msgstr "{stage}: в '{field}' ожидался список, а пришло {got}"
+
+#: stageflow/builtins/_args.py:21
+#, python-brace-format
+msgid "{stage}: '{field}' must be an object, got {got}"
+msgstr "{stage}: в '{field}' ожидался объект, а пришло {got}"
+
+#: stageflow/builtins/_args.py:30
+#, python-brace-format
+msgid "{stage}: '{field}' must be a number, got {got}"
+msgstr "{stage}: в '{field}' ожидалось число, а пришло {got}"
+
+#: stageflow/builtins/_args.py:39 stageflow/builtins/lists.py:35
+#: stageflow/builtins/lists.py:105 stageflow/builtins/vars.py:29
+#, python-brace-format
+msgid "{stage}: argument '{field}' is required"
+msgstr "{stage}: аргумент '{field}' обязателен"
+
+#: stageflow/builtins/lists.py:172
+msgid "PopListStage: cannot pop from an empty list"
+msgstr "PopListStage: из пустого списка нечего извлекать"
+
+#: stageflow/builtins/lists.py:180
+#, python-brace-format
+msgid "PopListStage: index {index} is out of range for a list of length {length}"
+msgstr "PopListStage: индекс {index} выходит за границы списка длиной {length}"
+
+#: stageflow/builtins/logic.py:35
+msgid "assertion failed"
+msgstr "проверка не прошла"
+
+#: stageflow/builtins/strings.py:14
+#, python-brace-format
+msgid ""
+"TemplateStage: placeholder '{{{field}}}' is not an argument name; attributes, indexes"
+" and positional numbers are not allowed"
+msgstr ""
+"TemplateStage: подстановка '{{{field}}}' — это не имя аргумента; атрибуты, индексы и "
+"номера позиций не допускаются"
+
+#: stageflow/builtins/strings.py:20
+#, python-brace-format
+msgid ""
+"TemplateStage: template references '{field}', but there is no such argument "
+"(available: {available})"
+msgstr ""
+"TemplateStage: шаблон ссылается на '{field}', но такого аргумента нет (есть: "
+"{available})"
+
+#: stageflow/core/cel.py:32
+msgid ""
+"No CEL backend found. Install 'common-expression-language' (recommended) or 'cel-"
+"python'."
+msgstr ""
+"Движок CEL не найден. Установите 'common-expression-language' (рекомендуется) или "
+"'cel-python'."
+
+#: stageflow/core/cel.py:51
+#, python-brace-format
+msgid "Cannot compile CEL {expr}: {reason}"
+msgstr "Не удалось скомпилировать CEL {expr}: {reason}"
+
+#: stageflow/core/cel.py:82
+#, python-brace-format
+msgid "Cannot evaluate CEL {expr}: {reason}"
+msgstr "Не удалось вычислить CEL {expr}: {reason}"
+
+#: stageflow/core/context.py:43
+msgid "Snapshot contains the 'local' scope (pre-0.7.0); the frame is now called 'vars'"
+msgstr "В снимке есть область 'local' (до 0.7.0); фрейм теперь называется 'vars'"
+
+#: stageflow/core/debug.py:130
+#, python-brace-format
+msgid "debugger before node '{node}'"
+msgstr "отладчик перед узлом '{node}'"
+
+#: stageflow/core/payload_schema.py:24
+#, python-brace-format
+msgid "{path} expected one of {expected}, got {got}"
+msgstr "{path}: ожидалось одно из {expected}, а пришло {got}"
+
+#: stageflow/core/payload_schema.py:47
+#, python-brace-format
+msgid "{path} missing required field '{field}'"
+msgstr "{path}: нет обязательного поля '{field}'"
+
+#: stageflow/core/payload_schema.py:66 stageflow/core/payload_schema.py:74
+#, python-brace-format
+msgid "{path} expected {expected}, got {got}"
+msgstr "{path}: ожидалось {expected}, а пришло {got}"
+
+#: stageflow/core/pipeline.py:50
+#, python-brace-format
+msgid "Invalid type declarations: {reason}"
+msgstr "Некорректные объявления типов: {reason}"
+
+#: stageflow/core/pipeline.py:71
+#, python-brace-format
+msgid "Pipeline schema validation failed: {reason}"
+msgstr "Пайплайн не проходит проверку по схеме: {reason}"
+
+#: stageflow/core/pipeline.py:74
+#, python-brace-format
+msgid "Subpipeline '{name}' schema validation failed: {reason}"
+msgstr "Субпайплайн '{name}' не проходит проверку по схеме: {reason}"
+
+#: stageflow/core/pipeline.py:86
+#, python-brace-format
+msgid "Node with id '{node}' not found in pipeline"
+msgstr "Узла с id '{node}' в пайплайне нет"
+
+#: stageflow/core/pipeline.py:117
+#, python-brace-format
+msgid "more than one entry node: {nodes} — there must be exactly one"
+msgstr "входных узлов больше одного: {nodes} — он должен быть ровно один"
+
+#: stageflow/core/pipeline.py:122
+#, python-brace-format
+msgid "{node}: this entry node is not the pipeline entry point (entry = '{entry}')"
+msgstr "{node}: этот входной узел не является точкой входа пайплайна (entry = '{entry}')"
+
+#: stageflow/core/pipeline.py:128
+#, python-brace-format
+msgid "{node}: jumping into the entry node '{entry}' is not allowed"
+msgstr "{node}: переход внутрь входного узла '{entry}' запрещён"
+
+#: stageflow/core/pipeline.py:140
+msgid "The pipeline has no entry"
+msgstr "У пайплайна нет точки входа"
+
+#: stageflow/core/pipeline.py:143
+#, python-brace-format
+msgid "Entry node '{entry}' not found in the graph"
+msgstr "Входного узла '{entry}' в графе нет"
+
+#: stageflow/core/pipeline.py:152
+#, python-brace-format
+msgid "Duplicate node id: '{node}'"
+msgstr "Повторяющийся id узла: '{node}'"
+
+#: stageflow/core/pipeline.py:190
+#, python-brace-format
+msgid "cycle in the graph: {cycle}"
+msgstr "цикл в графе: {cycle}"
+
+#: stageflow/core/policy.py:62
+#, python-brace-format
+msgid "{where}: stage '{name}' is not allowed by the policy"
+msgstr "{where}: стадия '{name}' не разрешена политикой"
+
+#: stageflow/core/policy.py:69
+#, python-brace-format
+msgid "{where}: node type '{type}' is not allowed by the policy"
+msgstr "{where}: тип узла '{type}' не разрешён политикой"
+
+#: stageflow/core/policy.py:114
+#, python-brace-format
+msgid ""
+"the shortest way through this graph is {nodes} nodes, and the policy allows {steps:g}"
+" steps"
+msgstr ""
+"самая короткая дорога через этот граф — {nodes} узлов, а политика разрешает {steps:g}"
+" шагов"
+
+#: stageflow/core/policy.py:124
+#, python-brace-format
+msgid "subpipelines nest {depth} deep, and the policy allows {allowed:g}"
+msgstr "субпайплайны вложены на {depth} уровней, а политика разрешает {allowed:g}"
+
+#: stageflow/core/policy.py:134
+#, python-brace-format
+msgid "{node}: retry asks for {asked} attempts, and the policy allows {allowed}"
+msgstr "{node}: retry просит {asked} попыток, а политика разрешает {allowed}"
+
+#: stageflow/core/policy.py:142
+#, python-brace-format
+msgid "{node}: retry waits {asked:g}s between attempts, and the policy allows {allowed:g}s"
+msgstr "{node}: retry ждёт {asked:g} с между попытками, а политика разрешает {allowed:g} с"
+
+#: stageflow/core/policy.py:166
+#, python-brace-format
+msgid "{where}{node}: node type '{type}' is not allowed by the policy"
+msgstr "{where}{node}: тип узла '{type}' не разрешён политикой"
+
+#: stageflow/core/policy.py:171
+#, python-brace-format
+msgid "{where}{node}: stage '{stage}' is not allowed by the policy"
+msgstr "{where}{node}: стадия '{stage}' не разрешена политикой"
+
+#: stageflow/core/registry.py:22
+#, python-brace-format
+msgid "stage '{name}' already registered"
+msgstr "стадия '{name}' уже зарегистрирована"
+
+#: stageflow/core/registry.py:24
+#, python-brace-format
+msgid "node type '{name}' already registered"
+msgstr "тип узла '{name}' уже зарегистрирован"
+
+#: stageflow/core/registry.py:25
+#, python-brace-format
+msgid "{kind} '{name}' already registered"
+msgstr "{kind} '{name}': уже зарегистрировано"
+
+#: stageflow/core/registry.py:30
+#, python-brace-format
+msgid "stage '{name}' not found in registry"
+msgstr "стадии '{name}' в реестре нет"
+
+#: stageflow/core/registry.py:32
+#, python-brace-format
+msgid "node type '{name}' not found in registry"
+msgstr "типа узла '{name}' в реестре нет"
+
+#: stageflow/core/registry.py:33
+#, python-brace-format
+msgid "{kind} '{name}' not found in registry"
+msgstr "{kind} '{name}': в реестре нет"
+
+#: stageflow/core/session.py:294
+#, python-brace-format
+msgid "{node}: reserve '{meter}' of stage {stage} is not a number: {value}"
+msgstr "{node}: резерв '{meter}' стадии {stage} — не число: {value}"
+
+#: stageflow/core/session.py:341
+#, python-brace-format
+msgid "Subpipeline '{name}' not found"
+msgstr "Субпайплайн '{name}' не найден"
+
+#: stageflow/core/session.py:516
+msgid "Pipeline is required to restore session"
+msgstr "Чтобы восстановить сессию, нужен пайплайн"
+
+#: stageflow/core/stage.py:23
+#, python-brace-format
+msgid "Event type '{type}' is not allowed for stage '{stage}'"
+msgstr "Событие '{type}' не разрешено для стадии '{stage}'"
+
+#: stageflow/core/stage.py:26
+#, python-brace-format
+msgid "Input type '{type}' is not allowed for stage '{stage}'"
+msgstr "Ввод '{type}' не разрешён для стадии '{stage}'"
+
+#: stageflow/core/stage.py:28
+#, python-brace-format
+msgid "{kind} type '{type}' is not allowed for stage '{stage}'"
+msgstr "{kind} '{type}': не разрешено для стадии '{stage}'"
+
+#: stageflow/core/typesys.py:27
+#, python-brace-format
+msgid "{path}: expected {expected}, got {got}"
+msgstr "{path}: ожидалось {expected}, а пришло {got}"
+
+#: stageflow/core/typesys.py:112
+#, python-brace-format
+msgid "{path}: map keys must be strings, got {got}"
+msgstr "{path}: ключи map должны быть строками, а пришло {got}"
+
+#: stageflow/core/typesys.py:174
+#, python-brace-format
+msgid "{path}: structure {struct} is missing required field '{field}'"
+msgstr "{path}: в структуре {struct} нет обязательного поля '{field}'"
+
+#: stageflow/core/typesys.py:182
+#, python-brace-format
+msgid "{path}: structure {struct} forbids extra fields: {fields}"
+msgstr "{path}: структура {struct} не допускает лишних полей: {fields}"
+
+#: stageflow/core/typesys.py:243
+#, python-brace-format
+msgid "Empty or non-string type expression: {expr}"
+msgstr "Пустое или нестроковое выражение типа: {expr}"
+
+#: stageflow/core/typesys.py:262
+#, python-brace-format
+msgid "Unclosed '{container}<' in expression {expr}"
+msgstr "Незакрытое '{container}<' в выражении {expr}"
+
+#: stageflow/core/typesys.py:269
+#, python-brace-format
+msgid "Malformed type expression: {expr}"
+msgstr "Некорректное выражение типа: {expr}"
+
+#: stageflow/core/typesys.py:280
+#, python-brace-format
+msgid "Type '{name}' must be an expression or a structure, got {got}"
+msgstr "Тип '{name}' должен быть выражением или структурой, а пришло {got}"
+
+#: stageflow/core/typesys.py:291
+#, python-brace-format
+msgid "Type '{name}': 'fields' must be an object"
+msgstr "Тип '{name}': 'fields' должен быть объектом"
+
+#: stageflow/core/typesys.py:302
+#, python-brace-format
+msgid "Type '{name}': malformed field name {field}"
+msgstr "Тип '{name}': некорректное имя поля {field}"
+
+#: stageflow/core/typesys.py:321
+#, python-brace-format
+msgid "Malformed type name: {name}"
+msgstr "Некорректное имя типа: {name}"
+
+#: stageflow/core/typesys.py:330
+#, python-brace-format
+msgid "Unknown type '{name}'"
+msgstr "Неизвестный тип '{name}'"
+
+#: stageflow/core/typesys.py:341
+#, python-brace-format
+msgid "type '{name}' references unknown type '{ref}'"
+msgstr "тип '{name}' ссылается на неизвестный тип '{ref}'"
+
+#: stageflow/core/typesys.py:376
+#, python-brace-format
+msgid ""
+"variables: the '{scope}' scope level was removed in 0.7.0 — declarations are flat: "
+"{{\"n\": \"int\"}}"
+msgstr ""
+"variables: уровень области '{scope}' убран в 0.7.0 — объявления плоские: {{\"n\": "
+"\"int\"}}"
+
+#: stageflow/core/typesys.py:397
+#, python-brace-format
+msgid "variable vars.{name} references unknown type '{ref}'"
+msgstr "переменная vars.{name} ссылается на неизвестный тип '{ref}'"
+
+#: stageflow/core/typesys.py:423
+#, python-brace-format
+msgid "{where}: {reason}"
+msgstr "{where}: {reason}"
+
+#: stageflow/core/nodes/base.py:51
+#, python-brace-format
+msgid "Unknown node type: {type}"
+msgstr "Неизвестный тип узла: {type}"
+
+#: stageflow/core/nodes/base.py:86
+#, python-brace-format
+msgid "{node}: expose source '{path}' must be a variable name"
+msgstr "{node}: expose, источник '{path}': нужно имя переменной"
+
+#: stageflow/core/nodes/base.py:87
+#, python-brace-format
+msgid "{node}: expose destination '{path}' must be a variable name"
+msgstr "{node}: expose, приёмник '{path}': нужно имя переменной"
+
+#: stageflow/core/nodes/base.py:99
+#, python-brace-format
+msgid ""
+"{node}: expose {source} -> {target}: incompatible types '{source_type}' and "
+"'{target_type}'"
+msgstr ""
+"{node}: expose {source} -> {target}: несовместимые типы '{source_type}' и "
+"'{target_type}'"
+
+#: stageflow/core/nodes/bindings.py:24
+#, python-brace-format
+msgid "Bucket must be a list or an object, got {got}"
+msgstr "Значение bucket должно быть списком или объектом, а пришло {got}"
+
+#: stageflow/core/nodes/bindings.py:79
+#, python-brace-format
+msgid "Stage did not return field '{field}' (available: {available})"
+msgstr "Стадия не вернула поле '{field}' (есть: {available})"
+
+#: stageflow/core/nodes/branching.py:38
+#, python-brace-format
+msgid "{node}: then '{target}' not found in the graph"
+msgstr "{node}: then '{target}' в графе не найден"
+
+#: stageflow/core/nodes/branching.py:43
+#, python-brace-format
+msgid "{node}: else '{target}' not found in the graph"
+msgstr "{node}: else '{target}' в графе не найден"
+
+#: stageflow/core/nodes/branching.py:80
+#, python-brace-format
+msgid "{node}: every case needs 'when' and 'next'"
+msgstr "{node}: в каждом case нужны 'when' и 'next'"
+
+#: stageflow/core/nodes/branching.py:85
+#, python-brace-format
+msgid "{node}: case next '{target}' not found in the graph"
+msgstr "{node}: case next '{target}' в графе не найден"
+
+#: stageflow/core/nodes/branching.py:90
+#, python-brace-format
+msgid "{node}: default '{target}' not found in the graph"
+msgstr "{node}: default '{target}' в графе не найден"
+
+#: stageflow/core/nodes/entry.py:44
+#, python-brace-format
+msgid "Node '{node}': 'variables' must be an object"
+msgstr "Узел '{node}': 'variables' должен быть объектом"
+
+#: stageflow/core/nodes/entry.py:94 stageflow/core/nodes/map_block.py:96
+#: stageflow/core/nodes/parallel.py:73 stageflow/core/nodes/stage.py:64
+#: stageflow/core/nodes/subpipeline.py:66 stageflow/core/nodes/try_block.py:128
+#, python-brace-format
+msgid "{node}: next '{target}' not found in the graph"
+msgstr "{node}: next '{target}' в графе не найден"
+
+#: stageflow/core/nodes/entry.py:110
+#, python-brace-format
+msgid "{node}: '{name}' is not a valid variable name"
+msgstr "{node}: '{name}' — недопустимое имя переменной"
+
+#: stageflow/core/nodes/entry.py:115
+#, python-brace-format
+msgid "{node}: variable '{name}' is declared twice"
+msgstr "{node}: переменная '{name}' объявлена дважды"
+
+#: stageflow/core/nodes/entry.py:121
+#, python-brace-format
+msgid "{node}: empty expression for variable '{name}'"
+msgstr "{node}: пустое выражение для переменной '{name}'"
+
+#: stageflow/core/nodes/entry.py:145
+#, python-brace-format
+msgid "{node}: cyclic variable dependency: {names}"
+msgstr "{node}: циклическая зависимость переменных: {names}"
+
+#: stageflow/core/nodes/map_block.py:63
+#, python-brace-format
+msgid "Node '{node}': field '{field}' is required"
+msgstr "Узел '{node}': поле '{field}' обязательно"
+
+#: stageflow/core/nodes/map_block.py:91 stageflow/core/nodes/try_block.py:108
+#, python-brace-format
+msgid "{node}: body '{target}' not found in the graph"
+msgstr "{node}: body '{target}' в графе не найден"
+
+#: stageflow/core/nodes/map_block.py:101
+#, python-brace-format
+msgid "{node}: mode '{mode}' is not one of {allowed}"
+msgstr "{node}: режим '{mode}' не входит в {allowed}"
+
+#: stageflow/core/nodes/map_block.py:117
+#, python-brace-format
+msgid "{node}: {field} '{name}' is not a valid variable name"
+msgstr "{node}: {field} '{name}' — недопустимое имя переменной"
+
+#: stageflow/core/nodes/map_block.py:122
+#, python-brace-format
+msgid "{node}: item_var and index_var are the same name"
+msgstr "{node}: item_var и index_var — одно и то же имя"
+
+#: stageflow/core/nodes/map_block.py:127
+#, python-brace-format
+msgid "{node}: collect source '{name}' must be a variable name"
+msgstr "{node}: collect, источник '{name}': нужно имя переменной"
+
+#: stageflow/core/nodes/map_block.py:128
+#, python-brace-format
+msgid "{node}: collect destination '{name}' must be a variable name"
+msgstr "{node}: collect, приёмник '{name}': нужно имя переменной"
+
+#: stageflow/core/nodes/map_block.py:150
+#, python-brace-format
+msgid ""
+"{node}: '{from_node}' leads to '{target}', outside the loop body; a road inside the "
+"body must end inside it"
+msgstr ""
+"{node}: '{from_node}' ведёт в '{target}', за пределы тела цикла; дорога внутри тела "
+"должна заканчиваться внутри него"
+
+#: stageflow/core/nodes/map_block.py:193
+#, python-brace-format
+msgid "{node}: items '{items}' must be a list, got {got}"
+msgstr "{node}: в items '{items}' ожидался список, а пришло {got}"
+
+#: stageflow/core/nodes/map_block.py:290
+#, python-brace-format
+msgid "{node}: item {index} did not write '{source}', collected as '{target}'"
+msgstr "{node}: элемент {index} не записал '{source}', который собирается в '{target}'"
+
+#: stageflow/core/nodes/parallel.py:63
+#, python-brace-format
+msgid "{node}: at least one branch is required"
+msgstr "{node}: нужна хотя бы одна ветка"
+
+#: stageflow/core/nodes/parallel.py:67
+#, python-brace-format
+msgid "{node}: entry of branch '{branch}' -> '{target}' not found in the graph"
+msgstr "{node}: вход ветки '{branch}' -> '{target}' в графе не найден"
+
+#: stageflow/core/nodes/parallel.py:106
+#, python-brace-format
+msgid "branch '{branch}' failed: {reason}"
+msgstr "ветка '{branch}' упала: {reason}"
+
+#: stageflow/core/nodes/parallel.py:163
+#, python-brace-format
+msgid "{node}: branches '{first}' and '{second}' both write {name}"
+msgstr "{node}: ветки '{first}' и '{second}' обе пишут {name}"
+
+#: stageflow/core/nodes/stage.py:42
+#, python-brace-format
+msgid "Node '{node}': field 'stage' is required"
+msgstr "Узел '{node}': поле 'stage' обязательно"
+
+#: stageflow/core/nodes/stage.py:61
+#, python-brace-format
+msgid "{node}: {reason}"
+msgstr "{node}: {reason}"
+
+#: stageflow/core/nodes/stage.py:71
+#, python-brace-format
+msgid "{node}: arguments.{bucket} must be an object or a list"
+msgstr "{node}: arguments.{bucket} должен быть объектом или списком"
+
+#: stageflow/core/nodes/stage.py:75
+#, python-brace-format
+msgid "{node}: outputs must be an object"
+msgstr "{node}: outputs должен быть объектом"
+
+#: stageflow/core/nodes/stage.py:83
+#, python-brace-format
+msgid ""
+"{node}: the '{scope}' scope level in outputs was removed in 0.7.0 — keys are flat: "
+"{{\"result_field\": \"variable\"}}"
+msgstr ""
+"{node}: уровень области '{scope}' в outputs убран в 0.7.0 — ключи плоские: "
+"{{\"result_field\": \"variable\"}}"
+
+#: stageflow/core/nodes/stage.py:100
+#, python-brace-format
+msgid "{node}: stage {stage} does not return field '{field}' (available: {available})"
+msgstr "{node}: стадия {stage} не возвращает поле '{field}' (есть: {available})"
+
+#: stageflow/core/nodes/stage.py:129
+#, python-brace-format
+msgid ""
+"{node}: argument '{argument}' of stage {stage} expects '{expected}', but "
+"vars.{variable} is declared as '{declared}'"
+msgstr ""
+"{node}: аргумент '{argument}' стадии {stage} ждёт '{expected}', а vars.{variable} "
+"объявлена как '{declared}'"
+
+#: stageflow/core/nodes/stage.py:142
+#, python-brace-format
+msgid ""
+"{node}: output '{output}' of stage {stage} has type '{type}', but is written to "
+"vars.{variable} typed '{declared}'"
+msgstr ""
+"{node}: выход '{output}' стадии {stage} имеет тип '{type}', а пишется в "
+"vars.{variable} с типом '{declared}'"
+
+#: stageflow/core/nodes/subpipeline.py:40
+#, python-brace-format
+msgid "Node '{node}': field 'subpipeline_id' is required"
+msgstr "Узел '{node}': поле 'subpipeline_id' обязательно"
+
+#: stageflow/core/nodes/subpipeline.py:56
+#, python-brace-format
+msgid "{node}: subpipeline '{name}' not found"
+msgstr "{node}: субпайплайн '{name}' не найден"
+
+#: stageflow/core/nodes/subpipeline.py:61
+#, python-brace-format
+msgid "{node}: a subpipeline cannot reference the root entry node"
+msgstr "{node}: субпайплайн не может ссылаться на корневой входной узел"
+
+#: stageflow/core/nodes/subpipeline.py:84
+#, python-brace-format
+msgid ""
+"{node}: subpipeline '{name}' did not return artifact '{artifact}' (available: "
+"{available})"
+msgstr "{node}: субпайплайн '{name}' не вернул артефакт '{artifact}' (есть: {available})"
+
+#: stageflow/core/nodes/try_block.py:26
+msgid "except: field 'next' is required"
+msgstr "except: поле 'next' обязательно"
+
+#: stageflow/core/nodes/try_block.py:70
+#, python-brace-format
+msgid "Node '{node}': field 'body' is required"
+msgstr "Узел '{node}': поле 'body' обязательно"
+
+#: stageflow/core/nodes/try_block.py:113
+#, python-brace-format
+msgid "{node}: at least one handler is required in 'except'"
+msgstr "{node}: в 'except' нужен хотя бы один обработчик"
+
+#: stageflow/core/nodes/try_block.py:118
+#, python-brace-format
+msgid "{node}: except.next '{target}' not found in the graph"
+msgstr "{node}: except.next '{target}' в графе не найден"
+
+#: stageflow/core/nodes/try_block.py:123
+#, python-brace-format
+msgid "{node}: handler '{target}' is inside the block body"
+msgstr "{node}: обработчик '{target}' стоит внутри тела блока"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AppendListStage.description)⁩
+msgid "Append value to list (creates list if missing)"
+msgstr "Добавляет значение в список (создаёт список, если его нет)"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AppendListStage.arguments.list)⁩
+msgid "List to append to (empty list if missing)"
+msgstr "Список, в который добавляем (пустой, если его нет)"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AppendListStage.arguments.value)⁩
+msgid "Value to append"
+msgstr "Что добавить"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AppendListStage.outputs.list)⁩
+msgid "Resulting list after append"
+msgstr "Список после добавления"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AssertStage.description)⁩
+msgid "Validate CEL condition against stage arguments, raise on failure"
+msgstr "Проверяет CEL-условие по аргументам стадии и падает, если оно не выполнено"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AssertStage.arguments.condition)⁩
+msgid "CEL condition; other arguments of the stage are visible as vars.*"
+msgstr "CEL-условие; остальные аргументы стадии видны как vars.*"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AssertStage.arguments.message)⁩
+msgid "Error message when condition fails"
+msgstr "Сообщение об ошибке, если условие не выполнено"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AssertStage.arguments.*)⁩
+#: ⁨stageflow/builtins (FilterListStage.arguments.*)⁩
+msgid "Any other argument is visible to the condition as vars.<name>"
+msgstr "Любой другой аргумент виден условию как vars.<имя>"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ConcatStage.description)⁩
+msgid "Concatenate stringified parts with separator"
+msgstr "Склеивает части через разделитель, приводя их к строкам"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ConcatStage.arguments.parts)⁩
+msgid "Values to concatenate (non-strings are stringified)"
+msgstr "Что склеить (не строки приводятся к строке)"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ConcatStage.arguments.separator)⁩
+msgid "Separator between parts"
+msgstr "Разделитель между частями"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ConcatStage.outputs.value)⁩
+msgid "Concatenated string"
+msgstr "Склеенная строка"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (CopyValueStage.description)⁩
+msgid "Copy value to output path, falling back to default when absent"
+msgstr "Копирует значение, подставляя default, когда его нет"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (CopyValueStage.arguments.value)⁩
+msgid "Value to copy"
+msgstr "Что копировать"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (CopyValueStage.arguments.default)⁩
+msgid "Used when 'value' is missing or null"
+msgstr "Идёт в дело, когда 'value' нет или там null"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (CopyValueStage.outputs.value)⁩
+msgid "Copied value"
+msgstr "Скопированное значение"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (DropKeysStage.description)⁩
+msgid "Remove specified keys from dict and return cleaned object"
+msgstr "Убирает из объекта названные ключи"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (DropKeysStage.arguments.src)⁩
+#: ⁨stageflow/builtins (PickKeysStage.arguments.src)⁩
+msgid "Source dict"
+msgstr "Исходный объект"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (DropKeysStage.arguments.keys)⁩
+msgid "Keys to remove from the dict"
+msgstr "Какие ключи убрать"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (DropKeysStage.outputs.result)⁩
+msgid "Dict without removed keys"
+msgstr "Объект без убранных ключей"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ExtendListStage.description)⁩
+msgid "Extend list with items from arguments"
+msgstr "Дополняет список элементами из аргументов"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ExtendListStage.arguments.list)⁩
+msgid "Base list to extend (empty list if missing)"
+msgstr "Список, который дополняем (пустой, если его нет)"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ExtendListStage.arguments.items)⁩
+msgid "Items to extend the list with"
+msgstr "Чем дополнить"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ExtendListStage.outputs.list)⁩
+msgid "Resulting list after extend"
+msgstr "Список после дополнения"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FailStage.description)⁩
+msgid "Always raise a runtime error with provided message"
+msgstr "Всегда падает, с переданным сообщением"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FailStage.arguments.message)⁩
+msgid "Message for raised error"
+msgstr "Сообщение ошибки"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FilterListStage.description)⁩
+msgid "Filter list items by CEL condition; current element is bound as `item`"
+msgstr "Отбирает элементы списка по CEL-условию; текущий элемент виден как `item`"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FilterListStage.arguments.items)⁩
+msgid "List to filter"
+msgstr "Список, который фильтруем"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FilterListStage.arguments.condition)⁩
+msgid "CEL condition evaluated per element, e.g. 'item > 2'"
+msgstr "CEL-условие, которое считается для каждого элемента, например 'item > 2'"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FilterListStage.outputs.list)⁩
+msgid "Filtered list"
+msgstr "Отобранные элементы"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (IncrementStage.description)⁩
+msgid "Increment numeric value by delta"
+msgstr "Увеличивает число на delta"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (IncrementStage.arguments.current)⁩
+msgid "Current numeric value"
+msgstr "Текущее число"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (IncrementStage.arguments.delta)⁩
+msgid "Increment step"
+msgstr "Шаг"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (IncrementStage.outputs.value)⁩
+msgid "Result after increment"
+msgstr "Число после увеличения"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (LogStage.description)⁩
+msgid "Emit log event with message and the stage's own arguments"
+msgstr "Отправляет событие лога — сообщение и свои же аргументы"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (LogStage.arguments.message)⁩
+msgid "Log message"
+msgstr "Сообщение"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (LogStage.arguments.*)⁩
+msgid "Anything else passed in arguments is logged as-is"
+msgstr "Всё остальное, что передали в аргументах, уходит в лог как есть"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (MergeDictStage.description)⁩
+msgid "Shallow merge src dict into dst"
+msgstr "Неглубоко сливает src в dst"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (MergeDictStage.arguments.src)⁩
+msgid "Dict with overrides"
+msgstr "Объект, который накладываем сверху"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (MergeDictStage.arguments.dst)⁩
+msgid "Base dict to merge into (empty by default)"
+msgstr "Объект, в который сливаем (по умолчанию пустой)"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (MergeDictStage.outputs.merged)⁩
+msgid "Merged dict result"
+msgstr "Результат слияния"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PickKeysStage.description)⁩
+msgid "Pick only specified keys from a dict and return new object"
+msgstr "Оставляет из объекта только названные ключи"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PickKeysStage.arguments.keys)⁩
+msgid "Keys to keep in the result"
+msgstr "Какие ключи оставить"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PickKeysStage.outputs.result)⁩
+msgid "Dict containing only picked keys"
+msgstr "Объект только из оставленных ключей"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.description)⁩
+msgid "Pop element from list (default last) and return list+popped value"
+msgstr ""
+"Извлекает элемент из списка (по умолчанию последний) и возвращает и список, и сам "
+"элемент"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.arguments.items)⁩
+msgid "List to pop from"
+msgstr "Список, из которого извлекаем"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.arguments.index)⁩
+msgid "Index to pop, -1 means last element"
+msgstr "Индекс; -1 — последний элемент"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.outputs.list)⁩
+msgid "List after pop"
+msgstr "Список после извлечения"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.outputs.popped)⁩
+msgid "Popped value"
+msgstr "Извлечённое значение"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SetValueStage.description)⁩
+msgid "Set value from arguments to the target path"
+msgstr "Кладёт значение из аргументов в указанную переменную"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SetValueStage.arguments.value)⁩
+msgid "Value to set (literal via const, or a variable reference)"
+msgstr "Что записать (литерал через const или ссылка на переменную)"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SetValueStage.outputs.value)⁩
+msgid "Value that was written"
+msgstr "Записанное значение"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SleepStage.description)⁩
+msgid "Async sleep for the given number of seconds"
+msgstr "Асинхронно ждёт заданное число секунд"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SleepStage.arguments.seconds)⁩
+msgid "Duration to sleep in seconds"
+msgstr "Сколько секунд ждать"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (TemplateStage.description)⁩
+msgid "Format template string with the stage's own arguments"
+msgstr "Подставляет в шаблон собственные аргументы стадии"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (TemplateStage.arguments.template)⁩
+#, python-brace-format
+msgid "Template string; a placeholder is a bare argument name ({name})"
+msgstr "Строка шаблона; подстановка — это просто имя аргумента ({name})"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (TemplateStage.arguments.*)⁩
+msgid "Any other argument becomes a template placeholder value"
+msgstr "Любой другой аргумент становится значением подстановки"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (TemplateStage.outputs.value)⁩
+msgid "Rendered string"
+msgstr "Готовая строка"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (UniqueListStage.description)⁩
+msgid "Deduplicate list while preserving original order"
+msgstr "Убирает повторы, сохраняя исходный порядок"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (UniqueListStage.arguments.items)⁩
+msgid "List to deduplicate"
+msgstr "Список, из которого убираем повторы"
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (UniqueListStage.outputs.list)⁩
+msgid "List with unique items"
+msgstr "Список без повторов"
+
+#~ msgid "{what} schema validation failed: {reason}"
+#~ msgstr ""
+

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ...exceptions import ArtifactNotFoundError, PipelineDefinitionError
+from ...i18n import _
 from ..context import Context
 from .base import Node, register_node
 from .recovery import run_with_retry
@@ -36,7 +37,8 @@ class SubPipelineNode(Node):
         subpipeline_id = data.get("subpipeline_id")
         if not subpipeline_id:
             raise PipelineDefinitionError(
-                f"Node '{data.get('id')}': field 'subpipeline_id' is required"
+                _("Node '{node}': field 'subpipeline_id' is required",
+                  node=data.get("id"))
             )
         return cls(
             subpipeline_id=subpipeline_id,
@@ -50,11 +52,20 @@ class SubPipelineNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if self.subpipeline_id not in pipeline.subpipelines:
-            errors.append(f"{self.id}: subpipeline '{self.subpipeline_id}' not found")
+            errors.append(
+                _("{node}: subpipeline '{name}' not found",
+                  node=self.id, name=self.subpipeline_id)
+            )
         elif self.subpipeline_id == pipeline.entry:
-            errors.append(f"{self.id}: a subpipeline cannot reference the root entry node")
+            errors.append(
+                _("{node}: a subpipeline cannot reference the root entry node",
+                  node=self.id)
+            )
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
+            errors.append(
+                _("{node}: next '{target}' not found in the graph",
+                  node=self.id, target=self.next)
+            )
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
@@ -70,8 +81,10 @@ class SubPipelineNode(Node):
             for parent_name, child_name in self.artifact_outputs.items():
                 if child_name not in child_result.artifacts:
                     raise ArtifactNotFoundError(
-                        f"{self.id}: subpipeline '{self.subpipeline_id}' did not return "
-                        f"artifact '{child_name}' (available: {sorted(child_result.artifacts)})"
+                        _("{node}: subpipeline '{name}' did not return "
+                          "artifact '{artifact}' (available: {available})",
+                          node=self.id, name=self.subpipeline_id, artifact=child_name,
+                          available=sorted(child_result.artifacts))
                     )
                 value = child_result.artifacts[child_name]
                 types.check_write(parent_name, value, self.id)

@@ -63,6 +63,7 @@ apart in the order it was written.
 | [Policy](policy.md) | restricting the stages and node types a pipeline may use |
 | [Limits](limits.md) | meters, budgets, what a stage spends |
 | [Variable typing](variable-typing.md) | gradual typing, static and runtime checks |
+| [Localization](localization.md) | answering in the caller's language, stage prose per locale |
 | [Session control](session-control.md) | stop/pause/resume, user input, snapshots |
 | [Step debugging](step-debugging.md) | stopping between nodes, editing the frame |
 | [Built-in stages](built-in-stages.md) | what ships with the package |

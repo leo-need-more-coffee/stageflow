@@ -5,13 +5,17 @@ from typing import Any
 
 import yaml
 
+from ..i18n import translate, translate_all
+
 
 @dataclass(frozen=True, slots=True)
 class FieldSpec:
     name: str
     type: str = "any"
     optional: bool = False
-    description: str = ""
+    #: prose, and prose is translatable: as written in the docstring this is a
+    #: string, or a `{locale: string}` mapping that `build_stage_spec` resolves
+    description: Any = ""
     extra: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -76,20 +80,71 @@ def parse_docstring_spec(doc: str | None) -> dict[str, Any]:
     return parsed if isinstance(parsed, dict) else {}
 
 
-def build_stage_spec(stage_cls: type) -> dict[str, Any]:
+def _prose(locale: str | None, domain: str | None):
+    """How one piece of prose in a spec is resolved.
+
+    No locale asked for means the spec is not being built for a reader, so every
+    language goes in it and whatever draws it chooses — see `translate_all`. A
+    locale asked for means one reader, one string.
+    """
+    if locale is None:
+        return lambda value: translate_all(value, domain)
+    return lambda value: translate(value, locale, domain)
+
+
+def _translated(raw: Any, locale: str | None, domain: str | None) -> list[dict[str, Any]]:
+    prose = _prose(locale, domain)
+    fields = []
+    for spec in parse_fields(raw):
+        as_dict = spec.to_dict()
+        as_dict["description"] = prose(as_dict.get("description", ""))
+        fields.append(as_dict)
+    return fields
+
+
+def _described(specs: list[Any], locale: str | None, domain: str | None) -> list[dict[str, Any]]:
+    """Event and input specs, with their one line of prose resolved."""
+    prose = _prose(locale, domain)
+    out = []
+    for spec in specs:
+        as_dict = spec.to_dict()
+        as_dict["description"] = prose(as_dict.get("description"))
+        out.append(as_dict)
+    return out
+
+
+def build_stage_spec(stage_cls: type, locale: str | None = None) -> dict[str, Any]:
+    """The card an editor draws this stage from.
+
+    Everything here but the prose is an identifier: a name, a type, a colour, a
+    meter. The prose — the stage's description and the description of every
+    argument, output, event and input — comes either out of the catalog of the
+    stage's `i18n_domain` or out of a per-locale mapping written in the
+    docstring. A stage with neither reads the same in every language, which is
+    the correct answer for a stage nobody has translated.
+
+    `locale=None`, the default, puts EVERY language in the spec as a `{locale:
+    text}` mapping and leaves the choosing to whatever draws it. That is what an
+    editor wants: it holds one copy of the specs and its reader may pick a
+    language long after they were fetched, so a backend that had chosen for them
+    would have to be asked again. Naming a locale collapses the prose to that
+    one language, for a caller that really is answering one reader — the docs
+    generator, mostly.
+    """
     doc = parse_docstring_spec(stage_cls.__doc__)
+    domain = getattr(stage_cls, "i18n_domain", None)
     return {
         "stage_name": stage_cls.stage_name,
         "skipable": stage_cls.skipable,
-        "allowed_events": [spec.to_dict() for spec in stage_cls.allowed_events],
-        "allowed_inputs": [spec.to_dict() for spec in stage_cls.allowed_inputs],
+        "allowed_events": _described(stage_cls.allowed_events, locale, domain),
+        "allowed_inputs": _described(stage_cls.allowed_inputs, locale, domain),
         "category": stage_cls.category,
         "icon": str(doc.get("icon", "") or ""),
         "icon_mono": bool(doc.get("icon_mono", False)),
         "color": doc.get("color") or None,
-        "description": doc.get("description", ""),
-        "arguments": [f.to_dict() for f in parse_fields(doc.get("arguments"))],
-        "outputs": [f.to_dict() for f in parse_fields(doc.get("outputs"))],
+        "description": _prose(locale, domain)(doc.get("description", "")),
+        "arguments": _translated(doc.get("arguments"), locale, domain),
+        "outputs": _translated(doc.get("outputs"), locale, domain),
         # what the stage asks to be held before it runs: {meter: number or CEL
         # over `args`}. Read before anything executes, which is why it is
         # declared rather than computed — an editor can show it, and a host

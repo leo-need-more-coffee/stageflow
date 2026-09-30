@@ -73,6 +73,7 @@ nav:
       - Policy: policy.md
       - Limits: limits.md
       - Variable typing: variable-typing.md
+      - Localization: localization.md
       - Session control: session-control.md
       - Step debugging: step-debugging.md
       - Built-in stages: built-in-stages.md
@@ -148,6 +149,7 @@ plugins:
             Policy: Политика
             Limits: Лимиты
             Variable typing: Типизация переменных
+            Localization: Локализация
             Session control: Управление сессией
             Step debugging: Пошаговая отладка
             Built-in stages: Встроенные стадии

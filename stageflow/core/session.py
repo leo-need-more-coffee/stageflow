@@ -8,6 +8,7 @@ from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Callable
 
 from ..exceptions import PipelineDefinitionError, StageContractError
+from ..i18n import _
 from .budget import Budget, BudgetExceeded, Limits
 from .cel import CelEngine
 from .context import Context
@@ -290,8 +291,9 @@ class Session:
                 amounts[meter] = float(value)
             except (TypeError, ValueError):
                 raise StageContractError(
-                    f"{node.id}: reserve '{meter}' of stage {node.stage} "
-                    f"is not a number: {value!r}"
+                    _("{node}: reserve '{meter}' of stage {stage} "
+                      "is not a number: {value}",
+                      node=node.id, meter=meter, stage=node.stage, value=repr(value))
                 ) from None
         return amounts
 
@@ -335,7 +337,9 @@ class Session:
 
     async def run_subpipeline(self, node, child_ctx: Context) -> SessionResult:
         if node.subpipeline_id not in self.pipeline.subpipelines:
-            raise PipelineDefinitionError(f"Subpipeline '{node.subpipeline_id}' not found")
+            raise PipelineDefinitionError(
+                _("Subpipeline '{name}' not found", name=node.subpipeline_id)
+            )
 
         data = dict(self.pipeline.subpipelines[node.subpipeline_id])
         data.setdefault("subpipelines", self.pipeline.subpipelines)
@@ -508,7 +512,9 @@ class Session:
         if pipeline is None:
             raw = snapshot.get("pipeline")
             if not raw:
-                raise PipelineDefinitionError("Pipeline is required to restore session")
+                raise PipelineDefinitionError(
+                    _("Pipeline is required to restore session")
+                )
             pipeline = Pipeline.from_dict(raw)
 
         session = cls(

@@ -26,7 +26,14 @@ async def stages() -> dict:
     return {"stages": {name: cls.get_specs() for name, cls in get_stages().items()}}
 ```
 
-`get_specs()` is the parsed docstring from [step 1](1-stages.md). This is the
+`get_specs()` is the parsed docstring from [step 1](1-stages.md), and it needs
+no argument here on purpose: the prose comes back in **every** language the
+build has, as a `{locale: text}` mapping, and the editor picks one for its
+reader. There is nothing to negotiate at this endpoint — the specs are fetched
+once and the language is chosen afterwards, so choosing here would only mean
+being asked again ([Localization](../localization.md)).
+
+This is the
 one endpoint the editor cannot open without — it is also what the connection
 screen probes, so "connected" means the thing really answered and really
 allows this origin, not that the address looked like a URL.

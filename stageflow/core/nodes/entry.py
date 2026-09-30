@@ -4,6 +4,7 @@ import re
 from typing import TYPE_CHECKING, Any
 
 from ...exceptions import PipelineDefinitionError, TypeCheckError
+from ...i18n import _
 from ..context import Context
 from .base import Node, register_node
 from .bindings import CEL_SUFFIX
@@ -40,7 +41,7 @@ class EntryNode(Node):
         variables = data.get("variables", {})
         if not isinstance(variables, dict):
             raise PipelineDefinitionError(
-                f"Node '{data.get('id')}': 'variables' must be an object"
+                _("Node '{node}': 'variables' must be an object", node=data.get("id"))
             )
         return cls(variables=variables, next=data.get("next"), **Node._common(data))
 
@@ -89,7 +90,10 @@ class EntryNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
+            errors.append(
+                _("{node}: next '{target}' not found in the graph",
+                  node=self.id, target=self.next)
+            )
         errors.extend(self._validate_names())
         errors.extend(self._validate_cycles())
         errors.extend(self._validate_seed_types(pipeline))
@@ -102,12 +106,21 @@ class EntryNode(Node):
             is_cel = key.endswith(CEL_SUFFIX)
             name = key[: -len(CEL_SUFFIX)] if is_cel else key
             if not name.isidentifier():
-                errors.append(f"{self.id}: '{name}' is not a valid variable name")
+                errors.append(
+                    _("{node}: '{name}' is not a valid variable name",
+                      node=self.id, name=name)
+                )
             elif name in seen:
-                errors.append(f"{self.id}: variable '{name}' is declared twice")
+                errors.append(
+                    _("{node}: variable '{name}' is declared twice",
+                      node=self.id, name=name)
+                )
             seen.add(name)
             if is_cel and not (isinstance(spec, str) and spec.strip()):
-                errors.append(f"{self.id}: empty expression for variable '{name}'")
+                errors.append(
+                    _("{node}: empty expression for variable '{name}'",
+                      node=self.id, name=name)
+                )
         return errors
 
     def _validate_cycles(self) -> list[str]:
@@ -129,8 +142,8 @@ class EntryNode(Node):
         if not remaining:
             return []
         return [
-            f"{self.id}: cyclic variable dependency: "
-            f"{', '.join(sorted(remaining))}"
+            _("{node}: cyclic variable dependency: {names}",
+              node=self.id, names=", ".join(sorted(remaining)))
         ]
 
     def _validate_seed_types(self, pipeline: "Pipeline") -> list[str]:

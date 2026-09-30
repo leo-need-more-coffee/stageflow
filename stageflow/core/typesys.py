@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Any, Iterator
 
 from ..exceptions import TypeCheckError, TypeDeclarationError
+from ..i18n import _
 from .context import Context
 
 _IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
@@ -22,7 +23,10 @@ class VarType:
 
 
 def _fail(path: str, expected: "VarType", value: Any) -> None:
-    raise TypeCheckError(f"{path}: expected {expected}, got {type(value).__name__}")
+    raise TypeCheckError(
+        _("{path}: expected {expected}, got {got}",
+          path=path, expected=expected, got=type(value).__name__)
+    )
 
 
 @dataclass(frozen=True)
@@ -105,7 +109,8 @@ class MapType(VarType):
         for key, element in value.items():
             if not isinstance(key, str):
                 raise TypeCheckError(
-                    f"{path}: map keys must be strings, got {type(key).__name__}"
+                    _("{path}: map keys must be strings, got {got}",
+                      path=path, got=type(key).__name__)
                 )
             self.value.check(element, f"{path}.{key}", registry)
 
@@ -166,14 +171,16 @@ class StructType(VarType):
                 if spec.optional:
                     continue
                 raise TypeCheckError(
-                    f"{path}: structure {self.name} is missing required field '{field_name}'"
+                    _("{path}: structure {struct} is missing required field '{field}'",
+                      path=path, struct=self.name, field=field_name)
                 )
             spec.type.check(value[field_name], f"{path}.{field_name}", registry)
         if self.strict:
             extra = set(value) - set(self.fields)
             if extra:
                 raise TypeCheckError(
-                    f"{path}: structure {self.name} forbids extra fields: {sorted(extra)}"
+                    _("{path}: structure {struct} forbids extra fields: {fields}",
+                      path=path, struct=self.name, fields=sorted(extra))
                 )
 
     def kinds(self, registry):
@@ -232,7 +239,9 @@ def _split_top_level(expr: str, sep: str) -> list[str]:
 
 def parse_type(expr: str) -> VarType:
     if not isinstance(expr, str) or not expr.strip():
-        raise TypeDeclarationError(f"Empty or non-string type expression: {expr!r}")
+        raise TypeDeclarationError(
+            _("Empty or non-string type expression: {expr}", expr=repr(expr))
+        )
     expr = expr.strip()
 
     union_parts = _split_top_level(expr, "|")
@@ -249,11 +258,16 @@ def parse_type(expr: str) -> VarType:
         prefix = container + "<"
         if expr.startswith(prefix):
             if not expr.endswith(">"):
-                raise TypeDeclarationError(f"Unclosed '{container}<' in expression {expr!r}")
+                raise TypeDeclarationError(
+                    _("Unclosed '{container}<' in expression {expr}",
+                      container=container, expr=repr(expr))
+                )
             return cls(parse_type(expr[len(prefix):-1]))
 
     if not _IDENT_RE.match(expr):
-        raise TypeDeclarationError(f"Malformed type expression: {expr!r}")
+        raise TypeDeclarationError(
+            _("Malformed type expression: {expr}", expr=repr(expr))
+        )
     return NamedRef(expr)
 
 
@@ -263,7 +277,8 @@ def _parse_type_value(name: str, spec: Any) -> VarType:
     if isinstance(spec, dict):
         return parse_struct(name, spec)
     raise TypeDeclarationError(
-        f"Type '{name}' must be an expression or a structure, got {type(spec).__name__}"
+        _("Type '{name}' must be an expression or a structure, got {got}",
+          name=name, got=type(spec).__name__)
     )
 
 
@@ -272,7 +287,9 @@ def parse_struct(name: str, data: dict) -> StructType:
         fields_raw = data["fields"]
         strict = bool(data.get("strict", False))
         if not isinstance(fields_raw, dict):
-            raise TypeDeclarationError(f"Type '{name}': 'fields' must be an object")
+            raise TypeDeclarationError(
+                _("Type '{name}': 'fields' must be an object", name=name)
+            )
     else:
         fields_raw, strict = data, False
 
@@ -281,7 +298,10 @@ def parse_struct(name: str, data: dict) -> StructType:
         optional = raw_name.endswith("?")
         field_name = raw_name[:-1] if optional else raw_name
         if not _IDENT_RE.match(field_name):
-            raise TypeDeclarationError(f"Type '{name}': malformed field name {raw_name!r}")
+            raise TypeDeclarationError(
+                _("Type '{name}': malformed field name {field}",
+                  name=name, field=repr(raw_name))
+            )
         fields[field_name] = StructField(
             type=_parse_type_value(f"{name}.{field_name}", spec), optional=optional
         )
@@ -297,7 +317,9 @@ class TypeRegistry:
         types: dict[str, VarType] = {}
         for name, spec in (data or {}).items():
             if not _IDENT_RE.match(name):
-                raise TypeDeclarationError(f"Malformed type name: {name!r}")
+                raise TypeDeclarationError(
+                    _("Malformed type name: {name}", name=repr(name))
+                )
             types[name] = _parse_type_value(name, spec)
         return cls(types)
 
@@ -305,7 +327,7 @@ class TypeRegistry:
         try:
             return self._types[name]
         except KeyError:
-            raise TypeDeclarationError(f"Unknown type '{name}'") from None
+            raise TypeDeclarationError(_("Unknown type '{name}'", name=name)) from None
 
     def __contains__(self, name: str) -> bool:
         return name in self._types
@@ -315,7 +337,10 @@ class TypeRegistry:
         for name, declared in self._types.items():
             for ref in declared.refs():
                 if ref not in self._types:
-                    errors.append(f"type '{name}' references unknown type '{ref}'")
+                    errors.append(
+                        _("type '{name}' references unknown type '{ref}'",
+                          name=name, ref=ref)
+                    )
         return errors
 
 
@@ -348,8 +373,8 @@ class TypeSystem:
         for legacy in ("local", "global"):
             if legacy in declarations and isinstance(declarations[legacy], dict):
                 raise TypeDeclarationError(
-                    f"variables: the '{legacy}' scope level was removed in 0.7.0 — "
-                    'declarations are flat: {"n": "int"}'
+                    _("variables: the '{scope}' scope level was removed in 0.7.0 — "
+                      'declarations are flat: {{"n": "int"}}', scope=legacy)
                 )
         variables = {
             name: _parse_type_value(f"vars.{name}", spec)
@@ -369,7 +394,8 @@ class TypeSystem:
             for ref in declared.refs():
                 if ref not in self._registry:
                     errors.append(
-                        f"variable vars.{name} references unknown type '{ref}'"
+                        _("variable vars.{name} references unknown type '{ref}'",
+                          name=name, ref=ref)
                     )
         return errors
 
@@ -394,7 +420,7 @@ class TypeSystem:
         try:
             declared.check(value, f"vars.{name}", self._registry)
         except TypeCheckError as exc:
-            raise TypeCheckError(f"{where}: {exc}") from None
+            raise TypeCheckError(_("{where}: {reason}", where=where, reason=exc)) from None
 
     def check_context(self, ctx: Context, where: str) -> None:
         for name in self._variables:

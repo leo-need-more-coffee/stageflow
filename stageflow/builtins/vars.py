@@ -1,10 +1,12 @@
-from ..core.stage import BaseStage, register_stage
+from ..core.stage import register_stage
+from ._base import BuiltinStage
 from ..exceptions import StageContractError
+from ..i18n import _
 from ._args import require_dict, require_number
 
 
 @register_stage("SetValueStage")
-class SetValueStage(BaseStage):
+class SetValueStage(BuiltinStage):
     """
     description: "Set value from arguments to the target path"
     icon: "="
@@ -23,12 +25,15 @@ class SetValueStage(BaseStage):
     async def run(self):
         args = self.get_arguments()
         if "value" not in args:
-            raise StageContractError("SetValueStage: argument 'value' is required")
+            raise StageContractError(
+                _("{stage}: argument '{field}' is required",
+                  stage="SetValueStage", field="value")
+            )
         self.set_outputs({"value": args["value"]})
 
 
 @register_stage("CopyValueStage")
-class CopyValueStage(BaseStage):
+class CopyValueStage(BuiltinStage):
     """
     description: "Copy value to output path, falling back to default when absent"
     icon: "⧉"
@@ -57,7 +62,7 @@ class CopyValueStage(BaseStage):
 
 
 @register_stage("IncrementStage")
-class IncrementStage(BaseStage):
+class IncrementStage(BuiltinStage):
     """
     description: "Increment numeric value by delta"
     icon: "＋"
@@ -86,7 +91,7 @@ class IncrementStage(BaseStage):
 
 
 @register_stage("MergeDictStage")
-class MergeDictStage(BaseStage):
+class MergeDictStage(BuiltinStage):
     """
     description: "Shallow merge src dict into dst"
     icon: "⋈"

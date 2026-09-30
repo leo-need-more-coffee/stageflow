@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Iterable
 
 from ..exceptions import PolicyViolationError
+from ..i18n import _
 from .budget import Limits
 
 
@@ -58,13 +59,15 @@ class Policy:
     def check_stage(self, name: str, where: str) -> None:
         if not self.allows_stage(name):
             raise PolicyViolationError(
-                f"{where}: stage '{name}' is not allowed by the policy"
+                _("{where}: stage '{name}' is not allowed by the policy",
+                  where=where, name=name)
             )
 
     def check_node_type(self, type_: str, where: str) -> None:
         if not self.allows_node_type(type_):
             raise PolicyViolationError(
-                f"{where}: node type '{type_}' is not allowed by the policy"
+                _("{where}: node type '{type}' is not allowed by the policy",
+                  where=where, type=type_)
             )
 
     def errors_for(self, pipeline) -> list[str]:
@@ -108,8 +111,9 @@ class Policy:
             least = _shortest_run(pipeline)
             if least is not None and least > floor:
                 errors.append(
-                    f"the shortest way through this graph is {least} nodes, "
-                    f"and the policy allows {floor:g} steps"
+                    _("the shortest way through this graph is {nodes} nodes, "
+                      "and the policy allows {steps:g} steps",
+                      nodes=least, steps=floor)
                 )
 
         deepest = limits.gauges.get("depth")
@@ -117,8 +121,9 @@ class Policy:
             depth = _subpipeline_depth(pipeline)
             if depth > deepest:
                 errors.append(
-                    f"subpipelines nest {depth} deep, "
-                    f"and the policy allows {deepest:g}"
+                    _("subpipelines nest {depth} deep, "
+                      "and the policy allows {allowed:g}",
+                      depth=depth, allowed=deepest)
                 )
 
         for node in pipeline.nodes:
@@ -126,14 +131,18 @@ class Policy:
                 if (limits.max_retries is not None
                         and retrier.max_attempts > limits.max_retries):
                     errors.append(
-                        f"{node.id}: retry asks for {retrier.max_attempts} attempts, "
-                        f"and the policy allows {limits.max_retries}"
+                        _("{node}: retry asks for {asked} attempts, "
+                          "and the policy allows {allowed}",
+                          node=node.id, asked=retrier.max_attempts,
+                          allowed=limits.max_retries)
                     )
                 if (limits.max_delay_seconds is not None
                         and retrier.interval_seconds > limits.max_delay_seconds):
                     errors.append(
-                        f"{node.id}: retry waits {retrier.interval_seconds:g}s between "
-                        f"attempts, and the policy allows {limits.max_delay_seconds:g}s"
+                        _("{node}: retry waits {asked:g}s between attempts, "
+                          "and the policy allows {allowed:g}s",
+                          node=node.id, asked=retrier.interval_seconds,
+                          allowed=limits.max_delay_seconds)
                     )
         return errors
 
@@ -154,11 +163,13 @@ class Policy:
         errors: list[str] = []
         if type_ is not None and not self.allows_node_type(type_):
             errors.append(
-                f"{where}{node_id}: node type '{type_}' is not allowed by the policy"
+                _("{where}{node}: node type '{type}' is not allowed by the policy",
+                  where=where, node=node_id, type=type_)
             )
         if stage is not None and not self.allows_stage(stage):
             errors.append(
-                f"{where}{node_id}: stage '{stage}' is not allowed by the policy"
+                _("{where}{node}: stage '{stage}' is not allowed by the policy",
+                  where=where, node=node_id, stage=stage)
             )
         return errors
 

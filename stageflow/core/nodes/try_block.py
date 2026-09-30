@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ...exceptions import PipelineDefinitionError
+from ...i18n import _
 from ..context import Context
 from .base import Node, register_node
 from .recovery import error_full_name, error_name, matches_error
@@ -22,7 +23,7 @@ class ExceptHandler:
     @classmethod
     def from_dict(cls, data: dict) -> "ExceptHandler":
         if "next" not in data:
-            raise PipelineDefinitionError("except: field 'next' is required")
+            raise PipelineDefinitionError(_("except: field 'next' is required"))
         return cls(
             error_equals=list(data.get("error_equals", ["*"])),
             next=data["next"],
@@ -65,7 +66,9 @@ class TryNode(Node):
     def _parse(cls, data: dict) -> "TryNode":
         body = data.get("body")
         if not body:
-            raise PipelineDefinitionError(f"Node '{data.get('id')}': field 'body' is required")
+            raise PipelineDefinitionError(
+                _("Node '{node}': field 'body' is required", node=data.get("id"))
+            )
         return cls(
             body=body,
             handlers=[ExceptHandler.from_dict(h) for h in data.get("except", [])],
@@ -101,18 +104,30 @@ class TryNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if not pipeline.has_node(self.body):
-            errors.append(f"{self.id}: body '{self.body}' not found in the graph")
+            errors.append(
+                _("{node}: body '{target}' not found in the graph",
+                  node=self.id, target=self.body)
+            )
         if not self.handlers:
-            errors.append(f"{self.id}: at least one handler is required in 'except'")
+            errors.append(
+                _("{node}: at least one handler is required in 'except'", node=self.id)
+            )
         for handler in self.handlers:
             if not pipeline.has_node(handler.next):
-                errors.append(f"{self.id}: except.next '{handler.next}' not found in the graph")
+                errors.append(
+                    _("{node}: except.next '{target}' not found in the graph",
+                      node=self.id, target=handler.next)
+                )
             elif pipeline.has_node(self.body) and handler.next in self.scope(pipeline):
                 errors.append(
-                    f"{self.id}: handler '{handler.next}' is inside the block body"
+                    _("{node}: handler '{target}' is inside the block body",
+                      node=self.id, target=handler.next)
                 )
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
+            errors.append(
+                _("{node}: next '{target}' not found in the graph",
+                  node=self.id, target=self.next)
+            )
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:

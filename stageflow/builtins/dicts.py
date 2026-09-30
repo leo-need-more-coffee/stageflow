@@ -1,9 +1,10 @@
-from ..core.stage import BaseStage, register_stage
+from ..core.stage import register_stage
 from ._args import require_dict, require_list
+from ._base import BuiltinStage
 
 
 @register_stage("PickKeysStage")
-class PickKeysStage(BaseStage):
+class PickKeysStage(BuiltinStage):
     """
     description: "Pick only specified keys from a dict and return new object"
     icon: "⊂"
@@ -30,7 +31,7 @@ class PickKeysStage(BaseStage):
 
 
 @register_stage("DropKeysStage")
-class DropKeysStage(BaseStage):
+class DropKeysStage(BuiltinStage):
     """
     description: "Remove specified keys from dict and return cleaned object"
     icon: "⊘"

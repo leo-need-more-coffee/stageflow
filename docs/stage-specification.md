@@ -42,6 +42,60 @@ nothing to notice: a stage that asks for `timeout: 90` in its docstring alone
 runs under the `BaseStage` default of 30 seconds, and the editor is told 30 as
 well.
 
+## Prose has languages, identifiers do not
+
+Everything in a spec is either an identifier or prose. A name, a type, a
+category, a meter, a colour — identifiers, the same in every language, never
+translated. The stage's `description` and the `description` of every argument,
+output, event and input — prose, and prose has a language.
+
+So any of those may be a `{locale: text}` mapping instead of a string:
+
+```yaml
+description:
+  en: "Increment numeric value by delta"
+  ru: "Увеличивает число на delta"
+arguments:
+  delta:
+    type: int
+    description:
+      en: "How much to add"
+      ru: "Насколько увеличить"
+```
+
+And `get_specs()` hands back **every** language it has, rather than choosing
+one:
+
+```python
+>>> IncrementStage.get_specs()["description"]
+{'en': 'Increment numeric value by delta', 'ru': 'Увеличивает число на delta'}
+```
+
+That is the shape a client wants. An editor fetches the specs once and its
+reader picks a language afterwards — and picks again whenever they change their
+mind — so a spec that had already been narrowed to one language would have to be
+fetched again on every change of mind. The spec carries the choice; whoever
+draws it chooses.
+
+Prose in one language stays a plain string, because a mapping of one entry is a
+choice that carries no information:
+
+```python
+>>> LoadTicketStage.get_specs()["description"]
+'Takes a prepared ticket out of data/tickets.json'
+```
+
+Naming a locale collapses the prose to it, for a caller that really is answering
+one reader rather than serving a client:
+
+```python
+IncrementStage.get_specs(locale="ru")["description"]   # 'Увеличивает число на delta'
+```
+
+A mapping is the whole mechanism for a handful of stages. For a hundred, a
+`gettext` catalog of your own is less repetitive, and the built-in stages use
+one — both in [Localization](localization.md).
+
 ## What it asks to reserve
 
 `reserve` declares what a run of the stage may consume, in the

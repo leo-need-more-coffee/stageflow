@@ -4,6 +4,7 @@ import asyncio
 import threading
 from typing import Any, Callable
 
+from ..i18n import _
 from .context import Context
 
 RUN = "run"
@@ -124,7 +125,10 @@ class StepDebugger:
         for name, value in values.items():
             try:
                 if types is not None:
-                    types.check_write(name, value, f"debugger before node '{self.node}'")
+                    types.check_write(
+                        name, value,
+                        _("debugger before node '{node}'", node=self.node),
+                    )
             except Exception as exc:  # noqa: BLE001
                 self._emit("var_rejected", name=name, error=str(exc))
                 continue

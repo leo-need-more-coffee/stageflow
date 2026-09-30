@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stageflow-framework"
-version = "0.12.0"
+version = "0.13.0"
 description = "StageFlow: pipeline framework for stages"
 readme = "README.md"
 license = "MIT"
@@ -45,10 +45,23 @@ docs = [
     "mkdocs-material",
     "mkdocs-static-i18n",
 ]
+# only for working ON the translations — running StageFlow in any language
+# needs nothing beyond the compiled catalogs in the package
+i18n = [
+    "babel",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["stageflow*"]
 
 [tool.setuptools.package-data]
-"stageflow" = ["py.typed", "docs/schemas/pipeline.json"]
+"stageflow" = [
+    "py.typed",
+    "docs/schemas/pipeline.json",
+    # the compiled catalogs are what the runtime reads; the .po ships next to
+    # them so a translator who has the wheel has the source too
+    "locale/*/LC_MESSAGES/*.mo",
+    "locale/*/LC_MESSAGES/*.po",
+    "locale/*.pot",
+]

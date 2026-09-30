@@ -96,6 +96,7 @@ against it, so a wrong argument name is an error before anything runs.
 | **Budgets that hold** | counters and gauges for time, steps, tokens, fan-out and depth; a ceiling a `try` block cannot catch |
 | **Gradual typing** | declare the variables that matter; checked at validation and on every write |
 | **Step debugging** | stop between nodes, read and edit the frame, replay the event stream |
+| **Answers in a language** | a locale per request, not per process, for the framework's own messages; stage specs carry every language at once and let the client choose |
 
 ## Documentation
 
@@ -111,6 +112,7 @@ The reference covers the rest:
 [Policy](https://leo-need-more-coffee.github.io/stageflow/policy/) ·
 [Limits](https://leo-need-more-coffee.github.io/stageflow/limits/) ·
 [Variable typing](https://leo-need-more-coffee.github.io/stageflow/variable-typing/) ·
+[Localization](https://leo-need-more-coffee.github.io/stageflow/localization/) ·
 [Session control](https://leo-need-more-coffee.github.io/stageflow/session-control/) ·
 [Step debugging](https://leo-need-more-coffee.github.io/stageflow/step-debugging/)
 

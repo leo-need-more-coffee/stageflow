@@ -1,7 +1,9 @@
 import string
 
-from ..core.stage import BaseStage, register_stage
+from ..core.stage import register_stage
+from ._base import BuiltinStage
 from ..exceptions import StageContractError
+from ..i18n import _
 from ._args import require_list, require_present
 
 
@@ -9,19 +11,21 @@ class _NameOnlyFormatter(string.Formatter):
     def get_field(self, field_name, args, kwargs):
         if not field_name.isidentifier():
             raise StageContractError(
-                f"TemplateStage: placeholder '{{{field_name}}}' is not an argument name; "
-                "attributes, indexes and positional numbers are not allowed"
+                _("TemplateStage: placeholder '{{{field}}}' is not an argument name; "
+                  "attributes, indexes and positional numbers are not allowed",
+                  field=field_name)
             )
         if field_name not in kwargs:
             raise StageContractError(
-                f"TemplateStage: template references '{field_name}', "
-                f"but there is no such argument (available: {sorted(kwargs)})"
+                _("TemplateStage: template references '{field}', "
+                  "but there is no such argument (available: {available})",
+                  field=field_name, available=sorted(kwargs))
             )
         return kwargs[field_name], field_name
 
 
 @register_stage("ConcatStage")
-class ConcatStage(BaseStage):
+class ConcatStage(BuiltinStage):
     """
     description: "Concatenate stringified parts with separator"
     icon: "⧺"
@@ -50,7 +54,7 @@ class ConcatStage(BaseStage):
 
 
 @register_stage("TemplateStage")
-class TemplateStage(BaseStage):
+class TemplateStage(BuiltinStage):
     """
     description: "Format template string with the stage's own arguments"
     icon: "{}"

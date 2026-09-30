@@ -18,6 +18,14 @@ The editor is one such tool. It holds no stages of its own: it asks a backend
 for the specs and draws the palette, the cards and the argument forms from
 them.
 
+The prose in those specs — a stage's description and the description of each of
+its arguments and outputs — comes out in **every** language the build has, as a
+`{locale: text}` mapping, and the tool drawing it picks one. So a single dump
+serves every reader, and a language is not a reason to generate the file again.
+`generate_stages_json(registry, locale="ru")` collapses the prose to one
+language for a file meant to be read rather than drawn from — see
+[Localization](localization.md).
+
 ## What this build can do
 
 An editor is written against one version of the core and then pointed at
@@ -29,7 +37,7 @@ one directly:
 from stageflow import capabilities, __version__
 
 capabilities()
-# {"stageflow": "0.12.0",
+# {"stageflow": "0.13.0",
 #  "node_types": ["condition", "entry", "map", "parallel", "stage",
 #                 "subpipeline", "switch", "terminal", "try"],
 #  "stages": 17}
@@ -40,7 +48,7 @@ which is what a backend should serve rather than a description of itself:
 
 ```python
 capabilities(basic_plan)
-# {"stageflow": "0.12.0",
+# {"stageflow": "0.13.0",
 #  "node_types": ["condition", "entry", "stage", "switch", "terminal"],
 #  "stages": 5}
 ```
@@ -55,7 +63,7 @@ A backend is expected to hand this to its clients. The example backend serves
 it at `GET /api/meta`, together with the version of its own HTTP contract:
 
 ```json
-{ "api": 1, "stageflow": "0.12.0", "node_types": ["condition", "…"], "stages": 17 }
+{ "api": 1, "stageflow": "0.13.0", "node_types": ["condition", "…"], "stages": 17 }
 ```
 
 `__version__` is read from the installed distribution. In a source checkout
