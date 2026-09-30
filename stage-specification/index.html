@@ -1475,6 +1475,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../localization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Localization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../session-control/" class="md-nav__link">
         
   
@@ -1617,6 +1645,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prose-has-languages-identifiers-do-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prose has languages, identifiers do not
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#what-it-asks-to-reserve" class="md-nav__link">
@@ -1787,6 +1826,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#prose-has-languages-identifiers-do-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prose has languages, identifiers do not
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-it-asks-to-reserve" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1893,13 +1943,51 @@ spec and the deadline the run enforces agree with each other and there is
 nothing to notice: a stage that asks for <code>timeout: 90</code> in its docstring alone
 runs under the <code>BaseStage</code> default of 30 seconds, and the editor is told 30 as
 well.</p>
+<h2 id="prose-has-languages-identifiers-do-not">Prose has languages, identifiers do not<a class="headerlink" href="#prose-has-languages-identifiers-do-not" title="Permanent link">&para;</a></h2>
+<p>Everything in a spec is either an identifier or prose. A name, a type, a
+category, a meter, a colour — identifiers, the same in every language, never
+translated. The stage's <code>description</code> and the <code>description</code> of every argument,
+output, event and input — prose, and prose has a language.</p>
+<p>So any of those may be a <code>{locale: text}</code> mapping instead of a string:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">description</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">en</span><span class="p">:</span><span class="w"> </span><span class="s">"Increment</span><span class="nv"> </span><span class="s">numeric</span><span class="nv"> </span><span class="s">value</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">delta"</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">ru</span><span class="p">:</span><span class="w"> </span><span class="s">"Увеличивает</span><span class="nv"> </span><span class="s">число</span><span class="nv"> </span><span class="s">на</span><span class="nv"> </span><span class="s">delta"</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nt">arguments</span><span class="p">:</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">delta</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">      </span><span class="nt">en</span><span class="p">:</span><span class="w"> </span><span class="s">"How</span><span class="nv"> </span><span class="s">much</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">add"</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">      </span><span class="nt">ru</span><span class="p">:</span><span class="w"> </span><span class="s">"Насколько</span><span class="nv"> </span><span class="s">увеличить"</span>
+</code></pre></div>
+<p>And <code>get_specs()</code> hands back <strong>every</strong> language it has, rather than choosing
+one:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">IncrementStage</span><span class="o">.</span><span class="n">get_specs</span><span class="p">()[</span><span class="s2">"description"</span><span class="p">]</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p">{</span><span class="s1">'en'</span><span class="p">:</span> <span class="s1">'Increment numeric value by delta'</span><span class="p">,</span> <span class="s1">'ru'</span><span class="p">:</span> <span class="s1">'Увеличивает число на delta'</span><span class="p">}</span>
+</code></pre></div>
+<p>That is the shape a client wants. An editor fetches the specs once and its
+reader picks a language afterwards — and picks again whenever they change their
+mind — so a spec that had already been narrowed to one language would have to be
+fetched again on every change of mind. The spec carries the choice; whoever
+draws it chooses.</p>
+<p>Prose in one language stays a plain string, because a mapping of one entry is a
+choice that carries no information:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">LoadTicketStage</span><span class="o">.</span><span class="n">get_specs</span><span class="p">()[</span><span class="s2">"description"</span><span class="p">]</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="s1">'Takes a prepared ticket out of data/tickets.json'</span>
+</code></pre></div>
+<p>Naming a locale collapses the prose to it, for a caller that really is answering
+one reader rather than serving a client:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">IncrementStage</span><span class="o">.</span><span class="n">get_specs</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"ru"</span><span class="p">)[</span><span class="s2">"description"</span><span class="p">]</span>   <span class="c1"># 'Увеличивает число на delta'</span>
+</code></pre></div>
+<p>A mapping is the whole mechanism for a handful of stages. For a hundred, a
+<code>gettext</code> catalog of your own is less repetitive, and the built-in stages use
+one — both in <a href="../localization/">Localization</a>.</p>
 <h2 id="what-it-asks-to-reserve">What it asks to reserve<a class="headerlink" href="#what-it-asks-to-reserve" title="Permanent link">&para;</a></h2>
 <p><code>reserve</code> declares what a run of the stage may consume, in the
 <a href="../limits/">meters</a> the host counts. Values are numbers or CEL over <code>args</code>,
 the arguments as the stage will receive them:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">reserve</span><span class="p">:</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">llm_calls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">tokens</span><span class="p">:</span><span class="w"> </span><span class="s">"args.max_tokens</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">size(args.text)</span><span class="nv"> </span><span class="s">/</span><span class="nv"> </span><span class="s">3"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">reserve</span><span class="p">:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">llm_calls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">tokens</span><span class="p">:</span><span class="w"> </span><span class="s">"args.max_tokens</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">size(args.text)</span><span class="nv"> </span><span class="s">/</span><span class="nv"> </span><span class="s">3"</span>
 </code></pre></div>
 <p>It is declared rather than computed because it is read <strong>before</strong> the stage
 runs: a host refuses a graph it cannot pay for without executing it, and an

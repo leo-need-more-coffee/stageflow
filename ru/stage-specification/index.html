@@ -1475,6 +1475,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../localization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Локализация
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../session-control/" class="md-nav__link">
         
   
@@ -1620,6 +1648,17 @@
       
         <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        У прозы есть языки, у идентификаторов нет
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         Что стадия просит зарезервировать
@@ -1790,6 +1829,17 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
+        У прозы есть языки, у идентификаторов нет
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         Что стадия просит зарезервировать
       
     </span>
@@ -1892,13 +1942,49 @@
 не противоречат — заметить нечего. Стадия, которая просит <code>timeout: 90</code> только
 в докстринге, работает с дефолтом <code>BaseStage</code>, тридцатью секундами, и
 редактору сообщают те же тридцать.</p>
-<h2 id="_2">Что стадия просит зарезервировать<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">У прозы есть языки, у идентификаторов нет<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>В спеке всё — либо идентификатор, либо проза. Имя, тип, категория, счётчик,
+цвет — идентификаторы, одинаковые на любом языке, и не переводятся никогда.
+<code>description</code> самой стадии и <code>description</code> каждого аргумента, выхода, события и
+входа — проза, а у прозы язык есть.</p>
+<p>Поэтому любое из них может быть таблицей <code>{локаль: текст}</code> вместо строки:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">description</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">en</span><span class="p">:</span><span class="w"> </span><span class="s">"Increment</span><span class="nv"> </span><span class="s">numeric</span><span class="nv"> </span><span class="s">value</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">delta"</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">ru</span><span class="p">:</span><span class="w"> </span><span class="s">"Увеличивает</span><span class="nv"> </span><span class="s">число</span><span class="nv"> </span><span class="s">на</span><span class="nv"> </span><span class="s">delta"</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nt">arguments</span><span class="p">:</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">delta</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">      </span><span class="nt">en</span><span class="p">:</span><span class="w"> </span><span class="s">"How</span><span class="nv"> </span><span class="s">much</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">add"</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">      </span><span class="nt">ru</span><span class="p">:</span><span class="w"> </span><span class="s">"Насколько</span><span class="nv"> </span><span class="s">увеличить"</span>
+</code></pre></div>
+<p>А <code>get_specs()</code> отдаёт <strong>все</strong> языки, какие есть, а не выбирает один:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">IncrementStage</span><span class="o">.</span><span class="n">get_specs</span><span class="p">()[</span><span class="s2">"description"</span><span class="p">]</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p">{</span><span class="s1">'en'</span><span class="p">:</span> <span class="s1">'Increment numeric value by delta'</span><span class="p">,</span> <span class="s1">'ru'</span><span class="p">:</span> <span class="s1">'Увеличивает число на delta'</span><span class="p">}</span>
+</code></pre></div>
+<p>Именно эта форма нужна клиенту. Редактор забирает спеки один раз, а его
+читатель выбирает язык потом — и выбирает заново всякий раз, когда передумает,
+— так что спеку, уже сведённую к одному языку, приходилось бы забирать снова на
+каждое такое «передумал». Спека несёт выбор; выбирает тот, кто её рисует.</p>
+<p>Проза на одном языке остаётся обычной строкой: таблица из одной записи была бы
+выбором, не несущим информации:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">LoadTicketStage</span><span class="o">.</span><span class="n">get_specs</span><span class="p">()[</span><span class="s2">"description"</span><span class="p">]</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="s1">'Takes a prepared ticket out of data/tickets.json'</span>
+</code></pre></div>
+<p>Явно названная локаль прозу сворачивает — для того, кто действительно отвечает
+одному читателю, а не обслуживает клиента:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">IncrementStage</span><span class="o">.</span><span class="n">get_specs</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"ru"</span><span class="p">)[</span><span class="s2">"description"</span><span class="p">]</span>   <span class="c1"># 'Увеличивает число на delta'</span>
+</code></pre></div>
+<p>Таблица — это весь механизм для горстки стадий. Для сотни каталог <code>gettext</code>
+менее многословен, и встроенные стадии живут именно так — и о том и о другом в
+<a href="../localization/">Локализации</a>.</p>
+<h2 id="_3">Что стадия просит зарезервировать<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p><code>reserve</code> объявляет, сколько прогон стадии может израсходовать, в тех
 <a href="../limits/">счётчиках</a>, которые считает хост. Значения — числа или CEL по
 <code>args</code>, то есть по аргументам в том виде, в каком их получит стадия:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">reserve</span><span class="p">:</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">llm_calls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">tokens</span><span class="p">:</span><span class="w"> </span><span class="s">"args.max_tokens</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">size(args.text)</span><span class="nv"> </span><span class="s">/</span><span class="nv"> </span><span class="s">3"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">reserve</span><span class="p">:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">llm_calls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">tokens</span><span class="p">:</span><span class="w"> </span><span class="s">"args.max_tokens</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">size(args.text)</span><span class="nv"> </span><span class="s">/</span><span class="nv"> </span><span class="s">3"</span>
 </code></pre></div>
 <p>Это объявлено, а не вычислено, потому что читается <strong>до</strong> запуска стадии:
 хост отказывает графу, который не может оплатить, не исполняя его, а

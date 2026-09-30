@@ -1577,6 +1577,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../localization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Localization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../session-control/" class="md-nav__link">
         
   
@@ -1949,6 +1977,12 @@ beside it as class attributes rather than docstring keys — <code>category</cod
 <code>timeout</code> — and <a href="../../stage-specification/">Stage specification</a> has the full
 grammar with that split. What matters here is that all of it lives in the file
 it describes, a few lines from the code it is about.</p>
+<p>Every <code>description</code> here is prose, and prose may be written in more than one
+language — <code>description: {en: …, ru: …}</code> instead of a string, or a <code>gettext</code>
+catalog for a backend with too many stages to repeat themselves. <code>get_specs()</code>
+then serves every language at once and the editor picks for its reader, so
+nothing about this endpoint or this docstring has to know which language anybody
+wanted (<a href="../../localization/">Localization</a>).</p>
 <p><img alt="The palette, built from the specs the backend serves" src="../../img/be-plan-palette.png" width="240" /></p>
 <h2 id="small-and-about-one-thing">Small, and about one thing<a class="headerlink" href="#small-and-about-one-thing" title="Permanent link">&para;</a></h2>
 <p>The stages in the example are deliberately tiny: load a ticket, classify it,
