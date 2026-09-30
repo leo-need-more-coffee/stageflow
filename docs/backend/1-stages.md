@@ -42,6 +42,13 @@ beside it as class attributes rather than docstring keys — `category` and
 grammar with that split. What matters here is that all of it lives in the file
 it describes, a few lines from the code it is about.
 
+Every `description` here is prose, and prose may be written in more than one
+language — `description: {en: …, ru: …}` instead of a string, or a `gettext`
+catalog for a backend with too many stages to repeat themselves. `get_specs()`
+then serves every language at once and the editor picks for its reader, so
+nothing about this endpoint or this docstring has to know which language anybody
+wanted ([Localization](../localization.md)).
+
 ![The palette, built from the specs the backend serves](../img/be-plan-palette.png){ width="240" }
 
 ## Small, and about one thing
