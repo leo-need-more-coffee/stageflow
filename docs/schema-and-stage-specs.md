@@ -37,7 +37,7 @@ one directly:
 from stageflow import capabilities, __version__
 
 capabilities()
-# {"stageflow": "0.12.0",
+# {"stageflow": "0.13.0",
 #  "node_types": ["condition", "entry", "map", "parallel", "stage",
 #                 "subpipeline", "switch", "terminal", "try"],
 #  "stages": 17}
@@ -48,7 +48,7 @@ which is what a backend should serve rather than a description of itself:
 
 ```python
 capabilities(basic_plan)
-# {"stageflow": "0.12.0",
+# {"stageflow": "0.13.0",
 #  "node_types": ["condition", "entry", "stage", "switch", "terminal"],
 #  "stages": 5}
 ```
@@ -63,7 +63,7 @@ A backend is expected to hand this to its clients. The example backend serves
 it at `GET /api/meta`, together with the version of its own HTTP contract:
 
 ```json
-{ "api": 1, "stageflow": "0.12.0", "node_types": ["condition", "…"], "stages": 17 }
+{ "api": 1, "stageflow": "0.13.0", "node_types": ["condition", "…"], "stages": 17 }
 ```
 
 `__version__` is read from the installed distribution. In a source checkout

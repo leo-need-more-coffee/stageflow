@@ -85,7 +85,7 @@ pipeline.validate(basic)
 
 ```python
 capabilities(basic)
-# {"stageflow": "0.12.0",
+# {"stageflow": "0.13.0",
 #  "node_types": ["condition", "entry", "stage", "switch", "terminal"],
 #  "stages": 3}
 ```
