@@ -1,11 +1,13 @@
 from ..core.context import Context
-from ..core.stage import BaseStage, register_stage
+from ..core.stage import register_stage
+from ._base import BuiltinStage
 from ..exceptions import StageContractError
+from ..i18n import _
 from ._args import require_list
 
 
 @register_stage("AppendListStage")
-class AppendListStage(BaseStage):
+class AppendListStage(BuiltinStage):
     """
     description: "Append value to list (creates list if missing)"
     icon: "⊕"
@@ -29,14 +31,17 @@ class AppendListStage(BaseStage):
     async def run(self):
         args = self.get_arguments()
         if "value" not in args:
-            raise StageContractError("AppendListStage: argument 'value' is required")
+            raise StageContractError(
+                _("{stage}: argument '{field}' is required",
+                  stage="AppendListStage", field="value")
+            )
         value = args["value"]
         base = require_list("AppendListStage", "list", args.get("list") or [])
         self.set_outputs({"list": [*base, value]})
 
 
 @register_stage("ExtendListStage")
-class ExtendListStage(BaseStage):
+class ExtendListStage(BuiltinStage):
     """
     description: "Extend list with items from arguments"
     icon: "⊞"
@@ -63,13 +68,14 @@ class ExtendListStage(BaseStage):
         items = args.get("items", [])
         if not isinstance(items, (list, tuple)):
             raise StageContractError(
-                f"ExtendListStage: 'items' must be a list, got {type(items).__name__}"
+                _("{stage}: '{field}' must be a list, got {got}",
+                  stage="ExtendListStage", field="items", got=type(items).__name__)
             )
         self.set_outputs({"list": [*base, *items]})
 
 
 @register_stage("FilterListStage")
-class FilterListStage(BaseStage):
+class FilterListStage(BuiltinStage):
     """
     description: "Filter list items by CEL condition; current element is bound as `item`"
     icon: "▽"
@@ -95,7 +101,10 @@ class FilterListStage(BaseStage):
         args = self.get_arguments()
         condition = args.pop("condition", None)
         if condition is None:
-            raise StageContractError("FilterListStage: argument 'condition' is required")
+            raise StageContractError(
+                _("{stage}: argument '{field}' is required",
+                  stage="FilterListStage", field="condition")
+            )
         items = require_list("FilterListStage", "items", args.pop("items", []))
         scope = Context(vars=args)
         result = [item for item in items if self.session.cel.eval(condition, scope, item=item)]
@@ -103,7 +112,7 @@ class FilterListStage(BaseStage):
 
 
 @register_stage("UniqueListStage")
-class UniqueListStage(BaseStage):
+class UniqueListStage(BuiltinStage):
     """
     description: "Deduplicate list while preserving original order"
     icon: "≠"
@@ -131,7 +140,7 @@ class UniqueListStage(BaseStage):
 
 
 @register_stage("PopListStage")
-class PopListStage(BaseStage):
+class PopListStage(BuiltinStage):
     """
     description: "Pop element from list (default last) and return list+popped value"
     icon: "⊟"
@@ -159,13 +168,16 @@ class PopListStage(BaseStage):
         args = self.get_arguments()
         items = require_list("PopListStage", "items", args.get("items", []))
         if not items:
-            raise StageContractError("PopListStage: cannot pop from an empty list")
+            raise StageContractError(
+                _("PopListStage: cannot pop from an empty list")
+            )
         index = args.get("index", -1)
         remaining = list(items)
         try:
             popped = remaining.pop(index)
         except IndexError:
             raise StageContractError(
-                f"PopListStage: index {index} is out of range for a list of length {len(items)}"
+                _("PopListStage: index {index} is out of range for a list of "
+                  "length {length}", index=index, length=len(items))
             ) from None
         self.set_outputs({"list": remaining, "popped": popped})

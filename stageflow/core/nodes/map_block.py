@@ -4,6 +4,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any
 
 from ...exceptions import PipelineDefinitionError, StageOutputError, TypeCheckError
+from ...i18n import _
 from ..context import Context
 from .base import Node, register_node
 from .bindings import normalize_bucket
@@ -59,7 +60,8 @@ class MapNode(Node):
         for field in ("items", "body"):
             if not data.get(field):
                 raise PipelineDefinitionError(
-                    f"Node '{data.get('id')}': field '{field}' is required"
+                    _("Node '{node}': field '{field}' is required",
+                      node=data.get("id"), field=field)
                 )
         return cls(
             items=data["items"],
@@ -85,12 +87,19 @@ class MapNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if not pipeline.has_node(self.body):
-            errors.append(f"{self.id}: body '{self.body}' not found in the graph")
+            errors.append(
+                _("{node}: body '{target}' not found in the graph",
+                  node=self.id, target=self.body)
+            )
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
+            errors.append(
+                _("{node}: next '{target}' not found in the graph",
+                  node=self.id, target=self.next)
+            )
         if self.mode not in MODES:
             errors.append(
-                f"{self.id}: mode '{self.mode}' is not one of {', '.join(MODES)}"
+                _("{node}: mode '{mode}' is not one of {allowed}",
+                  node=self.id, mode=self.mode, allowed=", ".join(MODES))
             )
         errors.extend(self._validate_names())
         if pipeline.has_node(self.body):
@@ -104,15 +113,22 @@ class MapNode(Node):
             names.append((self.index_var, "index_var"))
         for name, field in names:
             if not (isinstance(name, str) and name.isidentifier()):
-                errors.append(f"{self.id}: {field} '{name}' is not a valid variable name")
+                errors.append(
+                    _("{node}: {field} '{name}' is not a valid variable name",
+                      node=self.id, field=field, name=name)
+                )
         if self.index_var is not None and self.index_var == self.item_var:
-            errors.append(f"{self.id}: item_var and index_var are the same name")
+            errors.append(
+                _("{node}: item_var and index_var are the same name", node=self.id)
+            )
         for src, dst in self.collect.items():
-            for name, side in ((src, "source"), (dst, "destination")):
+            # one sentence per side, not a noun dropped into one — `registry.py`
+            for name, message in (
+                (src, _("{node}: collect source '{name}' must be a variable name")),
+                (dst, _("{node}: collect destination '{name}' must be a variable name")),
+            ):
                 if not (isinstance(name, str) and name.isidentifier()):
-                    errors.append(
-                        f"{self.id}: collect {side} '{name}' must be a variable name"
-                    )
+                    errors.append(message.format(node=self.id, name=name))
         return errors
 
     def _validate_closed(self, pipeline: "Pipeline") -> list[str]:
@@ -131,8 +147,9 @@ class MapNode(Node):
                 if target in scope or not pipeline.has_node(target):
                     continue
                 errors.append(
-                    f"{self.id}: '{node_id}' leads to '{target}', outside the loop body; "
-                    f"a road inside the body must end inside it"
+                    _("{node}: '{from_node}' leads to '{target}', outside the loop "
+                      "body; a road inside the body must end inside it",
+                      node=self.id, from_node=node_id, target=target)
                 )
         return errors
 
@@ -173,8 +190,8 @@ class MapNode(Node):
         if isinstance(value, (list, tuple)):
             return list(value)
         raise TypeCheckError(
-            f"{self.id}: items '{self.items}' must be a list, "
-            f"got {type(value).__name__}"
+            _("{node}: items '{items}' must be a list, got {got}",
+              node=self.id, items=self.items, got=type(value).__name__)
         )
 
     async def _run_sequential(
@@ -270,8 +287,9 @@ class MapNode(Node):
             for index, frame in enumerate(frames):
                 if frame is None or not frame.has_var(src):
                     raise StageOutputError(
-                        f"{self.id}: item {index} did not write '{src}', "
-                        f"collected as '{dst}'"
+                        _("{node}: item {index} did not write '{source}', "
+                          "collected as '{target}'",
+                          node=self.id, index=index, source=src, target=dst)
                     )
                 values.append(frame.get_var(src))
             types.check_write(dst, values, self.id)

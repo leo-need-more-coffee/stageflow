@@ -4,6 +4,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any
 
 from ..exceptions import StageContractError
+from ..i18n import _
 from .event import Event, EventSpec, InputSpec
 from .payload_schema import validate_schema
 from .registry import Registry
@@ -13,6 +14,19 @@ if TYPE_CHECKING:  # pragma: no cover
     from .session import Session
 
 _stages: Registry[type["BaseStage"]] = Registry("stage")
+
+
+def _not_allowed(kind: str, type_: str, stage: str) -> str:
+    """Two whole sentences rather than one with the noun filled in — see the
+    same problem, with the reason, in `registry.py`."""
+    if kind == "Event":
+        return _("Event type '{type}' is not allowed for stage '{stage}'",
+                 type=type_, stage=stage)
+    if kind == "Input":
+        return _("Input type '{type}' is not allowed for stage '{stage}'",
+                 type=type_, stage=stage)
+    return _("{kind} type '{type}' is not allowed for stage '{stage}'",
+             kind=kind, type=type_, stage=stage)
 
 
 def register_stage(name: str):
@@ -46,6 +60,12 @@ class BaseStage:
     allowed_events: list[EventSpec] = []
     allowed_inputs: list[InputSpec] = []
     timeout: float | None = 30
+    #: the gettext domain whose catalog translates this stage's prose. `None`
+    #: — there is none, so the docstring's text is used as written, or is a
+    #: `{locale: text}` mapping resolved without any catalog at all. A host
+    #: that keeps .po files registers its domain once
+    #: (`stageflow.i18n.register_domain`) and names it here
+    i18n_domain: str | None = None
 
     def __init__(self, stage_id: str, arguments: dict, session: "Session"):
         self.stage_id = stage_id
@@ -123,10 +143,20 @@ class BaseStage:
         declared = {spec.type for spec in specs if spec.type}
         if declared and type_ not in declared:
             raise StageContractError(
-                f"{kind} type '{type_}' is not allowed for stage '{self.stage_name}'"
+                _not_allowed(kind, type_, self.stage_name)
             )
         return next((spec for spec in specs if spec.type == type_), None)
 
     @classmethod
-    def get_specs(cls) -> dict[str, Any]:
-        return build_stage_spec(cls)
+    def get_specs(cls, locale: str | None = None) -> dict[str, Any]:
+        """This stage's card.
+
+        `None`, the default, puts every language the build can answer in into
+        the prose as a `{locale: text}` mapping, and whatever draws the card
+        chooses. A backend serving an editor wants exactly that: the reader
+        picks a language in the editor, long after the specs were fetched, and
+        nothing about that choice is the backend's to make.
+
+        Naming a locale collapses the prose to one language instead.
+        """
+        return build_stage_spec(cls, locale)

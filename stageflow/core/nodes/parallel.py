@@ -4,6 +4,7 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from ...exceptions import BranchError
+from ...i18n import _
 from ..budget import BudgetExceeded
 from ..context import Context
 from .base import Node, register_node
@@ -59,15 +60,19 @@ class ParallelNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if not self.branches:
-            errors.append(f"{self.id}: at least one branch is required")
+            errors.append(_("{node}: at least one branch is required", node=self.id))
         for branch in self.branches:
             if not pipeline.has_node(branch["entry"]):
                 errors.append(
-                    f"{self.id}: entry of branch '{branch['id']}' -> "
-                    f"'{branch['entry']}' not found in the graph"
+                    _("{node}: entry of branch '{branch}' -> "
+                      "'{target}' not found in the graph",
+                      node=self.id, branch=branch["id"], target=branch["entry"])
                 )
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
+            errors.append(
+                _("{node}: next '{target}' not found in the graph",
+                  node=self.id, target=self.next)
+            )
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
@@ -97,7 +102,9 @@ class ParallelNode(Node):
                 # the way out the budget exists to close
                 if isinstance(exc, BudgetExceeded):
                     raise exc
-                raise BranchError(f"branch '{branch_id}' failed: {exc}") from exc
+                raise BranchError(
+                    _("branch '{branch}' failed: {reason}", branch=branch_id, reason=exc)
+                ) from exc
 
             merged = self._merge(
                 ctx, baseline_keys, {bid: task.result() for bid, task in tasks.items()}
@@ -153,8 +160,8 @@ class ParallelNode(Node):
             for key in sorted(branch_ctx.var_names() - baseline_keys):
                 if key in owner:
                     raise BranchError(
-                        f"{self.id}: branches '{owner[key]}' and '{branch_id}' "
-                        f"both write {key}"
+                        _("{node}: branches '{first}' and '{second}' both write {name}",
+                          node=self.id, first=owner[key], second=branch_id, name=key)
                     )
                 owner[key] = branch_id
                 merged = merged.with_var(key, branch_ctx.get_var(key))

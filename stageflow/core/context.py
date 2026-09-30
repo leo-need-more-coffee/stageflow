@@ -5,6 +5,7 @@ from typing import Any
 import immutables
 
 from ..exceptions import PipelineDefinitionError
+from ..i18n import _
 
 
 class Context:
@@ -39,8 +40,8 @@ class Context:
     def from_dict(cls, data: dict[str, Any]) -> "Context":
         if "local" in data and "vars" not in data:
             raise PipelineDefinitionError(
-                "Snapshot contains the 'local' scope (pre-0.7.0); "
-                "the frame is now called 'vars'"
+                _("Snapshot contains the 'local' scope (pre-0.7.0); "
+                  "the frame is now called 'vars'")
             )
         return cls(vars=data.get("vars", {}))
 

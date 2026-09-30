@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .i18n import _
+
 
 class StageFlowError(Exception):
     def __str__(self) -> str:
@@ -25,7 +27,9 @@ class PolicyViolationError(StageFlowError, PermissionError):
 class PipelineValidationError(StageFlowError, ValueError):
     def __init__(self, errors: list[str]):
         self.errors = list(errors)
-        super().__init__("Pipeline validation failed: " + "; ".join(errors))
+        super().__init__(
+            _("Pipeline validation failed: {errors}", errors="; ".join(errors))
+        )
 
 
 class ExpressionError(StageFlowError, RuntimeError):

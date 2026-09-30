@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ...i18n import _
 from ..context import Context
 from .base import Node, register_node
 
@@ -33,9 +34,15 @@ class ConditionNode(Node):
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if not pipeline.has_node(self.then):
-            errors.append(f"{self.id}: then '{self.then}' not found in the graph")
+            errors.append(
+                _("{node}: then '{target}' not found in the graph",
+                  node=self.id, target=self.then)
+            )
         if self.else_ and not pipeline.has_node(self.else_):
-            errors.append(f"{self.id}: else '{self.else_}' not found in the graph")
+            errors.append(
+                _("{node}: else '{target}' not found in the graph",
+                  node=self.id, target=self.else_)
+            )
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
@@ -69,12 +76,20 @@ class SwitchNode(Node):
         errors = self._validate_common(pipeline)
         for case in self.cases:
             if "when" not in case or "next" not in case:
-                errors.append(f"{self.id}: every case needs 'when' and 'next'")
+                errors.append(
+                    _("{node}: every case needs 'when' and 'next'", node=self.id)
+                )
                 continue
             if not pipeline.has_node(case["next"]):
-                errors.append(f"{self.id}: case next '{case['next']}' not found in the graph")
+                errors.append(
+                    _("{node}: case next '{target}' not found in the graph",
+                      node=self.id, target=case["next"])
+                )
         if self.default and not pipeline.has_node(self.default):
-            errors.append(f"{self.id}: default '{self.default}' not found in the graph")
+            errors.append(
+                _("{node}: default '{target}' not found in the graph",
+                  node=self.id, target=self.default)
+            )
         return errors
 
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:

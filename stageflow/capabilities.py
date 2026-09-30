@@ -6,6 +6,7 @@ from typing import Any
 from .core.nodes import get_node_types
 from .core.policy import Policy
 from .core.stage import get_stages
+from .i18n import available_locales
 
 DISTRIBUTION = "stageflow-framework"
 
@@ -38,6 +39,9 @@ def capabilities(policy: Policy | None = None) -> dict[str, Any]:
     - `stages` — how many stages may be used. The specs themselves are a
       separate, much larger answer (`get_stages`), so this is only a hint that
       a registry is there at all.
+    - `locales` — the languages the core can put its own text into, the source
+      language first. A client cannot guess this: a catalog is a file in the
+      build, so the build has to say.
 
     With a `policy` the answer narrows to what that policy allows, which is
     what a backend should serve to a client: an editor needs to know what
@@ -59,4 +63,5 @@ def capabilities(policy: Policy | None = None) -> dict[str, Any]:
         "stageflow": __version__,
         "node_types": node_types,
         "stages": len(stages),
+        "locales": available_locales(),
     }

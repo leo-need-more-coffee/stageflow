@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from ...exceptions import PipelineDefinitionError, StageOutputError
+from ...i18n import _
 from ..context import Context
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -20,7 +21,7 @@ def normalize_bucket(bucket: Any) -> dict[str, str]:
     if isinstance(bucket, dict):
         return dict(bucket)
     raise PipelineDefinitionError(
-        f"Bucket must be a list or an object, got {type(bucket).__name__}"
+        _("Bucket must be a list or an object, got {got}", got=type(bucket).__name__)
     )
 
 
@@ -75,7 +76,8 @@ def apply_outputs(
             dest = spec
             if key not in output_ns:
                 raise StageOutputError(
-                    f"Stage did not return field '{key}' (available: {sorted(output_ns)})"
+                    _("Stage did not return field '{field}' (available: {available})",
+                      field=key, available=sorted(output_ns))
                 )
             value = output_ns[key]
         writes.append((dest, value))

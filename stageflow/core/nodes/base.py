@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ...exceptions import PipelineDefinitionError
+from ...i18n import _
 from ..context import Context
 from ..registry import Registry
 from .recovery import Retrier
@@ -46,7 +47,9 @@ class Node:
     def from_dict(data: dict) -> "Node":
         node_type = data.get("type")
         if node_type not in _node_types:
-            raise PipelineDefinitionError(f"Unknown node type: {node_type!r}")
+            raise PipelineDefinitionError(
+                _("Unknown node type: {type}", type=repr(node_type))
+            )
         return _node_types.get(node_type)._parse(data)
 
     @classmethod
@@ -77,11 +80,14 @@ class Node:
         errors: list[str] = []
         for src, dst in self.expose.items():
             malformed = False
-            for path, side in ((src, "source"), (dst, "destination")):
+            # a whole sentence per side rather than the English noun dropped
+            # into one — see the reason in `registry.py`
+            for path, message in (
+                (src, _("{node}: expose source '{path}' must be a variable name")),
+                (dst, _("{node}: expose destination '{path}' must be a variable name")),
+            ):
                 if not isinstance(path, str) or not path.isidentifier():
-                    errors.append(
-                        f"{self.id}: expose {side} '{path}' must be a variable name"
-                    )
+                    errors.append(message.format(node=self.id, path=path))
                     malformed = True
             if malformed:
                 continue
@@ -90,8 +96,10 @@ class Node:
             dst_type = ts.declared(dst)
             if src_type and dst_type and not ts.expose_compatible(src_type, dst_type):
                 errors.append(
-                    f"{self.id}: expose {src} -> {dst}: incompatible types "
-                    f"'{src_type}' and '{dst_type}'"
+                    _("{node}: expose {source} -> {target}: incompatible types "
+                      "'{source_type}' and '{target_type}'",
+                      node=self.id, source=src, target=dst,
+                      source_type=src_type, target_type=dst_type)
                 )
         return errors
 

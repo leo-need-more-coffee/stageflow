@@ -45,10 +45,23 @@ docs = [
     "mkdocs-material",
     "mkdocs-static-i18n",
 ]
+# only for working ON the translations — running StageFlow in any language
+# needs nothing beyond the compiled catalogs in the package
+i18n = [
+    "babel",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["stageflow*"]
 
 [tool.setuptools.package-data]
-"stageflow" = ["py.typed", "docs/schemas/pipeline.json"]
+"stageflow" = [
+    "py.typed",
+    "docs/schemas/pipeline.json",
+    # the compiled catalogs are what the runtime reads; the .po ships next to
+    # them so a translator who has the wheel has the source too
+    "locale/*/LC_MESSAGES/*.mo",
+    "locale/*/LC_MESSAGES/*.po",
+    "locale/*.pot",
+]

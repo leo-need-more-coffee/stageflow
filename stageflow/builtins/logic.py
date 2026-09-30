@@ -1,12 +1,14 @@
 import asyncio
 
 from ..core.context import Context
-from ..core.stage import BaseStage, register_stage
+from ..core.stage import register_stage
+from ..i18n import _
 from ._args import require_number, require_present
+from ._base import BuiltinStage
 
 
 @register_stage("AssertStage")
-class AssertStage(BaseStage):
+class AssertStage(BuiltinStage):
     """
     description: "Validate CEL condition against stage arguments, raise on failure"
     icon: "✓"
@@ -30,14 +32,14 @@ class AssertStage(BaseStage):
     async def run(self):
         args = self.get_arguments()
         condition = require_present("AssertStage", "condition", args.pop("condition", None))
-        message = args.pop("message", "assertion failed")
+        message = args.pop("message", None) or _("assertion failed")
         scope = Context(vars=args)
         if not self.session.cel.eval(condition, scope):
             raise AssertionError(message)
 
 
 @register_stage("FailStage")
-class FailStage(BaseStage):
+class FailStage(BuiltinStage):
     """
     description: "Always raise a runtime error with provided message"
     icon: "✕"
@@ -57,7 +59,7 @@ class FailStage(BaseStage):
 
 
 @register_stage("LogStage")
-class LogStage(BaseStage):
+class LogStage(BuiltinStage):
     """
     description: "Emit log event with message and the stage's own arguments"
     icon: "≡"
@@ -80,7 +82,7 @@ class LogStage(BaseStage):
 
 
 @register_stage("SleepStage")
-class SleepStage(BaseStage):
+class SleepStage(BuiltinStage):
     """
     description: "Async sleep for the given number of seconds"
     icon: "⏱"

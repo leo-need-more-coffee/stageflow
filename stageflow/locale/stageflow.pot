@@ -1,0 +1,910 @@
+# Translations template for StageFlow.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the StageFlow project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: StageFlow 0.12.0\n"
+"Report-Msgid-Bugs-To: https://github.com/leo-need-more-coffee/stageflow/issues\n"
+"POT-Creation-Date: 2026-09-29 23:42+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: stageflow/exceptions.py:31
+#, python-brace-format
+msgid "Pipeline validation failed: {errors}"
+msgstr ""
+
+#: stageflow/builtins/_args.py:12 stageflow/builtins/lists.py:71
+#, python-brace-format
+msgid "{stage}: '{field}' must be a list, got {got}"
+msgstr ""
+
+#: stageflow/builtins/_args.py:21
+#, python-brace-format
+msgid "{stage}: '{field}' must be an object, got {got}"
+msgstr ""
+
+#: stageflow/builtins/_args.py:30
+#, python-brace-format
+msgid "{stage}: '{field}' must be a number, got {got}"
+msgstr ""
+
+#: stageflow/builtins/_args.py:39 stageflow/builtins/lists.py:35
+#: stageflow/builtins/lists.py:105 stageflow/builtins/vars.py:29
+#, python-brace-format
+msgid "{stage}: argument '{field}' is required"
+msgstr ""
+
+#: stageflow/builtins/lists.py:172
+msgid "PopListStage: cannot pop from an empty list"
+msgstr ""
+
+#: stageflow/builtins/lists.py:180
+#, python-brace-format
+msgid "PopListStage: index {index} is out of range for a list of length {length}"
+msgstr ""
+
+#: stageflow/builtins/logic.py:35
+msgid "assertion failed"
+msgstr ""
+
+#: stageflow/builtins/strings.py:14
+#, python-brace-format
+msgid ""
+"TemplateStage: placeholder '{{{field}}}' is not an argument name; attributes, indexes"
+" and positional numbers are not allowed"
+msgstr ""
+
+#: stageflow/builtins/strings.py:20
+#, python-brace-format
+msgid ""
+"TemplateStage: template references '{field}', but there is no such argument "
+"(available: {available})"
+msgstr ""
+
+#: stageflow/core/cel.py:32
+msgid ""
+"No CEL backend found. Install 'common-expression-language' (recommended) or 'cel-"
+"python'."
+msgstr ""
+
+#: stageflow/core/cel.py:51
+#, python-brace-format
+msgid "Cannot compile CEL {expr}: {reason}"
+msgstr ""
+
+#: stageflow/core/cel.py:82
+#, python-brace-format
+msgid "Cannot evaluate CEL {expr}: {reason}"
+msgstr ""
+
+#: stageflow/core/context.py:43
+msgid "Snapshot contains the 'local' scope (pre-0.7.0); the frame is now called 'vars'"
+msgstr ""
+
+#: stageflow/core/debug.py:130
+#, python-brace-format
+msgid "debugger before node '{node}'"
+msgstr ""
+
+#: stageflow/core/payload_schema.py:24
+#, python-brace-format
+msgid "{path} expected one of {expected}, got {got}"
+msgstr ""
+
+#: stageflow/core/payload_schema.py:47
+#, python-brace-format
+msgid "{path} missing required field '{field}'"
+msgstr ""
+
+#: stageflow/core/payload_schema.py:66 stageflow/core/payload_schema.py:74
+#, python-brace-format
+msgid "{path} expected {expected}, got {got}"
+msgstr ""
+
+#: stageflow/core/pipeline.py:50
+#, python-brace-format
+msgid "Invalid type declarations: {reason}"
+msgstr ""
+
+#: stageflow/core/pipeline.py:71
+#, python-brace-format
+msgid "Pipeline schema validation failed: {reason}"
+msgstr ""
+
+#: stageflow/core/pipeline.py:74
+#, python-brace-format
+msgid "Subpipeline '{name}' schema validation failed: {reason}"
+msgstr ""
+
+#: stageflow/core/pipeline.py:86
+#, python-brace-format
+msgid "Node with id '{node}' not found in pipeline"
+msgstr ""
+
+#: stageflow/core/pipeline.py:117
+#, python-brace-format
+msgid "more than one entry node: {nodes} — there must be exactly one"
+msgstr ""
+
+#: stageflow/core/pipeline.py:122
+#, python-brace-format
+msgid "{node}: this entry node is not the pipeline entry point (entry = '{entry}')"
+msgstr ""
+
+#: stageflow/core/pipeline.py:128
+#, python-brace-format
+msgid "{node}: jumping into the entry node '{entry}' is not allowed"
+msgstr ""
+
+#: stageflow/core/pipeline.py:140
+msgid "The pipeline has no entry"
+msgstr ""
+
+#: stageflow/core/pipeline.py:143
+#, python-brace-format
+msgid "Entry node '{entry}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/pipeline.py:152
+#, python-brace-format
+msgid "Duplicate node id: '{node}'"
+msgstr ""
+
+#: stageflow/core/pipeline.py:190
+#, python-brace-format
+msgid "cycle in the graph: {cycle}"
+msgstr ""
+
+#: stageflow/core/policy.py:62
+#, python-brace-format
+msgid "{where}: stage '{name}' is not allowed by the policy"
+msgstr ""
+
+#: stageflow/core/policy.py:69
+#, python-brace-format
+msgid "{where}: node type '{type}' is not allowed by the policy"
+msgstr ""
+
+#: stageflow/core/policy.py:114
+#, python-brace-format
+msgid ""
+"the shortest way through this graph is {nodes} nodes, and the policy allows {steps:g}"
+" steps"
+msgstr ""
+
+#: stageflow/core/policy.py:124
+#, python-brace-format
+msgid "subpipelines nest {depth} deep, and the policy allows {allowed:g}"
+msgstr ""
+
+#: stageflow/core/policy.py:134
+#, python-brace-format
+msgid "{node}: retry asks for {asked} attempts, and the policy allows {allowed}"
+msgstr ""
+
+#: stageflow/core/policy.py:142
+#, python-brace-format
+msgid "{node}: retry waits {asked:g}s between attempts, and the policy allows {allowed:g}s"
+msgstr ""
+
+#: stageflow/core/policy.py:166
+#, python-brace-format
+msgid "{where}{node}: node type '{type}' is not allowed by the policy"
+msgstr ""
+
+#: stageflow/core/policy.py:171
+#, python-brace-format
+msgid "{where}{node}: stage '{stage}' is not allowed by the policy"
+msgstr ""
+
+#: stageflow/core/registry.py:22
+#, python-brace-format
+msgid "stage '{name}' already registered"
+msgstr ""
+
+#: stageflow/core/registry.py:24
+#, python-brace-format
+msgid "node type '{name}' already registered"
+msgstr ""
+
+#: stageflow/core/registry.py:25
+#, python-brace-format
+msgid "{kind} '{name}' already registered"
+msgstr ""
+
+#: stageflow/core/registry.py:30
+#, python-brace-format
+msgid "stage '{name}' not found in registry"
+msgstr ""
+
+#: stageflow/core/registry.py:32
+#, python-brace-format
+msgid "node type '{name}' not found in registry"
+msgstr ""
+
+#: stageflow/core/registry.py:33
+#, python-brace-format
+msgid "{kind} '{name}' not found in registry"
+msgstr ""
+
+#: stageflow/core/session.py:294
+#, python-brace-format
+msgid "{node}: reserve '{meter}' of stage {stage} is not a number: {value}"
+msgstr ""
+
+#: stageflow/core/session.py:341
+#, python-brace-format
+msgid "Subpipeline '{name}' not found"
+msgstr ""
+
+#: stageflow/core/session.py:516
+msgid "Pipeline is required to restore session"
+msgstr ""
+
+#: stageflow/core/stage.py:23
+#, python-brace-format
+msgid "Event type '{type}' is not allowed for stage '{stage}'"
+msgstr ""
+
+#: stageflow/core/stage.py:26
+#, python-brace-format
+msgid "Input type '{type}' is not allowed for stage '{stage}'"
+msgstr ""
+
+#: stageflow/core/stage.py:28
+#, python-brace-format
+msgid "{kind} type '{type}' is not allowed for stage '{stage}'"
+msgstr ""
+
+#: stageflow/core/typesys.py:27
+#, python-brace-format
+msgid "{path}: expected {expected}, got {got}"
+msgstr ""
+
+#: stageflow/core/typesys.py:112
+#, python-brace-format
+msgid "{path}: map keys must be strings, got {got}"
+msgstr ""
+
+#: stageflow/core/typesys.py:174
+#, python-brace-format
+msgid "{path}: structure {struct} is missing required field '{field}'"
+msgstr ""
+
+#: stageflow/core/typesys.py:182
+#, python-brace-format
+msgid "{path}: structure {struct} forbids extra fields: {fields}"
+msgstr ""
+
+#: stageflow/core/typesys.py:243
+#, python-brace-format
+msgid "Empty or non-string type expression: {expr}"
+msgstr ""
+
+#: stageflow/core/typesys.py:262
+#, python-brace-format
+msgid "Unclosed '{container}<' in expression {expr}"
+msgstr ""
+
+#: stageflow/core/typesys.py:269
+#, python-brace-format
+msgid "Malformed type expression: {expr}"
+msgstr ""
+
+#: stageflow/core/typesys.py:280
+#, python-brace-format
+msgid "Type '{name}' must be an expression or a structure, got {got}"
+msgstr ""
+
+#: stageflow/core/typesys.py:291
+#, python-brace-format
+msgid "Type '{name}': 'fields' must be an object"
+msgstr ""
+
+#: stageflow/core/typesys.py:302
+#, python-brace-format
+msgid "Type '{name}': malformed field name {field}"
+msgstr ""
+
+#: stageflow/core/typesys.py:321
+#, python-brace-format
+msgid "Malformed type name: {name}"
+msgstr ""
+
+#: stageflow/core/typesys.py:330
+#, python-brace-format
+msgid "Unknown type '{name}'"
+msgstr ""
+
+#: stageflow/core/typesys.py:341
+#, python-brace-format
+msgid "type '{name}' references unknown type '{ref}'"
+msgstr ""
+
+#: stageflow/core/typesys.py:376
+#, python-brace-format
+msgid ""
+"variables: the '{scope}' scope level was removed in 0.7.0 — declarations are flat: "
+"{{\"n\": \"int\"}}"
+msgstr ""
+
+#: stageflow/core/typesys.py:397
+#, python-brace-format
+msgid "variable vars.{name} references unknown type '{ref}'"
+msgstr ""
+
+#: stageflow/core/typesys.py:423
+#, python-brace-format
+msgid "{where}: {reason}"
+msgstr ""
+
+#: stageflow/core/nodes/base.py:51
+#, python-brace-format
+msgid "Unknown node type: {type}"
+msgstr ""
+
+#: stageflow/core/nodes/base.py:86
+#, python-brace-format
+msgid "{node}: expose source '{path}' must be a variable name"
+msgstr ""
+
+#: stageflow/core/nodes/base.py:87
+#, python-brace-format
+msgid "{node}: expose destination '{path}' must be a variable name"
+msgstr ""
+
+#: stageflow/core/nodes/base.py:99
+#, python-brace-format
+msgid ""
+"{node}: expose {source} -> {target}: incompatible types '{source_type}' and "
+"'{target_type}'"
+msgstr ""
+
+#: stageflow/core/nodes/bindings.py:24
+#, python-brace-format
+msgid "Bucket must be a list or an object, got {got}"
+msgstr ""
+
+#: stageflow/core/nodes/bindings.py:79
+#, python-brace-format
+msgid "Stage did not return field '{field}' (available: {available})"
+msgstr ""
+
+#: stageflow/core/nodes/branching.py:38
+#, python-brace-format
+msgid "{node}: then '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/branching.py:43
+#, python-brace-format
+msgid "{node}: else '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/branching.py:80
+#, python-brace-format
+msgid "{node}: every case needs 'when' and 'next'"
+msgstr ""
+
+#: stageflow/core/nodes/branching.py:85
+#, python-brace-format
+msgid "{node}: case next '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/branching.py:90
+#, python-brace-format
+msgid "{node}: default '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/entry.py:44
+#, python-brace-format
+msgid "Node '{node}': 'variables' must be an object"
+msgstr ""
+
+#: stageflow/core/nodes/entry.py:94 stageflow/core/nodes/map_block.py:96
+#: stageflow/core/nodes/parallel.py:73 stageflow/core/nodes/stage.py:64
+#: stageflow/core/nodes/subpipeline.py:66 stageflow/core/nodes/try_block.py:128
+#, python-brace-format
+msgid "{node}: next '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/entry.py:110
+#, python-brace-format
+msgid "{node}: '{name}' is not a valid variable name"
+msgstr ""
+
+#: stageflow/core/nodes/entry.py:115
+#, python-brace-format
+msgid "{node}: variable '{name}' is declared twice"
+msgstr ""
+
+#: stageflow/core/nodes/entry.py:121
+#, python-brace-format
+msgid "{node}: empty expression for variable '{name}'"
+msgstr ""
+
+#: stageflow/core/nodes/entry.py:145
+#, python-brace-format
+msgid "{node}: cyclic variable dependency: {names}"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:63
+#, python-brace-format
+msgid "Node '{node}': field '{field}' is required"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:91 stageflow/core/nodes/try_block.py:108
+#, python-brace-format
+msgid "{node}: body '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:101
+#, python-brace-format
+msgid "{node}: mode '{mode}' is not one of {allowed}"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:117
+#, python-brace-format
+msgid "{node}: {field} '{name}' is not a valid variable name"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:122
+#, python-brace-format
+msgid "{node}: item_var and index_var are the same name"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:127
+#, python-brace-format
+msgid "{node}: collect source '{name}' must be a variable name"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:128
+#, python-brace-format
+msgid "{node}: collect destination '{name}' must be a variable name"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:150
+#, python-brace-format
+msgid ""
+"{node}: '{from_node}' leads to '{target}', outside the loop body; a road inside the "
+"body must end inside it"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:193
+#, python-brace-format
+msgid "{node}: items '{items}' must be a list, got {got}"
+msgstr ""
+
+#: stageflow/core/nodes/map_block.py:290
+#, python-brace-format
+msgid "{node}: item {index} did not write '{source}', collected as '{target}'"
+msgstr ""
+
+#: stageflow/core/nodes/parallel.py:63
+#, python-brace-format
+msgid "{node}: at least one branch is required"
+msgstr ""
+
+#: stageflow/core/nodes/parallel.py:67
+#, python-brace-format
+msgid "{node}: entry of branch '{branch}' -> '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/parallel.py:106
+#, python-brace-format
+msgid "branch '{branch}' failed: {reason}"
+msgstr ""
+
+#: stageflow/core/nodes/parallel.py:163
+#, python-brace-format
+msgid "{node}: branches '{first}' and '{second}' both write {name}"
+msgstr ""
+
+#: stageflow/core/nodes/stage.py:42
+#, python-brace-format
+msgid "Node '{node}': field 'stage' is required"
+msgstr ""
+
+#: stageflow/core/nodes/stage.py:61
+#, python-brace-format
+msgid "{node}: {reason}"
+msgstr ""
+
+#: stageflow/core/nodes/stage.py:71
+#, python-brace-format
+msgid "{node}: arguments.{bucket} must be an object or a list"
+msgstr ""
+
+#: stageflow/core/nodes/stage.py:75
+#, python-brace-format
+msgid "{node}: outputs must be an object"
+msgstr ""
+
+#: stageflow/core/nodes/stage.py:83
+#, python-brace-format
+msgid ""
+"{node}: the '{scope}' scope level in outputs was removed in 0.7.0 — keys are flat: "
+"{{\"result_field\": \"variable\"}}"
+msgstr ""
+
+#: stageflow/core/nodes/stage.py:100
+#, python-brace-format
+msgid "{node}: stage {stage} does not return field '{field}' (available: {available})"
+msgstr ""
+
+#: stageflow/core/nodes/stage.py:129
+#, python-brace-format
+msgid ""
+"{node}: argument '{argument}' of stage {stage} expects '{expected}', but "
+"vars.{variable} is declared as '{declared}'"
+msgstr ""
+
+#: stageflow/core/nodes/stage.py:142
+#, python-brace-format
+msgid ""
+"{node}: output '{output}' of stage {stage} has type '{type}', but is written to "
+"vars.{variable} typed '{declared}'"
+msgstr ""
+
+#: stageflow/core/nodes/subpipeline.py:40
+#, python-brace-format
+msgid "Node '{node}': field 'subpipeline_id' is required"
+msgstr ""
+
+#: stageflow/core/nodes/subpipeline.py:56
+#, python-brace-format
+msgid "{node}: subpipeline '{name}' not found"
+msgstr ""
+
+#: stageflow/core/nodes/subpipeline.py:61
+#, python-brace-format
+msgid "{node}: a subpipeline cannot reference the root entry node"
+msgstr ""
+
+#: stageflow/core/nodes/subpipeline.py:84
+#, python-brace-format
+msgid ""
+"{node}: subpipeline '{name}' did not return artifact '{artifact}' (available: "
+"{available})"
+msgstr ""
+
+#: stageflow/core/nodes/try_block.py:26
+msgid "except: field 'next' is required"
+msgstr ""
+
+#: stageflow/core/nodes/try_block.py:70
+#, python-brace-format
+msgid "Node '{node}': field 'body' is required"
+msgstr ""
+
+#: stageflow/core/nodes/try_block.py:113
+#, python-brace-format
+msgid "{node}: at least one handler is required in 'except'"
+msgstr ""
+
+#: stageflow/core/nodes/try_block.py:118
+#, python-brace-format
+msgid "{node}: except.next '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/try_block.py:123
+#, python-brace-format
+msgid "{node}: handler '{target}' is inside the block body"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AppendListStage.description)⁩
+msgid "Append value to list (creates list if missing)"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AppendListStage.arguments.list)⁩
+msgid "List to append to (empty list if missing)"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AppendListStage.arguments.value)⁩
+msgid "Value to append"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AppendListStage.outputs.list)⁩
+msgid "Resulting list after append"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AssertStage.description)⁩
+msgid "Validate CEL condition against stage arguments, raise on failure"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AssertStage.arguments.condition)⁩
+msgid "CEL condition; other arguments of the stage are visible as vars.*"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AssertStage.arguments.message)⁩
+msgid "Error message when condition fails"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (AssertStage.arguments.*)⁩
+#: ⁨stageflow/builtins (FilterListStage.arguments.*)⁩
+msgid "Any other argument is visible to the condition as vars.<name>"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ConcatStage.description)⁩
+msgid "Concatenate stringified parts with separator"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ConcatStage.arguments.parts)⁩
+msgid "Values to concatenate (non-strings are stringified)"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ConcatStage.arguments.separator)⁩
+msgid "Separator between parts"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ConcatStage.outputs.value)⁩
+msgid "Concatenated string"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (CopyValueStage.description)⁩
+msgid "Copy value to output path, falling back to default when absent"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (CopyValueStage.arguments.value)⁩
+msgid "Value to copy"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (CopyValueStage.arguments.default)⁩
+msgid "Used when 'value' is missing or null"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (CopyValueStage.outputs.value)⁩
+msgid "Copied value"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (DropKeysStage.description)⁩
+msgid "Remove specified keys from dict and return cleaned object"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (DropKeysStage.arguments.src)⁩
+#: ⁨stageflow/builtins (PickKeysStage.arguments.src)⁩
+msgid "Source dict"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (DropKeysStage.arguments.keys)⁩
+msgid "Keys to remove from the dict"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (DropKeysStage.outputs.result)⁩
+msgid "Dict without removed keys"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ExtendListStage.description)⁩
+msgid "Extend list with items from arguments"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ExtendListStage.arguments.list)⁩
+msgid "Base list to extend (empty list if missing)"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ExtendListStage.arguments.items)⁩
+msgid "Items to extend the list with"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (ExtendListStage.outputs.list)⁩
+msgid "Resulting list after extend"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FailStage.description)⁩
+msgid "Always raise a runtime error with provided message"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FailStage.arguments.message)⁩
+msgid "Message for raised error"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FilterListStage.description)⁩
+msgid "Filter list items by CEL condition; current element is bound as `item`"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FilterListStage.arguments.items)⁩
+msgid "List to filter"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FilterListStage.arguments.condition)⁩
+msgid "CEL condition evaluated per element, e.g. 'item > 2'"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (FilterListStage.outputs.list)⁩
+msgid "Filtered list"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (IncrementStage.description)⁩
+msgid "Increment numeric value by delta"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (IncrementStage.arguments.current)⁩
+msgid "Current numeric value"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (IncrementStage.arguments.delta)⁩
+msgid "Increment step"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (IncrementStage.outputs.value)⁩
+msgid "Result after increment"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (LogStage.description)⁩
+msgid "Emit log event with message and the stage's own arguments"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (LogStage.arguments.message)⁩
+msgid "Log message"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (LogStage.arguments.*)⁩
+msgid "Anything else passed in arguments is logged as-is"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (MergeDictStage.description)⁩
+msgid "Shallow merge src dict into dst"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (MergeDictStage.arguments.src)⁩
+msgid "Dict with overrides"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (MergeDictStage.arguments.dst)⁩
+msgid "Base dict to merge into (empty by default)"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (MergeDictStage.outputs.merged)⁩
+msgid "Merged dict result"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PickKeysStage.description)⁩
+msgid "Pick only specified keys from a dict and return new object"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PickKeysStage.arguments.keys)⁩
+msgid "Keys to keep in the result"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PickKeysStage.outputs.result)⁩
+msgid "Dict containing only picked keys"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.description)⁩
+msgid "Pop element from list (default last) and return list+popped value"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.arguments.items)⁩
+msgid "List to pop from"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.arguments.index)⁩
+msgid "Index to pop, -1 means last element"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.outputs.list)⁩
+msgid "List after pop"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (PopListStage.outputs.popped)⁩
+msgid "Popped value"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SetValueStage.description)⁩
+msgid "Set value from arguments to the target path"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SetValueStage.arguments.value)⁩
+msgid "Value to set (literal via const, or a variable reference)"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SetValueStage.outputs.value)⁩
+msgid "Value that was written"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SleepStage.description)⁩
+msgid "Async sleep for the given number of seconds"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (SleepStage.arguments.seconds)⁩
+msgid "Duration to sleep in seconds"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (TemplateStage.description)⁩
+msgid "Format template string with the stage's own arguments"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (TemplateStage.arguments.template)⁩
+#, python-brace-format
+msgid "Template string; a placeholder is a bare argument name ({name})"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (TemplateStage.arguments.*)⁩
+msgid "Any other argument becomes a template placeholder value"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (TemplateStage.outputs.value)⁩
+msgid "Rendered string"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (UniqueListStage.description)⁩
+msgid "Deduplicate list while preserving original order"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (UniqueListStage.arguments.items)⁩
+msgid "List to deduplicate"
+msgstr ""
+
+#. the spec of a built-in stage
+#: ⁨stageflow/builtins (UniqueListStage.outputs.list)⁩
+msgid "List with unique items"
+msgstr ""
+

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ...exceptions import PipelineDefinitionError, RegistryError
+from ...i18n import _
 from ..context import Context
 from ..stage import BaseStage, get_stage
 from .base import Node, register_node
@@ -37,7 +38,9 @@ class StageNode(Node):
     def _parse(cls, data: dict) -> "StageNode":
         stage = data.get("stage")
         if not stage:
-            raise PipelineDefinitionError(f"Node '{data.get('id')}': field 'stage' is required")
+            raise PipelineDefinitionError(
+                _("Node '{node}': field 'stage' is required", node=data.get("id"))
+            )
         return cls(
             stage=stage,
             arguments=data.get("arguments", {}),
@@ -55,15 +58,21 @@ class StageNode(Node):
         try:
             get_stage(self.stage)
         except RegistryError as exc:
-            errors.append(f"{self.id}: {exc}")
+            errors.append(_("{node}: {reason}", node=self.id, reason=exc))
         if self.next and not pipeline.has_node(self.next):
-            errors.append(f"{self.id}: next '{self.next}' not found in the graph")
+            errors.append(
+                _("{node}: next '{target}' not found in the graph",
+                  node=self.id, target=self.next)
+            )
         for bucket in ("vars", "const"):
             value = self.arguments.get(bucket)
             if value is not None and not isinstance(value, (dict, list)):
-                errors.append(f"{self.id}: arguments.{bucket} must be an object or a list")
+                errors.append(
+                    _("{node}: arguments.{bucket} must be an object or a list",
+                      node=self.id, bucket=bucket)
+                )
         if self.outputs and not isinstance(self.outputs, dict):
-            errors.append(f"{self.id}: outputs must be an object")
+            errors.append(_("{node}: outputs must be an object", node=self.id))
         errors.extend(self._validate_legacy_scope())
         errors.extend(self._validate_output_fields())
         errors.extend(self._validate_variable_types(pipeline))
@@ -71,8 +80,8 @@ class StageNode(Node):
 
     def _validate_legacy_scope(self) -> list[str]:
         return [
-            f"{self.id}: the '{key}' scope level in outputs was removed in 0.7.0 — "
-            'keys are flat: {"result_field": "variable"}'
+            _("{node}: the '{scope}' scope level in outputs was removed in 0.7.0 — "
+              'keys are flat: {{"result_field": "variable"}}', node=self.id, scope=key)
             for key in ("local", "global")
             if isinstance((self.outputs or {}).get(key), dict)
         ]
@@ -88,8 +97,9 @@ class StageNode(Node):
             return []
 
         return [
-            f"{self.id}: stage {self.stage} does not return field '{key}' "
-            f"(available: {sorted(declared)})"
+            _("{node}: stage {stage} does not return field '{field}' "
+              "(available: {available})",
+              node=self.id, stage=self.stage, field=key, available=sorted(declared))
             for key in (self.outputs or {})
             if not key.endswith(CEL_SUFFIX) and key not in declared
         ]
@@ -116,8 +126,10 @@ class StageNode(Node):
                 hint = arg_hints.get(arg_name)
                 if declared is not None and not ts.hint_compatible(declared, hint):
                     errors.append(
-                        f"{self.id}: argument '{arg_name}' of stage {self.stage} expects "
-                        f"'{hint}', but vars.{var_ref} is declared as '{declared}'"
+                        _("{node}: argument '{argument}' of stage {stage} expects "
+                          "'{expected}', but vars.{variable} is declared as '{declared}'",
+                          node=self.id, argument=arg_name, stage=self.stage,
+                          expected=hint, variable=var_ref, declared=declared)
                     )
 
         for out_field, dest in (self.outputs or {}).items():
@@ -127,8 +139,10 @@ class StageNode(Node):
             hint = out_hints.get(out_field)
             if declared is not None and not ts.hint_compatible(declared, hint):
                 errors.append(
-                    f"{self.id}: output '{out_field}' of stage {self.stage} has type "
-                    f"'{hint}', but is written to vars.{dest} typed '{declared}'"
+                    _("{node}: output '{output}' of stage {stage} has type "
+                      "'{type}', but is written to vars.{variable} typed '{declared}'",
+                      node=self.id, output=out_field, stage=self.stage,
+                      type=hint, variable=dest, declared=declared)
                 )
         return errors
 

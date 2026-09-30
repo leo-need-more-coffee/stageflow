@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..exceptions import ExpressionError
+from ..i18n import _
 from .context import Context
 
 CelError = ExpressionError
@@ -28,8 +29,8 @@ class CelEngine:
         self._compiled: dict[str, Any] = {}
         if _BACKEND is None:  # pragma: no cover
             raise ExpressionError(
-                "No CEL backend found. Install "
-                "'common-expression-language' (recommended) or 'cel-python'."
+                _("No CEL backend found. Install "
+                  "'common-expression-language' (recommended) or 'cel-python'.")
             )
 
     @property
@@ -46,7 +47,9 @@ class CelEngine:
                     env = _celpy.Environment()
                     program = env.program(env.compile(expr))
             except Exception as exc:  # noqa: BLE001
-                raise ExpressionError(f"Cannot compile CEL {expr!r}: {exc}") from exc
+                raise ExpressionError(
+                    _("Cannot compile CEL {expr}: {reason}", expr=repr(expr), reason=exc)
+                ) from exc
             self._compiled[expr] = program
         return program
 
@@ -75,4 +78,6 @@ class CelEngine:
                 return program.execute(activation)
             return program.evaluate(activation)  # pragma: no cover
         except Exception as exc:  # noqa: BLE001
-            raise ExpressionError(f"Cannot evaluate CEL {expr!r}: {exc}") from exc
+            raise ExpressionError(
+                _("Cannot evaluate CEL {expr}: {reason}", expr=repr(expr), reason=exc)
+            ) from exc

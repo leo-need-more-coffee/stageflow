@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Union, get_args, get_origin
 
 from ..exceptions import PayloadValidationError
+from ..i18n import _
 
 
 def validate_schema(value: Any, schema: object, path: str = "payload") -> None:
@@ -20,7 +21,8 @@ def validate_schema(value: Any, schema: object, path: str = "payload") -> None:
             except PayloadValidationError:
                 continue
         raise PayloadValidationError(
-            f"{path} expected one of {args}, got {type(value).__name__}"
+            _("{path} expected one of {expected}, got {got}",
+              path=path, expected=args, got=type(value).__name__)
         )
 
     if origin is list and args:
@@ -41,7 +43,9 @@ def validate_schema(value: Any, schema: object, path: str = "payload") -> None:
         _require(value, dict, path)
         for key, sub_schema in schema.items():
             if key not in value:
-                raise PayloadValidationError(f"{path} missing required field '{key}'")
+                raise PayloadValidationError(
+                    _("{path} missing required field '{field}'", path=path, field=key)
+                )
             validate_schema(value[key], sub_schema, f"{path}.{key}")
         return
 
@@ -59,14 +63,16 @@ def validate_schema(value: Any, schema: object, path: str = "payload") -> None:
         return
     if not isinstance(value, expected):
         raise PayloadValidationError(
-            f"{path} expected {schema}, got {type(value).__name__}"
+            _("{path} expected {expected}, got {got}",
+              path=path, expected=schema, got=type(value).__name__)
         )
 
 
 def _require(value: Any, type_: type, path: str) -> None:
     if not isinstance(value, type_):
         raise PayloadValidationError(
-            f"{path} expected {type_.__name__}, got {type(value).__name__}"
+            _("{path} expected {expected}, got {got}",
+              path=path, expected=type_.__name__, got=type(value).__name__)
         )
 
 
