@@ -1,44 +1,44 @@
 
 <!doctype html>
-<html lang="ru" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Фреймворк описания и исполнения JSON-пайплайнов">
+        <meta name="description" content="A framework for describing and running JSON-defined pipelines">
       
       
       
-        <link rel="canonical" href="https://leo-need-more-coffee.github.io/stageflow/ru/tutorial/">
+        <link rel="canonical" href="https://leo-need-more-coffee.github.io/stageflow/mcp/">
       
       
-        <link rel="prev" href="../expressions/">
+        <link rel="prev" href="../schema-and-stage-specs/">
       
       
-        <link rel="next" href="1-first-pipeline/">
+        <link rel="next" href="../releasing/">
       
       
         
-          <link rel="alternate" href="../../tutorial/" hreflang="en">
+          <link rel="alternate" href="./" hreflang="en">
         
-          <link rel="alternate" href="./" hreflang="ru">
+          <link rel="alternate" href="../ru/mcp/" hreflang="ru">
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Что собираем - StageFlow</title>
+        <title>Assistants (MCP) - StageFlow</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -57,7 +57,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -82,8 +82,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
-          Перейти к содержанию
+        <a href="#assistants-mcp" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -97,8 +97,8 @@
   
 
 <header class="md-header md-header--shadow" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Верхний колонтитул">
-    <a href="../" title="StageFlow" class="md-header__button md-logo" aria-label="StageFlow" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="StageFlow" class="md-header__button md-logo" aria-label="StageFlow" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Что собираем
+              Assistants (MCP)
             
           </span>
         </div>
@@ -158,20 +158,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Выберите язык">
+    <button class="md-header__button md-icon" aria-label="Select language">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../tutorial/" hreflang="en" class="md-select__link">
+            <a href="./" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="./" hreflang="ru" class="md-select__link">
+            <a href="../ru/mcp/" hreflang="ru" class="md-select__link">
               Русский
             </a>
           </li>
@@ -192,16 +192,16 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Поиск" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Поиск">
+      <nav class="md-search__options" aria-label="Search">
         
-        <button type="reset" class="md-search__icon md-icon" title="Очистить" aria-label="Очистить" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -214,7 +214,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Инициализация поиска
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -226,7 +226,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/leo-need-more-coffee/stageflow" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+        <a href="https://github.com/leo-need-more-coffee/stageflow" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
@@ -260,9 +260,9 @@
 
 
 
-<nav class="md-nav md-nav--primary" aria-label="Навигация" data-md-level="0">
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../" title="StageFlow" class="md-nav__button md-logo" aria-label="StageFlow" data-md-component="logo">
+    <a href=".." title="StageFlow" class="md-nav__button md-logo" aria-label="StageFlow" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -272,7 +272,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/leo-need-more-coffee/stageflow" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+      <a href="https://github.com/leo-need-more-coffee/stageflow" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
@@ -292,14 +292,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Главная
+    Home
   
 
     
@@ -342,7 +342,7 @@
   <span class="md-ellipsis">
     
   
-    Начало работы
+    Getting started
   
 
     
@@ -358,7 +358,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Начало работы
+    Getting started
   
 
           </label>
@@ -378,7 +378,7 @@
   <span class="md-ellipsis">
     
   
-    Быстрый старт
+    Quick start
   
 
     
@@ -406,7 +406,7 @@
   <span class="md-ellipsis">
     
   
-    Типы узлов
+    Node types
   
 
     
@@ -434,7 +434,7 @@
   <span class="md-ellipsis">
     
   
-    Модель данных
+    Data model
   
 
     
@@ -462,7 +462,7 @@
   <span class="md-ellipsis">
     
   
-    Выражения
+    Expressions
   
 
     
@@ -487,8 +487,6 @@
       
   
   
-    
-  
   
   
     
@@ -501,11 +499,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
@@ -515,7 +513,7 @@
   <span class="md-ellipsis">
     
   
-    Туториал
+    Tutorial
   
 
     
@@ -526,12 +524,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Туториал
+    Tutorial
   
 
           </label>
@@ -541,114 +539,17 @@
                 
   
   
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Что собираем
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Что собираем
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Содержание">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Содержание
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Шаги
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Что понадобится
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
   
   
     <li class="md-nav__item">
-      <a href="1-first-pipeline/" class="md-nav__link">
+      <a href="../tutorial/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    1. Первый запуск
+    What we build
   
 
     
@@ -669,14 +570,14 @@
   
   
     <li class="md-nav__item">
-      <a href="2-frame/" class="md-nav__link">
+      <a href="../tutorial/1-first-pipeline/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    2. Данные между узлами
+    1. A pipeline that runs
   
 
     
@@ -697,14 +598,14 @@
   
   
     <li class="md-nav__item">
-      <a href="3-branching/" class="md-nav__link">
+      <a href="../tutorial/2-frame/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    3. Выбор дороги
+    2. Data between nodes
   
 
     
@@ -725,14 +626,14 @@
   
   
     <li class="md-nav__item">
-      <a href="4-parallel/" class="md-nav__link">
+      <a href="../tutorial/3-branching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    4. Два дела сразу
+    3. Choosing the road
   
 
     
@@ -753,14 +654,14 @@
   
   
     <li class="md-nav__item">
-      <a href="5-errors/" class="md-nav__link">
+      <a href="../tutorial/4-parallel/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    5. Когда узел падает
+    4. Two things at once
   
 
     
@@ -781,14 +682,14 @@
   
   
     <li class="md-nav__item">
-      <a href="6-subpipelines/" class="md-nav__link">
+      <a href="../tutorial/5-errors/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    6. Граф внутри узла
+    5. When a node fails
   
 
     
@@ -809,14 +710,42 @@
   
   
     <li class="md-nav__item">
-      <a href="7-debugger/" class="md-nav__link">
+      <a href="../tutorial/6-subpipelines/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    7. Смотрим, как он работает
+    6. A graph inside a node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/7-debugger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Watching it run
   
 
     
@@ -867,7 +796,7 @@
   <span class="md-ellipsis">
     
   
-    Свой бэкенд
+    Building a backend
   
 
     
@@ -883,7 +812,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Свой бэкенд
+    Building a backend
   
 
           </label>
@@ -903,7 +832,7 @@
   <span class="md-ellipsis">
     
   
-    Что такое бэкенд
+    What a backend is
   
 
     
@@ -931,7 +860,7 @@
   <span class="md-ellipsis">
     
   
-    1. Ваши стадии
+    1. Your stages
   
 
     
@@ -959,7 +888,7 @@
   <span class="md-ellipsis">
     
   
-    2. Эндпоинты
+    2. The endpoints
   
 
     
@@ -987,7 +916,7 @@
   <span class="md-ellipsis">
     
   
-    3. Что разрешено собирать
+    3. What may be composed
   
 
     
@@ -1015,7 +944,7 @@
   <span class="md-ellipsis">
     
   
-    4. Во что обходится прогон
+    4. What a run costs
   
 
     
@@ -1043,7 +972,7 @@
   <span class="md-ellipsis">
     
   
-    5. Чей это запрос
+    5. Who is calling
   
 
     
@@ -1068,8 +997,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -1080,11 +1011,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -1094,7 +1025,7 @@
   <span class="md-ellipsis">
     
   
-    Справочник
+    Reference
   
 
     
@@ -1105,12 +1036,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Справочник
+    Reference
   
 
           </label>
@@ -1143,7 +1074,7 @@
   <span class="md-ellipsis">
     
   
-    Узлы
+    Nodes
   
 
     
@@ -1159,7 +1090,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Узлы
+    Nodes
   
 
           </label>
@@ -1179,7 +1110,7 @@
   <span class="md-ellipsis">
     
   
-    Узел entry
+    The entry node
   
 
     
@@ -1207,7 +1138,7 @@
   <span class="md-ellipsis">
     
   
-    Узел stage
+    The stage node
   
 
     
@@ -1235,7 +1166,7 @@
   <span class="md-ellipsis">
     
   
-    Узел condition
+    The condition node
   
 
     
@@ -1263,7 +1194,7 @@
   <span class="md-ellipsis">
     
   
-    Узел switch
+    The switch node
   
 
     
@@ -1291,7 +1222,7 @@
   <span class="md-ellipsis">
     
   
-    Узел parallel
+    The parallel node
   
 
     
@@ -1319,7 +1250,7 @@
   <span class="md-ellipsis">
     
   
-    Узел try
+    The try node
   
 
     
@@ -1347,7 +1278,7 @@
   <span class="md-ellipsis">
     
   
-    Узел map
+    The map node
   
 
     
@@ -1375,7 +1306,7 @@
   <span class="md-ellipsis">
     
   
-    Узел subpipeline
+    The subpipeline node
   
 
     
@@ -1403,7 +1334,7 @@
   <span class="md-ellipsis">
     
   
-    Узел terminal
+    The terminal node
   
 
     
@@ -1439,7 +1370,7 @@
   <span class="md-ellipsis">
     
   
-    Ошибки
+    Errors
   
 
     
@@ -1467,7 +1398,7 @@
   <span class="md-ellipsis">
     
   
-    Политика
+    Policy
   
 
     
@@ -1495,7 +1426,7 @@
   <span class="md-ellipsis">
     
   
-    Лимиты
+    Limits
   
 
     
@@ -1523,7 +1454,7 @@
   <span class="md-ellipsis">
     
   
-    Типизация переменных
+    Variable typing
   
 
     
@@ -1551,7 +1482,7 @@
   <span class="md-ellipsis">
     
   
-    Локализация
+    Localization
   
 
     
@@ -1579,7 +1510,7 @@
   <span class="md-ellipsis">
     
   
-    Управление сессией
+    Session control
   
 
     
@@ -1607,7 +1538,7 @@
   <span class="md-ellipsis">
     
   
-    Пошаговая отладка
+    Step debugging
   
 
     
@@ -1635,7 +1566,7 @@
   <span class="md-ellipsis">
     
   
-    Встроенные стадии
+    Built-in stages
   
 
     
@@ -1663,7 +1594,7 @@
   <span class="md-ellipsis">
     
   
-    Спецификация стадии
+    Stage specification
   
 
     
@@ -1691,7 +1622,7 @@
   <span class="md-ellipsis">
     
   
-    Схема и спецификации
+    Schema and stage specs
   
 
     
@@ -1709,17 +1640,44 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../mcp/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assistants (MCP)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Ассистенты (MCP)
+    Assistants (MCP)
   
 
     
@@ -1728,6 +1686,115 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setting-it-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting it up
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setting it up">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-credential-if-your-backend-wants-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A credential, if your backend wants one
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-an-assistant-is-given" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What an assistant is given
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What an assistant is given">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-checking-costs-no-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How checking costs no run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-may-want-to-do-about-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you may want to do about it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-bridge-to-an-open-editor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bridge to an open editor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it does not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1770,7 +1837,7 @@
   <span class="md-ellipsis">
     
   
-    Разработка
+    Development
   
 
     
@@ -1786,7 +1853,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Разработка
+    Development
   
 
           </label>
@@ -1806,7 +1873,7 @@
   <span class="md-ellipsis">
     
   
-    Релизы
+    Releasing
   
 
     
@@ -1840,7 +1907,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -1849,15 +1916,71 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Содержание
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#setting-it-up" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Шаги
+        Setting it up
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setting it up">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-credential-if-your-backend-wants-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A credential, if your backend wants one
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-an-assistant-is-given" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What an assistant is given
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What an assistant is given">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-checking-costs-no-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How checking costs no run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-may-want-to-do-about-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you may want to do about it
       
     </span>
   </a>
@@ -1865,10 +1988,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#the-bridge-to-an-open-editor" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Что понадобится
+        The bridge to an open editor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it does not do
       
     </span>
   </a>
@@ -1892,7 +2026,7 @@
 
 
   
-    <a href="https://github.com/leo-need-more-coffee/stageflow/edit/main/docs/tutorial/index.ru.md" title="Редактировать страницу" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/leo-need-more-coffee/stageflow/edit/main/docs/mcp.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1900,84 +2034,156 @@
   
 
 
-<h1 id="_1">Туториал: бот поддержки<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>В этом туториале вы собираете один пайплайн с нуля и наращиваете его шаг за
-шагом. Это бот поддержки: он берёт тикет, разбирается, о чём тот, ищет ответ в
-базе знаний и либо отвечает, либо отдаёт тикет человеку.</p>
-<p>Каждый тип узла появляется один раз — там, где он действительно нужен. К концу
-граф выглядит так:</p>
-<p><img alt="Готовый бот в редакторе" src="../../img/tut-final.png" /></p>
-<h2 id="_2">Шаги<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h1 id="assistants-mcp">Assistants (MCP)<a class="headerlink" href="#assistants-mcp" title="Permanent link">&para;</a></h1>
+<p>A pipeline is JSON, and a language model can write JSON. What it cannot do is
+know whether the graph it wrote is one <em>your</em> backend will accept: the stages
+are yours, the node types are your core's, and the ceilings belong to whoever
+is calling.</p>
+<p><a href="https://github.com/leo-need-more-coffee/stageflow-mcp">stageflow-mcp</a> is the
+missing half — an <a href="https://modelcontextprotocol.io">MCP</a> server that speaks the
+same seven endpoints the editor does, so an assistant can check a graph against
+a real backend, run it, and read what happened.</p>
+<p><strong>Your backend needs no changes.</strong> It is a second client of a contract you
+already serve, and it works against a deployment that predates it.</p>
+<h2 id="setting-it-up">Setting it up<a class="headerlink" href="#setting-it-up" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>stageflow<span class="w"> </span>--<span class="w"> </span>uvx<span class="w"> </span>stageflow-mcp<span class="w"> </span>--backend<span class="w"> </span>https://your-backend.example
+</code></pre></div>
+<p>That address is the one you would type on the editor's connection screen, and
+it is read the same way — <code>localhost:8765</code> and <code>…/api</code> both mean one backend.
+A bare hostname gets <code>https://</code> unless it is loopback.</p>
+<p>Check it before wiring an assistant to it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gp">$ </span>stageflow-mcp<span class="w"> </span>--backend<span class="w"> </span>https://your-backend.example<span class="w"> </span>--check
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="go">backend      https://your-backend.example</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="go">credential   none sent</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="go">stages       23</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="go">core         0.13.0</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="go">plan         demo (open)</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="go">node types   condition, entry, map, parallel, stage, subpipeline, switch, terminal, try</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="go">limits       {"counters": {"seconds": 30, "steps": 300, …}}</span>
+</code></pre></div>
+<h3 id="a-credential-if-your-backend-wants-one">A credential, if your backend wants one<a class="headerlink" href="#a-credential-if-your-backend-wants-one" title="Permanent link">&para;</a></h3>
+<p>It is the same credential the editor carries, in the same header, and it is not
+this tool's to issue: the core has no idea what a token is
+(<a href="../backend/5-tenants/">Who is calling</a>), so you decide what one looks like.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>stageflow-mcp<span class="w"> </span>--backend<span class="w"> </span>https://…<span class="w"> </span>--token<span class="w"> </span><span class="s2">"</span><span class="nv">$TOKEN</span><span class="s2">"</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>stageflow-mcp<span class="w"> </span>--backend<span class="w"> </span>https://…<span class="w"> </span>--token<span class="w"> </span><span class="s2">"</span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span>--auth-header<span class="w"> </span>X-Api-Key
+</code></pre></div>
+<p>Without one, the caller is whatever your backend calls an anonymous visitor.</p>
+<p>With no <code>--backend</code> at all, the first tool that needs an address asks for one
+through the MCP client's own prompt and remembers the answer. A credential is
+never written to disk and there is deliberately no tool that accepts one: a
+tool argument is written by the model, which puts it in the conversation and in
+that client's logs.</p>
+<h2 id="what-an-assistant-is-given">What an assistant is given<a class="headerlink" href="#what-an-assistant-is-given" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Шаг</th>
-<th>Что добавляем</th>
-<th>Что разбираем</th>
+<th>Tool</th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="1-first-pipeline/">1. Первый запуск</a></td>
-<td>стадию и три узла</td>
-<td>как стадия и пайплайн стыкуются</td>
+<td><code>validate_pipeline</code></td>
+<td>every violation at once — schema, graph, declared types, and what the caller's plan refuses. <strong>Costs no run.</strong></td>
 </tr>
 <tr>
-<td><a href="2-frame/">2. Данные между узлами</a></td>
-<td>вторую стадию</td>
-<td>фрейм, аргументы, выходы, типы</td>
+<td><code>run_pipeline</code></td>
+<td>runs it and reports the frame at the end, the meters against your ceilings, and the path of nodes it took</td>
 </tr>
 <tr>
-<td><a href="3-branching/">3. Выбор дороги</a></td>
-<td>условие и два финала</td>
-<td>ветвление по CEL-выражению</td>
-</tr>
-<tr>
-<td><a href="4-parallel/">4. Два дела сразу</a></td>
-<td>параллельные ветки и <code>switch</code></td>
-<td>конкурентность и маршрутизация</td>
-</tr>
-<tr>
-<td><a href="5-errors/">5. Когда узел падает</a></td>
-<td><code>retry</code> и <code>try</code>/<code>except</code></td>
-<td>ошибки как часть графа</td>
-</tr>
-<tr>
-<td><a href="6-subpipelines/">6. Граф внутри узла</a></td>
-<td>субпайплайн</td>
-<td>переиспользование графа, изоляция фрейма</td>
-</tr>
-<tr>
-<td><a href="7-debugger/">7. Смотрим, как он работает</a></td>
-<td>редактор и отладчик</td>
-<td>проход по шагам</td>
+<td><code>stop_run</code></td>
+<td>stops one that is still going</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_3">Что понадобится<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>Для шагов с 1 по 6 хватит ядра:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>stageflow-framework
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stageflow://guide</code></td>
+<td>how a graph is written: the frame, the node types, expressions</td>
+</tr>
+<tr>
+<td><code>stageflow://stages</code></td>
+<td>your stages, a line each</td>
+</tr>
+<tr>
+<td><code>stageflow://stages/{name}</code></td>
+<td>one stage in full — types, optionality, what each argument means</td>
+</tr>
+<tr>
+<td><code>stageflow://capabilities</code></td>
+<td>node types, plan and ceilings, from <code>/api/meta</code></td>
+</tr>
+<tr>
+<td><code>stageflow://schema</code></td>
+<td>the pipeline JSON Schema, with your stage names and node types as enums</td>
+</tr>
+</tbody>
+</table>
+<p>The working method the server asks for is write, <code>validate_pipeline</code>, fix
+everything it listed, repeat — and only then run. Checking is free, so there is
+no reason to spend a run finding out that a field name was wrong.</p>
+<h3 id="how-checking-costs-no-run">How checking costs no run<a class="headerlink" href="#how-checking-costs-no-run" title="Permanent link">&para;</a></h3>
+<p>There is no <code>/api/validate</code> in the contract and none is asked for.
+<code>POST /api/run</code> with <code>mode: "step"</code> parses the graph and validates it against
+the caller's policy <strong>before</strong> admitting a run — both reference backends do it
+in that order, before a thread, a slot or an id exists. An invalid graph is
+refused for free; a valid one comes back parked before its first node, having
+executed nothing, and is stopped immediately.</p>
+<p>So a check briefly occupies one of the caller's run slots and executes nothing.
+If your backend admits runs before validating them, that is worth knowing about
+for other reasons too.</p>
+<h2 id="what-you-may-want-to-do-about-it">What you may want to do about it<a class="headerlink" href="#what-you-may-want-to-do-about-it" title="Permanent link">&para;</a></h2>
+<p>Nothing is required. Two things are worth having.</p>
+<p><strong>Answer in the caller's language.</strong> The assistant passes <code>Accept-Language</code>;
+without this, the core's own messages come back in the language they were
+written in (<a href="../localization/">Localization</a>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">i18n</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">asked</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"accept-language"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">with</span> <span class="n">i18n</span><span class="o">.</span><span class="n">use_locale</span><span class="p">(</span><span class="n">i18n</span><span class="o">.</span><span class="n">negotiate</span><span class="p">(</span><span class="n">i18n</span><span class="o">.</span><span class="n">parse_accept_language</span><span class="p">(</span><span class="n">asked</span><span class="p">))):</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="o">...</span>
 </code></pre></div>
-<p>Скриншоты сняты в <a href="https://github.com/leo-need-more-coffee/stageflow-ui">редакторе
-StageFlow</a> — это
-веб-страница, которая рисует и отлаживает граф. Сама она ничего не исполняет:
-она обращается к бэкенду, где лежат ваши стадии. Чтобы повторять за
-туториалом в редакторе, запустите
-<a href="https://github.com/leo-need-more-coffee/stageflow-example">бэкенд примера</a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/leo-need-more-coffee/stageflow-example
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span>stageflow-example
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>python<span class="w"> </span>main.py<span class="w">                 </span><span class="c1"># http://127.0.0.1:8765</span>
+<p><strong>Keep the core current.</strong> A refusal names the node it belongs to and lists
+every problem at once (<a href="../errors/#both-halves-of-a-refusal-name-the-place">Errors</a>),
+which is the difference between a list an assistant works through and a
+sentence it has to decode:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>guard.except[0]: 'next' is a required property;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>risky.arguments: Additional properties are not allowed ('oops' was unexpected)
 </code></pre></div>
-<p>и рядом сам редактор:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/leo-need-more-coffee/stageflow-ui
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">cd</span><span class="w"> </span>stageflow-ui
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>npm<span class="w"> </span>start<span class="w">                      </span><span class="c1"># http://127.0.0.1:8080</span>
+<h2 id="the-bridge-to-an-open-editor">The bridge to an open editor<a class="headerlink" href="#the-bridge-to-an-open-editor" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>stageflow-mcp<span class="w"> </span>--backend<span class="w"> </span>https://…<span class="w"> </span>--bridge
 </code></pre></div>
-<p>Откройте <code>http://127.0.0.1:8080</code>, введите адрес бэкенда на экране подключения
-и загружайте пайплайн нужного шага через «File» → «Import JSON…».</p>
-<p>Готовый бот, его стадии и файлы с данными лежат в репозитории примера. Здесь
-мы собираем то же самое, по одной идее за раз.</p>
+<p>prints a link. Open it, and the
+<a href="https://github.com/leo-need-more-coffee/stageflow-ui">editor</a> is looking at the
+same graph the assistant is: what it draws lands on the canvas, what you change
+there is read back. An incoming graph keeps your view and the placement of
+every card you have dragged, marks what it touched, and waits to be kept or put
+back.</p>
+<p>The bridge is a loopback socket on the machine the assistant runs on, under a
+token, and your backend is not involved — beyond allowing the editor's origin,
+which it already does if anybody uses the editor. One browser rule is worth
+knowing: a page served from the internet reaching <code>127.0.0.1</code> is gated behind a
+permission prompt in current Chrome. Allow it, or serve the editor from the
+same machine (<code>--editor http://127.0.0.1:8080/</code>) and nothing crosses anything.</p>
+<h2 id="what-it-does-not-do">What it does not do<a class="headerlink" href="#what-it-does-not-do" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Inputs.</strong> A stage can await input in the core, but the HTTP contract has no
+  channel for it — the editor has none either — so a graph that waits will time
+  out (<a href="../session-control/">Session control</a>).</li>
+<li><strong>Step debugging.</strong> Stepping exists so a person can watch a graph go by; an
+  assistant that is not watching would only be holding a slot.</li>
+<li><strong>Anything local.</strong> Nothing is validated or executed in that process. The
+  semantics live in the core your backend runs, and a second opinion would be a
+  second implementation to drift from it.</li>
+</ul>
 
 
 
@@ -2001,7 +2207,7 @@ StageFlow</a> — это
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  К началу
+  Back to top
 </button>
         
       </main>
@@ -2037,10 +2243,10 @@ StageFlow</a> — это
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "search.highlight", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440", "clipboard.copy": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u0431\u0443\u0444\u0435\u0440", "search.result.more.one": "\u0415\u0449\u0451 1 \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.more.other": "\u0415\u0449\u0451 # \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.none": "\u0421\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e", "search.result.one": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e 1 \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0435", "search.result.other": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439: #", "search.result.placeholder": "\u041d\u0430\u0447\u043d\u0438\u0442\u0435 \u043f\u0435\u0447\u0430\u0442\u0430\u0442\u044c \u0434\u043b\u044f \u043f\u043e\u0438\u0441\u043a\u0430", "search.result.term.missing": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442", "select.version": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u0435\u0440\u0441\u0438\u044e"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "search.highlight", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

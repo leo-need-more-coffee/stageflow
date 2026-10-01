@@ -71,6 +71,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/map-node/"/>
     </url>
     <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/mcp/</loc>
+        <lastmod>2026-10-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/mcp/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/mcp/"/>
+    </url>
+    <url>
         <loc>https://leo-need-more-coffee.github.io/stageflow/node-types/</loc>
         <lastmod>2026-10-01</lastmod>
         <changefreq>daily</changefreq>
@@ -342,6 +349,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/map-node/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/map-node/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/mcp/</loc>
+        <lastmod>2026-10-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/mcp/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/mcp/"/>
     </url>
     <url>
         <loc>https://leo-need-more-coffee.github.io/stageflow/ru/node-types/</loc>
