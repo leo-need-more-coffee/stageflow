@@ -1495,6 +1495,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#letting-a-road-come-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Letting a road come back
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-a-policy-does-not-do" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1931,6 +1942,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#letting-a-road-come-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Letting a road come back
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-a-policy-does-not-do" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2055,6 +2077,39 @@ answer to it:</p>
 what <strong>this</strong> caller may draw, and whether a node type is missing because the
 core is older or because the allowance is narrower is not a distinction it
 has to make.</p>
+<h2 id="letting-a-road-come-back">Letting a road come back<a class="headerlink" href="#letting-a-road-come-back" title="Permanent link">&para;</a></h2>
+<p>A cycle in the order edges is refused by validation. The language has a loop of
+its own — the <a href="../map-node/"><code>map</code> node</a>, bounded by the list it walks — and a
+back edge is bounded by nothing: it spins for as long as the process lives, and
+it is far more often a <code>next</code> pointed at the wrong id than a loop somebody
+meant.</p>
+<p>A host that has something to stop one with can say so:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">Policy</span><span class="p">(</span><span class="n">allow_cycles</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">Limits</span><span class="p">(</span><span class="n">counters</span><span class="o">=</span><span class="p">{</span><span class="s2">"steps"</span><span class="p">:</span> <span class="mi">5_000</span><span class="p">}))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bump"</span><span class="p">,</span><span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"stage"</span><span class="p">,</span><span class="w"> </span><span class="nt">"stage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Increment"</span><span class="p">,</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w"> </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"vars"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"current"</span><span class="p">:</span><span class="w"> </span><span class="s2">"n"</span><span class="p">}},</span><span class="w"> </span><span class="nt">"outputs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"n"</span><span class="p">},</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w"> </span><span class="nt">"next"</span><span class="p">:</span><span class="w"> </span><span class="s2">"enough"</span><span class="p">},</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"enough"</span><span class="p">,</span><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"condition"</span><span class="p">,</span><span class="w"> </span><span class="nt">"condition"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vars.n &gt;= 3"</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w"> </span><span class="nt">"then"</span><span class="p">:</span><span class="w"> </span><span class="s2">"done"</span><span class="p">,</span><span class="w"> </span><span class="nt">"else"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bump"</span><span class="p">}</span>
+</code></pre></div>
+<p>This is the one field here whose default is a restriction rather than the
+absence of one, and the asymmetry is deliberate: every other field narrows what
+the process can already do, while this one permits a shape the language does
+not otherwise have.</p>
+<p><strong>What makes it safe is not in the graph.</strong> A loop that the graph does not end
+is ended by the budget — <code>BudgetExceeded</code> is outside the <code>Exception</code> tree, so
+no <code>try</code> in the pipeline can swallow it, and the run comes back as a result
+saying which meter ran out rather than as a process that stopped answering
+(<a href="../limits/">Limits</a>). Setting <code>allow_cycles</code> without a ceiling is permitted
+and is a host's business: a platform may bound its work with a request timeout
+or a supervisor, and a framework arguing with that would be a framework fighting
+its host.</p>
+<p>Everything else is still checked. A graph with a permitted loop in it is
+refused for a <code>next</code> that names nothing, for a stage outside the policy, for a
+type that does not exist — allowing a loop is not switching validation off.</p>
+<p>Clients are told: <code>capabilities(policy)</code> carries <code>"cycles": true | false</code>
+alongside the node types, because finding the rule out after writing a graph is
+the worst moment to learn it.</p>
 <h2 id="what-a-policy-does-not-do">What a policy does not do<a class="headerlink" href="#what-a-policy-does-not-do" title="Permanent link">&para;</a></h2>
 <p>It restricts <strong>what a pipeline is made of</strong>, not <strong>how much it consumes</strong>. A
 graph of allowed stages can still loop, fan out or run for a long time —

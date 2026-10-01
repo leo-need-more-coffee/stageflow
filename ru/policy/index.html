@@ -1498,6 +1498,17 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
+        Когда дороге можно вернуться
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         Чего политика не делает
       
     </span>
@@ -1934,6 +1945,17 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
+        Когда дороге можно вернуться
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         Чего политика не делает
       
     </span>
@@ -2055,7 +2077,39 @@
 <p>Именно это бэкенду и стоит отдавать редактору: редактору нужно знать, что
 может рисовать <strong>этот</strong> вызывающий, а недоступен тип узла из-за старого ядра
 или из-за узкого разрешения — различие, которое ему проводить незачем.</p>
-<h2 id="_5">Чего политика не делает<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h2 id="_5">Когда дороге можно вернуться<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>Цикл по рёбрам порядка валидация отклоняет. У языка есть собственный цикл —
+<a href="../map-node/">узел <code>map</code></a>, ограниченный списком, по которому идёт, — а
+обратное ребро не ограничено ничем: оно крутится столько, сколько живёт
+процесс, и гораздо чаще оказывается <code>next</code>, указывающим не на тот id, чем
+задуманным циклом.</p>
+<p>Хост, которому есть чем такое остановить, может это разрешить:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">Policy</span><span class="p">(</span><span class="n">allow_cycles</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">Limits</span><span class="p">(</span><span class="n">counters</span><span class="o">=</span><span class="p">{</span><span class="s2">"steps"</span><span class="p">:</span> <span class="mi">5_000</span><span class="p">}))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bump"</span><span class="p">,</span><span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"stage"</span><span class="p">,</span><span class="w"> </span><span class="nt">"stage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Increment"</span><span class="p">,</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w"> </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"vars"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"current"</span><span class="p">:</span><span class="w"> </span><span class="s2">"n"</span><span class="p">}},</span><span class="w"> </span><span class="nt">"outputs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"n"</span><span class="p">},</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w"> </span><span class="nt">"next"</span><span class="p">:</span><span class="w"> </span><span class="s2">"enough"</span><span class="p">},</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"enough"</span><span class="p">,</span><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"condition"</span><span class="p">,</span><span class="w"> </span><span class="nt">"condition"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vars.n &gt;= 3"</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w"> </span><span class="nt">"then"</span><span class="p">:</span><span class="w"> </span><span class="s2">"done"</span><span class="p">,</span><span class="w"> </span><span class="nt">"else"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bump"</span><span class="p">}</span>
+</code></pre></div>
+<p>Это единственное поле здесь, у которого по умолчанию стоит запрет, а не
+отсутствие ограничения, и асимметрия намеренная: все остальные поля сужают то,
+что процесс и так умеет, а это — разрешает форму, которой у языка иначе нет.</p>
+<p><strong>Безопасным это делает не граф.</strong> Цикл, который граф не заканчивает,
+заканчивает бюджет: <code>BudgetExceeded</code> живёт вне ветки <code>Exception</code>, так что ни
+один <code>try</code> внутри пайплайна его не проглотит, и прогон возвращается результатом
+с именем исчерпанного счётчика, а не процессом, переставшим отвечать
+(<a href="../limits/">Лимиты</a>). Поставить <code>allow_cycles</code> без потолка можно, и это
+дело хоста: платформа может ограничивать работу таймаутом запроса или
+супервизором, а фреймворк, спорящий с этим, — это фреймворк, воюющий со своим
+хостом.</p>
+<p>Всё остальное по-прежнему проверяется. Граф с разрешённым циклом будет отклонён
+за <code>next</code>, который никуда не ведёт, за стадию вне политики, за несуществующий
+тип: разрешить цикл — не значит выключить валидацию.</p>
+<p>Клиентам об этом говорят: <code>capabilities(policy)</code> несёт <code>"cycles": true | false</code>
+рядом с типами узлов, потому что узнать правило после того, как граф написан, —
+худший момент для такого знания.</p>
+<h2 id="_6">Чего политика не делает<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <p>Она ограничивает, <strong>из чего пайплайн состоит</strong>, а не <strong>сколько он потребляет</strong>.
 Граф из разрешённых стадий по-прежнему может зациклиться, развернуться веером
 или работать долго — <code>retry</code>, <code>map</code> по большому списку, ветки <code>parallel</code>.</p>
