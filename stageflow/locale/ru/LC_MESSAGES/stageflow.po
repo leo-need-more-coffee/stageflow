@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: StageFlow VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-29 23:42+0000\n"
+"POT-Creation-Date: 2026-10-01 21:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: StageFlow\n"
 "Language: ru\n"
@@ -116,56 +116,61 @@ msgstr "{path}: нет обязательного поля '{field}'"
 msgid "{path} expected {expected}, got {got}"
 msgstr "{path}: ожидалось {expected}, а пришло {got}"
 
-#: stageflow/core/pipeline.py:50
+#: stageflow/core/pipeline.py:73
 #, python-brace-format
 msgid "Invalid type declarations: {reason}"
 msgstr "Некорректные объявления типов: {reason}"
 
-#: stageflow/core/pipeline.py:71
+#: stageflow/core/pipeline.py:109
+#, python-brace-format
+msgid "; and {more} more"
+msgstr "; и ещё {more}"
+
+#: stageflow/core/pipeline.py:113
 #, python-brace-format
 msgid "Pipeline schema validation failed: {reason}"
 msgstr "Пайплайн не проходит проверку по схеме: {reason}"
 
-#: stageflow/core/pipeline.py:74
+#: stageflow/core/pipeline.py:115
 #, python-brace-format
 msgid "Subpipeline '{name}' schema validation failed: {reason}"
 msgstr "Субпайплайн '{name}' не проходит проверку по схеме: {reason}"
 
-#: stageflow/core/pipeline.py:86
+#: stageflow/core/pipeline.py:127
 #, python-brace-format
 msgid "Node with id '{node}' not found in pipeline"
 msgstr "Узла с id '{node}' в пайплайне нет"
 
-#: stageflow/core/pipeline.py:117
+#: stageflow/core/pipeline.py:158
 #, python-brace-format
 msgid "more than one entry node: {nodes} — there must be exactly one"
 msgstr "входных узлов больше одного: {nodes} — он должен быть ровно один"
 
-#: stageflow/core/pipeline.py:122
+#: stageflow/core/pipeline.py:163
 #, python-brace-format
 msgid "{node}: this entry node is not the pipeline entry point (entry = '{entry}')"
 msgstr "{node}: этот входной узел не является точкой входа пайплайна (entry = '{entry}')"
 
-#: stageflow/core/pipeline.py:128
+#: stageflow/core/pipeline.py:169
 #, python-brace-format
 msgid "{node}: jumping into the entry node '{entry}' is not allowed"
 msgstr "{node}: переход внутрь входного узла '{entry}' запрещён"
 
-#: stageflow/core/pipeline.py:140
+#: stageflow/core/pipeline.py:181
 msgid "The pipeline has no entry"
 msgstr "У пайплайна нет точки входа"
 
-#: stageflow/core/pipeline.py:143
+#: stageflow/core/pipeline.py:184
 #, python-brace-format
 msgid "Entry node '{entry}' not found in the graph"
 msgstr "Входного узла '{entry}' в графе нет"
 
-#: stageflow/core/pipeline.py:152
+#: stageflow/core/pipeline.py:193
 #, python-brace-format
 msgid "Duplicate node id: '{node}'"
 msgstr "Повторяющийся id узла: '{node}'"
 
-#: stageflow/core/pipeline.py:190
+#: stageflow/core/pipeline.py:231
 #, python-brace-format
 msgid "cycle in the graph: {cycle}"
 msgstr "цикл в графе: {cycle}"
