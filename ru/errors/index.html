@@ -1455,6 +1455,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Обе половины отказа называют место
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1869,6 +1880,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Обе половины отказа называют место
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2038,6 +2060,21 @@
 </tr>
 </tbody>
 </table>
+<h2 id="_3">Обе половины отказа называют место<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Граф проверяется дважды — JSON Schema за форму и перекрёстные правила за всё,
+чего форма не выражает, — и отвечают они одинаково: все нарушения разом, у
+каждого впереди место, к которому оно относится.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>PipelineDefinitionError: Пайплайн не проходит проверку по схеме:
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  guard.except[0]: 'next' is a required property;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  guard.except[0]: Additional properties are not allowed ('then' was unexpected);
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  risky.arguments: Additional properties are not allowed ('oops' was unexpected)
+</code></pre></div>
+<p>Место — это <code>id</code> узла, если он есть: автор написал его сам и видит на карточке
+в редакторе. <code>nodes[4]</code> появляется, только когда назвать нечем. Перечисляются
+десять, остальные считаются: список длиннее перестаёт быть списком.</p>
+<p>Это адресовано тому, кто чинит граф, а он может быть далеко отсюда — строка
+состояния в редакторе, помощник, пишущий JSON через API. Одно предложение об
+одной проблеме без указания места отправляет его читать схему.</p>
 <p>Одна ошибка намеренно <strong>вне</strong> этого дерева. <code>BudgetExceeded</code> наследует
 <code>BaseException</code>, поэтому <code>except Exception</code> его не видит, и блоки <code>try</code> с
 машинкой повторов тоже, — <a href="../limits/">бюджет</a>, который пайплайн способен
