@@ -193,7 +193,10 @@ class Pipeline:
                 errors.append(_("Duplicate node id: '{node}'", node=node.id))
             seen.add(node.id)
             errors.extend(node.validate(self))
-        errors.extend(self._cycle_errors())
+        # a road that comes back is refused unless the caller's policy says it
+        # has something to stop it with (see Policy.allow_cycles)
+        if policy is None or not policy.allow_cycles:
+            errors.extend(self._cycle_errors())
         return errors
 
     def _cycle_errors(self) -> list[str]:
@@ -205,6 +208,10 @@ class Pipeline:
         and it is almost always a `next` pointed at the wrong id. Saying so
         at validation costs one walk of the graph and saves finding out by
         watching a server fall over.
+
+        A host with something to stop one with — a budget, a timeout a layer
+        above — says so with `Policy(allow_cycles=True)`, and then this is not
+        called at all. See `collect_errors`.
         """
         colour: dict[str, int] = {}  # 0 — on the current path, 1 — done with
         found: list[str] = []

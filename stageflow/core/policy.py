@@ -35,6 +35,23 @@ class Policy:
 
     stages: frozenset[str] | None = None
     node_types: frozenset[str] | None = None
+    #: Whether a road may come back to where it has been.
+    #:
+    #: Off, and the only field here whose default is a restriction rather than
+    #: an absence of one. The reason is that a cycle in the order edges is not
+    #: a narrower version of something — it is a shape the language does not
+    #: otherwise have, and one nothing in the graph bounds. `map` loops over a
+    #: list and stops when the list does; a cycle stops when something outside
+    #: the graph stops it, and it is far more often a `next` pointed at the
+    #: wrong id than a loop somebody meant.
+    #:
+    #: Turning it on is a host saying "I have something that will stop this".
+    #: Usually that is `limits=Limits(counters={"steps": …})` — a run that
+    #: cannot be ended by its own graph is ended by its budget. It can also be
+    #: a timeout a layer above, which is why this does not refuse to be set
+    #: without a ceiling: a platform that already bounds its work should not
+    #: have to argue with a framework about it.
+    allow_cycles: bool = False
     #: how much a session under this policy may spend. A plan is one object:
     #: which blocks, and how many of anything. Built fresh rather than shared
     #: with every other default policy — one `Limits` handed round and then
@@ -47,6 +64,9 @@ class Policy:
 
     @property
     def unrestricted(self) -> bool:
+        """Nothing is narrowed. `allow_cycles` is not part of this: it widens
+        what may be written rather than narrowing it, and a policy that permits
+        a loop is not thereby an absence of a policy."""
         return (self.stages is None and self.node_types is None
                 and self.limits.unlimited)
 

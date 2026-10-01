@@ -42,6 +42,9 @@ def capabilities(policy: Policy | None = None) -> dict[str, Any]:
     - `locales` — the languages the core can put its own text into, the source
       language first. A client cannot guess this: a catalog is a file in the
       build, so the build has to say.
+    - `cycles` — whether this caller may write a road that comes back to where
+      it has been (`Policy.allow_cycles`). Off unless a policy says otherwise,
+      including when there is no policy at all.
 
     With a `policy` the answer narrows to what that policy allows, which is
     what a backend should serve to a client: an editor needs to know what
@@ -64,4 +67,9 @@ def capabilities(policy: Policy | None = None) -> dict[str, Any]:
         "node_types": node_types,
         "stages": len(stages),
         "locales": available_locales(),
+        # whether a road may come back to where it has been. A client that
+        # draws graphs needs this before it offers one: a back edge is refused
+        # at validation, and finding that out after writing it is the worst
+        # moment to learn a rule
+        "cycles": bool(policy is not None and policy.allow_cycles),
     }

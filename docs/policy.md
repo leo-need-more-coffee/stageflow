@@ -94,6 +94,50 @@ what **this** caller may draw, and whether a node type is missing because the
 core is older or because the allowance is narrower is not a distinction it
 has to make.
 
+## Letting a road come back
+
+A cycle in the order edges is refused by validation. The language has a loop of
+its own — the [`map` node](map-node.md), bounded by the list it walks — and a
+back edge is bounded by nothing: it spins for as long as the process lives, and
+it is far more often a `next` pointed at the wrong id than a loop somebody
+meant.
+
+A host that has something to stop one with can say so:
+
+```python
+Policy(allow_cycles=True, limits=Limits(counters={"steps": 5_000}))
+```
+
+```json
+{"id": "bump",    "type": "stage", "stage": "Increment",
+ "arguments": {"vars": {"current": "n"}}, "outputs": {"value": "n"},
+ "next": "enough"},
+{"id": "enough",  "type": "condition", "condition": "vars.n >= 3",
+ "then": "done", "else": "bump"}
+```
+
+This is the one field here whose default is a restriction rather than the
+absence of one, and the asymmetry is deliberate: every other field narrows what
+the process can already do, while this one permits a shape the language does
+not otherwise have.
+
+**What makes it safe is not in the graph.** A loop that the graph does not end
+is ended by the budget — `BudgetExceeded` is outside the `Exception` tree, so
+no `try` in the pipeline can swallow it, and the run comes back as a result
+saying which meter ran out rather than as a process that stopped answering
+([Limits](limits.md)). Setting `allow_cycles` without a ceiling is permitted
+and is a host's business: a platform may bound its work with a request timeout
+or a supervisor, and a framework arguing with that would be a framework fighting
+its host.
+
+Everything else is still checked. A graph with a permitted loop in it is
+refused for a `next` that names nothing, for a stage outside the policy, for a
+type that does not exist — allowing a loop is not switching validation off.
+
+Clients are told: `capabilities(policy)` carries `"cycles": true | false`
+alongside the node types, because finding the rule out after writing a graph is
+the worst moment to learn it.
+
 ## What a policy does not do
 
 It restricts **what a pipeline is made of**, not **how much it consumes**. A
