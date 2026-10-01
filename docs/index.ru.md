@@ -70,6 +70,7 @@ pip install stageflow-framework
 | [Встроенные стадии](built-in-stages.ru.md) | что идёт в комплекте |
 | [Спецификация стадии](stage-specification.ru.md) | контракт в YAML-докстроке |
 | [Схема и спецификации](schema-and-stage-specs.ru.md) | JSON Schema и метаданные для редактора |
+| [Ассистенты (MCP)](mcp.ru.md) | ассистент, который пишет пайплайны против вашего бэкенда |
 
 ## Разработка
 

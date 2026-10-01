@@ -69,6 +69,7 @@ apart in the order it was written.
 | [Built-in stages](built-in-stages.md) | what ships with the package |
 | [Stage specification](stage-specification.md) | the YAML docstring contract |
 | [Schema and stage specs](schema-and-stage-specs.md) | JSON Schema and editor metadata |
+| [Assistants (MCP)](mcp.md) | an assistant writing pipelines against your backend |
 
 ## Development
 

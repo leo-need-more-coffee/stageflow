@@ -79,6 +79,7 @@ nav:
       - Built-in stages: built-in-stages.md
       - Stage specification: stage-specification.md
       - Schema and stage specs: schema-and-stage-specs.md
+      - Assistants (MCP): mcp.md
   - Development:
       - Releasing: releasing.md
 
@@ -155,6 +156,7 @@ plugins:
             Built-in stages: Встроенные стадии
             Stage specification: Спецификация стадии
             Schema and stage specs: Схема и спецификации
+            Assistants (MCP): Ассистенты (MCP)
             Development: Разработка
             Releasing: Релизы
 
