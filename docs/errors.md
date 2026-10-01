@@ -68,6 +68,28 @@ package:
 | `RegistryError` | `ValueError` | an unknown stage or node type |
 | `PolicyViolationError` | `PermissionError` | a stage or node type the [policy](policy.md) does not allow |
 
+## Both halves of a refusal name the place
+
+A graph is checked twice — the JSON Schema for its shape, the cross-graph rules
+for everything the shape cannot express — and both answer the same way: every
+problem at once, each with the place it belongs to in front of it.
+
+```
+PipelineDefinitionError: Pipeline schema validation failed:
+  guard.except[0]: 'next' is a required property;
+  guard.except[0]: Additional properties are not allowed ('then' was unexpected);
+  risky.arguments: Additional properties are not allowed ('oops' was unexpected)
+```
+
+The place is the node's `id` where there is one — what the author typed, and
+what a card shows in an editor; `nodes[4]` appears only when there is no id to
+use instead. Ten are listed and the rest are counted, because a list longer
+than that has stopped being a list.
+
+This is for whoever is fixing the graph, and they may be a long way from here:
+a status bar in an editor, or an assistant writing JSON through an API. One
+sentence about one problem with no location sends them to read the schema.
+
 One error is deliberately **not** in that tree. `BudgetExceeded` inherits
 `BaseException`, so `except Exception` does not see it and neither do `try`
 blocks or the retry machinery — a [budget](limits.md) a pipeline could catch

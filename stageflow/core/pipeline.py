@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from jsonschema import ValidationError as _SchemaError
-from jsonschema import validate as _json_validate
+from jsonschema import Draft202012Validator as _VALIDATOR
 
 from stageflow.docs.schema import load_pipeline_schema
 
@@ -14,6 +13,30 @@ from ..i18n import _
 from .nodes import EntryNode, Node
 from .policy import Policy
 from .typesys import TypeSystem
+
+
+#: How many shape problems are worth listing before the list stops helping.
+_MAX_SCHEMA_ERRORS = 10
+
+
+def _located(data: dict, exc) -> str:
+    """One schema complaint with the place it belongs to in front of it.
+
+    The place is the node's `id` when the path runs through `nodes`, because an
+    index is something the author has to count and an id is something they
+    wrote. Anything else keeps the dotted path it came with.
+    """
+    path = list(exc.absolute_path)
+    where = ""
+    if len(path) >= 2 and path[0] == "nodes" and isinstance(path[1], int):
+        node = (data.get("nodes") or [])[path[1]] if path[1] < len(data.get("nodes") or []) else {}
+        named = node.get("id") if isinstance(node, dict) else None
+        rest = "".join(f"[{p}]" if isinstance(p, int) else f".{p}" for p in path[2:])
+        where = f"{named or f'nodes[{path[1]}]'}{rest}"
+    elif path:
+        where = "".join(f"[{p}]" if isinstance(p, int) else (f".{p}" if i else str(p))
+                        for i, p in enumerate(path))
+    return f"{where}: {exc.message}" if where else exc.message
 
 
 class Pipeline:
@@ -62,18 +85,36 @@ class Pipeline:
 
     @staticmethod
     def _check_schema(data: dict, schema: dict, sub_id: str | None = None) -> None:
-        try:
-            _json_validate(instance=data, schema=schema)
-        except _SchemaError as exc:
-            # a whole sentence per case rather than a noun filled into one —
-            # the reason is in `registry.py`
-            if sub_id is None:
-                message = _("Pipeline schema validation failed: {reason}",
-                            reason=exc.message)
-            else:
-                message = _("Subpipeline '{name}' schema validation failed: {reason}",
-                            name=sub_id, reason=exc.message)
-            raise PipelineDefinitionError(message) from exc
+        """Everything wrong with the SHAPE of a pipeline, at once and located.
+
+        Two things the first-error-only version could not do, and both of them
+        are what the author of a graph actually needs.
+
+        It says WHERE. `'next' is a required property` is a true sentence about
+        a graph with forty nodes and a useless one; `nodes[4].except[0]: 'next'
+        is a required property` names the thing to go and fix. The path is the
+        node's id where there is one, because that is what the author typed and
+        what the editor shows — an index means counting.
+
+        And it says everything, the way the cross-graph checks already do (see
+        `collect_errors`). A shape is usually wrong in the same way in several
+        places, and fixing them one round trip at a time is the difference
+        between a correction and a conversation.
+        """
+        found = sorted(_VALIDATOR(schema).iter_errors(data), key=lambda e: list(e.absolute_path))
+        if not found:
+            return
+        reason = "; ".join(_located(data, exc) for exc in found[:_MAX_SCHEMA_ERRORS])
+        if len(found) > _MAX_SCHEMA_ERRORS:
+            reason += _("; and {more} more", more=len(found) - _MAX_SCHEMA_ERRORS)
+        # a whole sentence per case rather than a noun filled into one —
+        # the reason is in `registry.py`
+        if sub_id is None:
+            message = _("Pipeline schema validation failed: {reason}", reason=reason)
+        else:
+            message = _("Subpipeline '{name}' schema validation failed: {reason}",
+                        name=sub_id, reason=reason)
+        raise PipelineDefinitionError(message) from found[0]
 
     def has_node(self, node_id: str) -> bool:
         return node_id in self._nodes_map
