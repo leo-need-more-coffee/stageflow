@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING, Any
 
 from ...exceptions import PipelineDefinitionError, StageOutputError, TypeCheckError
@@ -8,6 +7,7 @@ from ...i18n import _
 from ..context import Context
 from .base import Node, register_node
 from .bindings import normalize_bucket
+from .fanout import run_children
 from .recovery import error_name, run_with_retry
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -216,33 +216,26 @@ class MapNode(Node):
     async def _run_parallel(
         self, session: "Session", ctx: Context, scope: frozenset[str], items: list
     ) -> list[Context | None]:
-        tasks = [
-            asyncio.create_task(self._run_item(session, ctx, scope, index, item))
-            for index, item in enumerate(items)
-        ]
-        if not tasks:
+        if not items:
             return []
-
-        mode = asyncio.FIRST_EXCEPTION if self.cancel_on_error else asyncio.ALL_COMPLETED
-        try:
-            _, pending = await asyncio.wait(tasks, return_when=mode)
-        except asyncio.CancelledError:
-            for task in tasks:
-                task.cancel()
-            raise
-        if pending:
-            cancelled = [index for index, task in enumerate(tasks) if task in pending]
-            for task in pending:
-                task.cancel()
-            await asyncio.gather(*pending, return_exceptions=True)
+        tasks, cancelled = await run_children(
+            session,
+            {
+                index: (lambda index=index, item=item:
+                        self._run_item(session, ctx, scope, index, item))
+                for index, item in enumerate(items)
+            },
+            self.cancel_on_error,
+        )
+        if cancelled:
             session.emit_node_event("map_cancelled", self, {"items": sorted(cancelled)})
 
-        for index, task in enumerate(tasks):
+        for index, task in tasks.items():
             if task.cancelled() or task.exception() is None:
                 continue
             self._emit_failure(session, index, task.exception())
             raise task.exception()
-        return [None if task.cancelled() else task.result() for task in tasks]
+        return [None if task.cancelled() else task.result() for task in tasks.values()]
 
     async def _run_item(
         self,

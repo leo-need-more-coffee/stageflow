@@ -1,10 +1,30 @@
 from __future__ import annotations
 
 import asyncio
+import contextvars
 import time
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
 from typing import AsyncIterator, Iterator
+
+
+class _Ticket:
+    """One unit a task holds — or held, until it gave it back for a wait."""
+
+    __slots__ = ("held",)
+
+    def __init__(self) -> None:
+        self.held = True
+
+
+#: The slots the current task holds, by meter. A context variable because a
+#: task is what holds one: `asyncio.create_task` copies the context, so a
+#: child task starts out believing it holds whatever its parent held — which
+#: is why children are only ever created inside `Budget.released`, where the
+#: parent has given its slot back and the copy says so.
+_HOLDING: contextvars.ContextVar[dict[str, _Ticket]] = contextvars.ContextVar(
+    "stageflow_budget_holding", default={}
+)
 
 
 class BudgetExceeded(BaseException):
@@ -112,6 +132,25 @@ class Budget:
         self._idle: float = 0.0
         self._idle_since: float | None = None
         self._idle_depth = 0
+        #: busy time spent before this object existed — a session restored
+        #: from a snapshot carries on from what it had already used
+        self._carried: float = 0.0
+
+    def restore(self, spent: dict[str, float] | None) -> None:
+        """Carry the running total over from a snapshot's `meters`.
+
+        Without it a session restored mid-run starts from zero, and stopping
+        and restoring a session is a way to get a fresh allowance whenever the
+        old one runs out. Only counters travel: gauges are instantaneous and
+        nothing is being held by a session that is not running.
+        """
+        for meter, amount in (spent or {}).items():
+            if meter.startswith("peak_"):
+                continue
+            if meter == "seconds":
+                self._carried = float(amount)
+            else:
+                self.counters[meter] = float(amount)
 
     # ------------------------------------------------------------- the clock
 
@@ -137,7 +176,7 @@ class Budget:
         if self._started is None:
             return 0.0
         until = self._stopped if self._stopped is not None else time.monotonic()
-        return until - self._started - self.idle_seconds
+        return self._carried + until - self._started - self.idle_seconds
 
     def begin_idle(self) -> None:
         """Stop the clock: from here the session is waiting, not working.
@@ -249,21 +288,92 @@ class Budget:
         not have a hundred calls in the air at once. Failing it would refuse
         legitimate work for being wide; holding it back runs the same work
         within the allowance.
+
+        Re-entrant within a task: a sequential `map` inside a `parallel`
+        branch runs in the branch's own task and adds no concurrency, so it
+        does not take a second unit. A task waiting for children of its own
+        gives its unit back for the wait — see `released`.
         """
-        limit = self.limits.gauges.get(meter)
-        if limit is None:
-            with self._hold(meter):
-                yield
+        if meter in _HOLDING.get():
+            yield
             return
+        await self._acquire(meter)
+        ticket = _Ticket()
+        token = _HOLDING.set({**_HOLDING.get(), meter: ticket})
+        try:
+            yield
+        finally:
+            _HOLDING.reset(token)
+            # not held when taking it back after a wait was cut short — by a
+            # cancellation or the deadline — and then there is nothing to give
+            if ticket.held:
+                self._release(meter)
+
+    @asynccontextmanager
+    async def released(self, meter: str = "concurrency") -> AsyncIterator[None]:
+        """Give this task's unit back while it waits for its children.
+
+        A `parallel` branch that runs a `map` holds a unit and then waits for
+        items that each need one. With the limit at 1 that is a deadlock, and
+        with any limit it is one as soon as the nesting is wider than the
+        allowance — the waiting parent occupies the very unit its children
+        need. A task that is waiting is not working, so for the length of the
+        wait it is not counted: the limit bounds the work actually in the
+        air, and the parent takes its unit back once the children are done.
+
+        Children must be created *inside* this block: they copy the context,
+        and only here does it say the parent holds nothing.
+        """
+        ticket = _HOLDING.get().get(meter)
+        if ticket is None or not ticket.held:
+            yield
+            return
+        self._release(meter)
+        ticket.held = False
+        token = _HOLDING.set({k: v for k, v in _HOLDING.get().items() if k != meter})
+        try:
+            yield
+        finally:
+            _HOLDING.reset(token)
+            await self._acquire(meter)
+            ticket.held = True
+
+    async def _acquire(self, meter: str) -> None:
+        limit = self.limits.gauges.get(meter)
+        if limit is not None:
+            slot = self._slots.get(meter)
+            if slot is None:
+                # a throttle of nothing would deadlock, so nonsense serialises
+                slot = self._slots[meter] = asyncio.Semaphore(max(1, int(limit)))
+            await self._within_deadline(slot.acquire())
+        # the semaphore is the enforcement; holding only records the peak, or
+        # the two would have to agree about the boundary twice
+        held = self._held.get(meter, 0.0) + 1
+        self._held[meter] = held
+        self.peaks[meter] = max(self.peaks.get(meter, 0.0), held)
+
+    def _release(self, meter: str) -> None:
+        self._held[meter] = self._held.get(meter, 0.0) - 1
         slot = self._slots.get(meter)
-        if slot is None:
-            # a throttle of nothing would deadlock, so nonsense serialises
-            slot = self._slots[meter] = asyncio.Semaphore(max(1, int(limit)))
-        async with slot:
-            # the semaphore is the enforcement here; holding only records the
-            # peak, or the two would have to agree about the boundary twice
-            with self._hold(meter):
-                yield
+        if slot is not None:
+            slot.release()
+
+    async def _within_deadline(self, waiting) -> None:
+        """Wait for a turn, but not past the session's deadline.
+
+        The deadline is otherwise checked between nodes, and a task waiting
+        for a unit is between nothing: without this, a run whose units are
+        all taken would wait for as long as they are, whatever `seconds` says.
+        """
+        left = self.remaining_seconds()
+        if left is None:
+            await waiting
+            return
+        try:
+            await asyncio.wait_for(waiting, timeout=max(left, 0))
+        except asyncio.TimeoutError:
+            raise BudgetExceeded("seconds", self.deadline_seconds,
+                                 self.busy_seconds) from None
 
     @contextmanager
     def gauge(self, meter: str, amount: float = 1) -> Iterator[None]:

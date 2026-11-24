@@ -171,10 +171,23 @@ class SlotTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_an_unlimited_slot_lets_everything_through(self):
         budget = Budget()
+
+        async def worker():
+            async with budget.slot("concurrency"):
+                await asyncio.sleep(0.01)
+
+        await asyncio.gather(worker(), worker())
+        self.assertEqual(budget.report()["peak_concurrency"], 2)
+
+    async def test_a_slot_is_reentrant_within_one_task(self):
+        # a sequential loop inside a branch runs in the branch's task and adds
+        # no concurrency: it must not need — and with the limit at 1, wait
+        # forever for — a second unit
+        budget = Budget(Limits(gauges={"concurrency": 1}))
         async with budget.slot("concurrency"):
             async with budget.slot("concurrency"):
                 pass
-        self.assertEqual(budget.report()["peak_concurrency"], 2)
+        self.assertEqual(budget.report()["peak_concurrency"], 1)
 
     async def test_a_slot_is_released_when_the_body_raises(self):
         budget = Budget(Limits(gauges={"concurrency": 1}))

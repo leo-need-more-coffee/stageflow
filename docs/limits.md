@@ -43,7 +43,19 @@ charge whatever they spent. `concurrency` is the one gauge that **waits**
 rather than failing: a hundred items to process is a good pipeline that may
 not have a hundred calls in the air at once, and refusing it for being wide
 would be refusing the work rather than bounding it. Depth and size do fail —
-too deep is too deep, and waiting would not help. **Meter names are not fixed by the core.** A host
+too deep is too deep, and waiting would not help.
+
+`concurrency` bounds the work **in the air**, nested or not. A `parallel`
+branch or a `map` item holds one unit while it runs; a node that is waiting
+for children of its own — a branch that runs a `map`, an item that runs a
+`parallel` — gives its unit back for the wait and takes it again after. So a
+`map` inside a branch runs at `concurrency: 1` instead of waiting for a unit
+its own parent holds, and a sequential loop inside a branch takes no second
+unit at all: it adds no concurrency. Waiting for a unit is still bounded by
+`seconds` — a run whose units are all taken ends on its deadline like any
+other.
+
+**Meter names are not fixed by the core.** A host
 counts what is scarce for it, and a meter nobody limits simply accumulates and
 comes back in `result.meters`, which is what a bill is made of.
 

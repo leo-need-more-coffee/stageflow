@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING
 
 from ...exceptions import BranchError
@@ -8,6 +7,7 @@ from ...i18n import _
 from ..budget import BudgetExceeded
 from ..context import Context
 from .base import Node, register_node
+from .fanout import first_failure, run_children
 from .recovery import run_with_retry
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -79,22 +79,19 @@ class ParallelNode(Node):
         async def body() -> tuple[Node | None, Context]:
             baseline_keys = ctx.var_names()
 
-            tasks = {
-                branch["id"]: asyncio.create_task(
-                    self._branch(session, branch["entry"], ctx)
-                )
-                for branch in self.branches
-            }
-            await self._wait_branches(session, tasks)
-
-            failure = next(
-                (
-                    (branch_id, task.exception())
-                    for branch_id, task in tasks.items()
-                    if not task.cancelled() and task.exception() is not None
-                ),
-                None,
+            tasks, cancelled = await run_children(
+                session,
+                {
+                    branch["id"]: (lambda entry=branch["entry"]: self._branch(session, entry, ctx))
+                    for branch in self.branches
+                },
+                self.cancel_on_error,
             )
+            if cancelled:
+                session.emit_node_event(
+                    "parallel_cancelled", self, {"branches": sorted(cancelled)}
+                )
+            failure = first_failure(tasks)
             if failure is not None:
                 branch_id, exc = failure
                 # BranchError is an ordinary exception and a `try` block can
@@ -105,19 +102,20 @@ class ParallelNode(Node):
                 raise BranchError(
                     _("branch '{branch}' failed: {reason}", branch=branch_id, reason=exc)
                 ) from exc
+            # a terminal in a branch has ended the run: the other branches are
+            # cancelled, and there is no `next` to go on to
+            if session.finished:
+                return None, ctx
 
-            merged = self._merge(
-                ctx, baseline_keys, {bid: task.result() for bid, task in tasks.items()}
-            )
+            results = {bid: task.result() for bid, task in tasks.items()}
+            merged = self._merge(ctx, baseline_keys, results)
             merged = self.apply_expose(session, merged)
             session.emit_node_event(
                 "parallel_completed",
                 self,
                 {
                     "merged": sorted(merged.var_names() - baseline_keys),
-                    "dropped": self._dropped(
-                        ctx, baseline_keys, {bid: task.result() for bid, task in tasks.items()}
-                    ),
+                    "dropped": self._dropped(ctx, baseline_keys, results),
                 },
             )
             return self._goto(session, self.next), merged
@@ -132,21 +130,6 @@ class ParallelNode(Node):
         """
         async with session.budget.slot("concurrency"):
             return await session.run_subgraph(entry, ctx)
-
-    async def _wait_branches(self, session: "Session", tasks: dict[str, asyncio.Task]) -> None:
-        mode = asyncio.FIRST_EXCEPTION if self.cancel_on_error else asyncio.ALL_COMPLETED
-        try:
-            _, pending = await asyncio.wait(tasks.values(), return_when=mode)
-        except asyncio.CancelledError:
-            for task in tasks.values():
-                task.cancel()
-            raise
-        if pending:
-            cancelled = [branch_id for branch_id, task in tasks.items() if task in pending]
-            for task in pending:
-                task.cancel()
-            await asyncio.gather(*pending, return_exceptions=True)
-            session.emit_node_event("parallel_cancelled", self, {"branches": sorted(cancelled)})
 
     def _merge(
         self,

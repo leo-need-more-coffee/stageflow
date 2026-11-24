@@ -25,6 +25,8 @@ EventHandler = Callable[[Event], None]
 
 _STOPPED_RESULT = {"result": "stopped"}
 
+_NO_FRAME = Context()
+
 #: How many events one session keeps. A cyclic graph emits tens of thousands
 #: a second, and an unbounded list is the cheapest way for a pipeline to take
 #: a process down — the log is a window, not an archive.
@@ -285,7 +287,9 @@ class Session:
             return {}
         amounts: dict[str, float] = {}
         for meter, spec in declared.items():
-            value = (self.cel.eval(spec, self.context, args=kwargs)
+            # over `args` only, as documented: a reservation is read before
+            # the stage runs and has to be knowable from what it is given
+            value = (self.cel.eval(spec, _NO_FRAME, args=kwargs)
                      if isinstance(spec, str) else spec)
             try:
                 amounts[meter] = float(value)
@@ -387,11 +391,16 @@ class Session:
 
     async def run_subgraph(self, start_id: str, ctx: Context) -> Context:
         node: Node | None = self.pipeline.get_node(start_id)
-        while node is not None:
+        # a terminal elsewhere — in a sibling branch — has ended the run
+        while node is not None and not self.finished:
             node, ctx = await self.execute_node(node, ctx)
         return ctx
 
     def finish(self, node: TerminalNode, ctx: Context) -> None:
+        # two branches of a `parallel` can both reach a terminal; the first
+        # one ends the run, and the second is not allowed to rewrite it
+        if self.finished:
+            return
         self.artifacts = {name: ctx.get_var(name) for name in node.artifacts}
         self.result = node.result
         self.finished = True
@@ -427,6 +436,9 @@ class Session:
                     self.result = dict(_STOPPED_RESULT)
                     break
                 node, ctx = step.result()
+                # kept current so that a snapshot taken between nodes resumes
+                # with the frame as it is, not as the run started
+                self.context = ctx
         except BudgetExceeded as over:
             # the one place that catches it. A pipeline cannot: `try` blocks
             # and `run_with_retry` catch Exception, and this is not one. The
@@ -500,6 +512,9 @@ class Session:
             "paused": self.paused,
             "skip_requested": self._skip_requested,
             "pipeline": self.pipeline.raw_json,
+            # what the run has spent, so that a restored one goes on from it
+            # rather than from a fresh allowance
+            "meters": self.budget.report(),
         }
 
     @classmethod
@@ -508,7 +523,18 @@ class Session:
         snapshot: dict,
         pipeline: Pipeline | None = None,
         event_handler: EventHandler | None = None,
+        *,
+        policy: Policy,
+        limits: Limits | None = None,
     ) -> "Session":
+        """Restore a session, under the policy the host gives it now.
+
+        `policy` is required, and is deliberately not part of the snapshot. A
+        snapshot is data — stored, passed around, possibly edited — and an
+        allowance read back out of data is one the data can widen. The host
+        says again what this session may do; `OPEN` is a valid answer, but it
+        has to be given. The spent meters do travel, and are carried over.
+        """
         if pipeline is None:
             raw = snapshot.get("pipeline")
             if not raw:
@@ -522,12 +548,18 @@ class Session:
             pipeline=pipeline,
             context=Context.from_dict(snapshot.get("context", {})),
             event_handler=event_handler,
+            policy=policy,
+            limits=limits,
         )
+        session.budget.restore(snapshot.get("meters"))
         session._current_node_id = snapshot.get("current_node_id")
         session.result = snapshot.get("result")
         session.artifacts = snapshot.get("artifacts", {})
         session.inputs.history.extend(snapshot.get("input_history", []))
-        session.event_history = [Event.from_dict(e) for e in snapshot.get("event_history", [])]
+        session.event_history = deque(
+            (Event.from_dict(e) for e in snapshot.get("event_history", [])),
+            maxlen=EVENT_HISTORY,
+        )
         session._skip_requested = snapshot.get("skip_requested", False)
         if snapshot.get("stopped", False):
             session._stop_requested.set()
