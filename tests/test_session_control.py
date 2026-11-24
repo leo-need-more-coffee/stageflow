@@ -13,6 +13,14 @@ class SlowStage(BaseStage):
         self.set_outputs({"done": True})
 
 
+@register_stage("StubbornStage")
+class StubbornStage(BaseStage):
+    """Cannot be skipped: `skipable` is False by default."""
+
+    async def run(self):
+        self.set_outputs({"done": True})
+
+
 def _slow_pipeline() -> Pipeline:
     return Pipeline.from_dict({
         "entry": "slow",
@@ -83,6 +91,60 @@ class SessionControlTests(unittest.IsolatedAsyncioTestCase):
         result = await asyncio.wait_for(session.run(), timeout=1.0)
         self.assertEqual(result.result, {"status": "ok"})
         self.assertIn("stage_skipped", [e.type for e in session.event_history])
+
+    async def test_a_skip_says_which_node_and_stage(self):
+        session = Session(id="skip2", pipeline=_slow_pipeline(), context=Context())
+        session.request_skip()
+        await asyncio.wait_for(session.run(), timeout=1.0)
+        skipped = [e for e in session.event_history if e.type == "stage_skipped"]
+        self.assertEqual([(e.stage_id, e.payload) for e in skipped],
+                         [("slow", {"stage": "SlowStage"})])
+
+    async def test_skipping_the_last_node_ends_the_run(self):
+        # a stage with no `next` is the end of the graph, skipped or not
+        session = Session(id="skip3", pipeline=Pipeline.from_dict({
+            "entry": "slow",
+            "nodes": [{"id": "slow", "type": "stage", "stage": "SlowStage"}],
+        }), context=Context())
+        session.request_skip()
+        result = await asyncio.wait_for(session.run(), timeout=1.0)
+        self.assertIsNone(result.result)
+        self.assertIn("stage_skipped", [e.type for e in session.event_history])
+
+    async def test_a_stage_that_cannot_be_skipped_runs_and_says_so(self):
+        session = Session(id="deny", pipeline=Pipeline.from_dict({
+            "entry": "s",
+            "nodes": [
+                {"id": "s", "type": "stage", "stage": "StubbornStage",
+                 "outputs": {"done": "done"}, "next": "end"},
+                {"id": "end", "type": "terminal", "artifacts": ["done"]},
+            ],
+        }), context=Context())
+        session.request_skip()
+        result = await asyncio.wait_for(session.run(), timeout=1.0)
+        self.assertIs(result.artifacts["done"], True)
+        denied = [e for e in session.event_history if e.type == "skip_denied"]
+        self.assertEqual([(e.stage_id, e.payload) for e in denied],
+                         [("s", {"stage": "StubbornStage"})])
+        # the request is used up: it does not skip a later stage instead
+        self.assertNotIn("stage_skipped", [e.type for e in session.event_history])
+
+    async def test_one_request_skips_one_stage(self):
+        session = Session(id="once", pipeline=Pipeline.from_dict({
+            "entry": "a",
+            "nodes": [
+                {"id": "a", "type": "stage", "stage": "SlowStage", "next": "b"},
+                {"id": "b", "type": "stage", "stage": "SlowStage",
+                 "arguments": {"const": {"seconds": 0}}, "outputs": {"done": "done"},
+                 "next": "end"},
+                {"id": "end", "type": "terminal", "artifacts": ["done"]},
+            ],
+        }), context=Context())
+        session.request_skip()
+        result = await asyncio.wait_for(session.run(), timeout=1.0)
+        skipped = [e.stage_id for e in session.event_history if e.type == "stage_skipped"]
+        self.assertEqual(skipped, ["a"])
+        self.assertIs(result.artifacts["done"], True)
 
 
 if __name__ == "__main__":

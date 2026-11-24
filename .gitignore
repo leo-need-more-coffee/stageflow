@@ -39,3 +39,6 @@ site/
 
 # Hypothesis example database
 .hypothesis/
+
+# Mutation testing (mutmut)
+mutants/

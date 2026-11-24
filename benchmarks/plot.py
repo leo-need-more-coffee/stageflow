@@ -157,6 +157,29 @@ def frame(new: dict) -> None:
     save(fig, "frame.png")
 
 
+def memory(new: dict) -> None:
+    rows = [r for r in new.get("memory", []) if r["case"] == "chain"]
+    if not rows:
+        return
+    fig, ax = plt.subplots(figsize=(7, 3.8))
+    xs = [r["size"] for r in rows]
+    ys = [r["peak_kib"] / 1024 for r in rows]
+    ax.plot(xs, ys, color=NEW, marker="o")
+    for x, y in zip(xs, ys):
+        ax.annotate(f"{y:.1f} MiB", (x, y), xytext=(0, 9), textcoords="offset points",
+                    ha="center", color=INK_2)
+    cap = max(ys)
+    ax.axhline(cap, color=OLD, linewidth=1, linestyle="--", zorder=0)
+    ax.text(xs[0], cap * 1.04, "event history full: 10,000 events", color=INK_2, va="bottom")
+    ax.set_xscale("log")
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.0f}"))
+    ax.set_ylim(0, cap * 1.35)
+    ax.set_xlabel("nodes walked in one run")
+    ax.set_ylabel("peak memory of the run, MiB")
+    ax.set_title("A long run's memory stops growing")
+    save(fig, "memory.png")
+
+
 def main() -> int:
     new = load(HERE / "results.json")
     baseline = HERE / "baseline-0.14.1.json"
@@ -167,6 +190,7 @@ def main() -> int:
     overhead(new)
     map_scaling(new)
     frame(new)
+    memory(new)
     return 0
 
 

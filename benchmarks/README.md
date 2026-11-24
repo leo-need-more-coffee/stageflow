@@ -71,10 +71,33 @@ The frame is a HAMT (`immutables.Map`): a write is a new frame that shares
 almost everything with the old one. 300 ns per write with 10 variables, 456 ns
 with a million — logarithmic, as it should be.
 
+## Memory
+
+![A long run's memory stops growing](results/memory.png)
+
+`tracemalloc` around `Session.run()`, with the session built beforehand so
+the graph's validation is not counted.
+
+| run | peak | kept after the run |
+|---|---|---|
+| chain of 100 nodes | 69 KiB | 68 KiB |
+| chain of 1 000 | 660 KiB | 659 KiB |
+| chain of 10 000 | 3.2 MiB | 3.2 MiB |
+| chain of 50 000 | 3.2 MiB | 3.2 MiB |
+| sequential `map` over 10 000 items | 5.7 MiB | 3.7 MiB |
+| a ~1 MiB list carried through 1 000 stages | 659 KiB | 658 KiB |
+
+Almost all of it is the event history: about 330 bytes per event, two events
+per stage. The history is a window of the last 10 000 events
+(`EVENT_HISTORY`), so once it is full a run stops growing however long it
+goes on. A `map` also holds the list it collects, which is its result.
+
+The last row is the frame at work: a list of a megabyte, written into the
+frame and passed from stage to stage a thousand times, costs nothing beyond
+the run itself — every stage gets the same object, nothing is copied.
+
 ## Not measured here
 
-- Real stages: an LLM call is hundreds of milliseconds, a database query
-  milliseconds. Against that, a few microseconds of framework per node is noise;
-  the point of these numbers is that the framework is never the bottleneck.
-- Memory. Every frame is shared structurally, so a long run holds little more
-  than its largest frame; not benchmarked yet.
+Real stages: an LLM call is hundreds of milliseconds, a database query
+milliseconds. Against that, a few microseconds of framework per node is noise;
+the point of these numbers is that the framework is never the bottleneck.

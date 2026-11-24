@@ -14,6 +14,7 @@ from stageflow import (
     register_stage,
 )
 from stageflow.exceptions import ArtifactNotFoundError, StageOutputError
+from stageflow.testing import isolated_stages
 
 
 @register_stage("EchoStage")
@@ -24,6 +25,10 @@ class EchoStage(BaseStage):
 
 
 class SessionFlowTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        # the tests register stages of their own
+        self.enterContext(isolated_stages())
+
     async def test_stage_success_and_outputs(self):
         nodes = [
             StageNode(

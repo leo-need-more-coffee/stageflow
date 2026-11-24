@@ -2,6 +2,7 @@ import unittest
 
 from stageflow import BaseStage, Context, Limits, Pipeline, Session, register_stage
 from stageflow.exceptions import StageContractError
+from stageflow.testing import isolated_stages
 
 
 @register_stage("FixedPriceStage")
@@ -236,6 +237,10 @@ class FailureTests(unittest.IsolatedAsyncioTestCase):
 
 
 class GateTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        # the tests register stages of their own
+        self.enterContext(isolated_stages())
+
     async def test_the_stage_is_not_even_constructed_when_it_cannot_be_paid(self):
         started = []
 

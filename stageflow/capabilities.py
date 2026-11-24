@@ -3,6 +3,7 @@ from __future__ import annotations
 from importlib.metadata import PackageNotFoundError, version as _package_version
 from typing import Any
 
+from .core.migrations import FORMAT_VERSION
 from .core.nodes import get_node_types
 from .core.policy import Policy
 from .core.stage import get_stages
@@ -27,6 +28,8 @@ def capabilities(policy: Policy | None = None) -> dict[str, Any]:
     """What this build supports, or what a caller may use under `policy`.
 
     - `stageflow`: the core version (informational);
+    - `format`: the pipeline format version this core reads and writes; a
+      client saving a pipeline should put it in the document's `version`;
     - `node_types`: node types a pipeline may use, sorted. Clients should
       check this rather than the version: other types are rejected;
     - `stages`: how many stages may be used (the specs are served separately);
@@ -44,6 +47,7 @@ def capabilities(policy: Policy | None = None) -> dict[str, Any]:
         stages = [name for name in stages if policy.allows_stage(name)]
     return {
         "stageflow": __version__,
+        "format": FORMAT_VERSION,
         "node_types": node_types,
         "stages": len(stages),
         "locales": available_locales(),

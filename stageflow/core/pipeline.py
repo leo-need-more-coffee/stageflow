@@ -20,6 +20,7 @@ from ..exceptions import (
     TypeDeclarationError,
 )
 from ..i18n import _
+from .migrations import migrate
 from .nodes import EntryNode, Node
 from .policy import Policy
 from .typesys import TypeSystem
@@ -145,6 +146,10 @@ class Pipeline:
 
     @classmethod
     def from_dict(cls, data: dict) -> "Pipeline":
+        """Parse a pipeline document. An older format version is upgraded
+        first (see `core/migrations.py`); `raw_json` holds the upgraded one."""
+        if isinstance(data, dict):
+            data = migrate(data)
         schema = load_pipeline_schema()
         cls._check_schema(data, schema)
 

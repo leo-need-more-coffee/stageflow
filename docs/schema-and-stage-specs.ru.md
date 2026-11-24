@@ -37,7 +37,7 @@ stages = generate_stages_json(get_stages())       # спеки стадий дл
 from stageflow import capabilities, __version__
 
 capabilities()
-# {"stageflow": "0.10.0",
+# {"stageflow": "0.16.0", "format": 1,
 #  "node_types": ["condition", "entry", "map", "parallel", "stage",
 #                 "subpipeline", "switch", "terminal", "try"],
 #  "stages": 17}
@@ -54,7 +54,7 @@ capabilities()
 `GET /api/meta`, вместе с версией собственного HTTP-контракта:
 
 ```json
-{ "api": 1, "stageflow": "0.10.0", "node_types": ["condition", "…"], "stages": 17 }
+{ "api": 1, "stageflow": "0.16.0", "format": 1, "node_types": ["condition", "…"], "stages": 17 }
 ```
 
 `__version__` читается из установленного дистрибутива. В чекауте, который
@@ -62,3 +62,29 @@ capabilities()
 номер, чтобы его никто не сравнивал с настоящими.
 
 ![Редактор, работающий на спецификациях бэкенда](img/tut-final.png)
+
+## Версия формата
+
+Документ пайплайна может указать, в каком формате он записан:
+
+```json
+{ "version": 1, "nodes": [ … ] }
+```
+
+Документ без `version` считается версией 1. `capabilities()["format"]` — версия,
+которую ядро читает и пишет; редактор должен ставить её в каждый сохраняемый
+документ.
+
+Когда формат меняется несовместимо, версия растёт, а в ядре появляется
+обновление с предыдущей (`stageflow/core/migrations.py`). `Pipeline.from_dict`
+применяет обновления по очереди, поэтому пайплайн, сохранённый давно, всё
+равно загрузится; `pipeline.raw_json` хранит уже обновлённый документ, его
+можно сохранить обратно. Документ версии новее, чем ядро, отвергается с
+понятным сообщением — «сохранён более новым StageFlow», — а не жалобой на
+первое попавшееся незнакомое поле.
+
+```python
+from stageflow.core.migrations import FORMAT_VERSION, migrate
+
+migrate(old_document)          # копия в FORMAT_VERSION; исходный документ не меняется
+```

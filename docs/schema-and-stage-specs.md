@@ -37,7 +37,7 @@ one directly:
 from stageflow import capabilities, __version__
 
 capabilities()
-# {"stageflow": "0.13.0",
+# {"stageflow": "0.16.0", "format": 1,
 #  "node_types": ["condition", "entry", "map", "parallel", "stage",
 #                 "subpipeline", "switch", "terminal", "try"],
 #  "stages": 17}
@@ -48,7 +48,7 @@ which is what a backend should serve rather than a description of itself:
 
 ```python
 capabilities(basic_plan)
-# {"stageflow": "0.13.0",
+# {"stageflow": "0.16.0", "format": 1,
 #  "node_types": ["condition", "entry", "stage", "switch", "terminal"],
 #  "stages": 5}
 ```
@@ -63,7 +63,7 @@ A backend is expected to hand this to its clients. The example backend serves
 it at `GET /api/meta`, together with the version of its own HTTP contract:
 
 ```json
-{ "api": 1, "stageflow": "0.13.0", "node_types": ["condition", "…"], "stages": 17 }
+{ "api": 1, "stageflow": "0.16.0", "format": 1, "node_types": ["condition", "…"], "stages": 17 }
 ```
 
 `__version__` is read from the installed distribution. In a source checkout
@@ -72,3 +72,28 @@ plausible number, so that nobody compares it with one.
 
 ![The editor working off a backend's specs](img/tut-final.png)
 
+## Format version
+
+A pipeline document may say which format it is written in:
+
+```json
+{ "version": 1, "nodes": [ … ] }
+```
+
+A document without `version` is version 1. `capabilities()["format"]` is the
+version this core reads and writes, and an editor should put it in every
+document it saves.
+
+When the format changes incompatibly, the version goes up and the core gets
+an upgrade from the previous one (`stageflow/core/migrations.py`).
+`Pipeline.from_dict` applies the upgrades in turn, so a pipeline saved years
+ago still loads; `pipeline.raw_json` holds the upgraded document, ready to be
+saved back. A document of a version newer than the core is refused with a
+message that says so — "saved by a newer StageFlow" — rather than with a
+complaint about whichever unknown field the schema trips on first.
+
+```python
+from stageflow.core.migrations import FORMAT_VERSION, migrate
+
+migrate(old_document)          # a copy at FORMAT_VERSION; the input is untouched
+```

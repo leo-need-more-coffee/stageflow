@@ -11,6 +11,7 @@ from stageflow import (
     Session,
     register_stage,
 )
+from stageflow.testing import isolated_stages
 
 
 @register_stage("SpenderStage")
@@ -406,6 +407,10 @@ class BudgetSharingTests(unittest.IsolatedAsyncioTestCase):
 
 
 class ClampTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        # the tests register stages of their own
+        self.enterContext(isolated_stages())
+
     async def test_the_pipelines_retry_is_a_request_not_a_setting(self):
         attempts = {"n": 0}
 
@@ -738,6 +743,10 @@ class StageTimeoutTests(unittest.IsolatedAsyncioTestCase):
 
 class NoRegressionTests(unittest.IsolatedAsyncioTestCase):
     """Ordinary error handling still works with a budget in the way."""
+
+    def setUp(self):
+        # the tests register stages of their own
+        self.enterContext(isolated_stages())
 
     async def test_a_try_block_still_catches_an_ordinary_failure(self):
         data = {"entry": "start", "nodes": [

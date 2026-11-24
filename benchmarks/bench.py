@@ -18,6 +18,7 @@ What each benchmark answers:
 - frame        writing into a frame that already holds N variables
 - load         Pipeline.from_dict + validate for graphs of N nodes
 - cel          condition evaluation, with the compiled-expression cache
+- memory       peak memory of a run, and what a finished run keeps (tracemalloc)
 """
 from __future__ import annotations
 
@@ -28,6 +29,7 @@ import platform
 import statistics
 import sys
 import time
+import tracemalloc
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
@@ -317,6 +319,55 @@ async def bench_cel(quick: bool) -> list[dict]:
     return rows
 
 
+async def traced(make: Callable[[], Awaitable[Any]]) -> tuple[Any, float, float]:
+    """Run once under tracemalloc: (result, peak KiB, KiB still held by the
+    result). The result is kept alive while the second number is taken."""
+    tracemalloc.start()
+    try:
+        base = tracemalloc.get_traced_memory()[0]
+        result = await make()
+        held, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+    return result, (peak - base) / 1024, (held - base) / 1024
+
+
+async def bench_memory(quick: bool) -> list[dict]:
+    """Memory, not time. Three questions:
+
+    - does a run's memory grow with the number of nodes it walked?
+    - does a big value passed along a chain get copied at every node?
+    - how much does a finished run keep (its result and event history)?
+
+    The session is built before measuring, so its validation of the graph
+    is not counted; `peak_kib` is the run alone.
+    """
+    from stageflow.core.session import EVENT_HISTORY
+
+    async def case(name: str, size: int, data: dict) -> dict:
+        pipeline = Pipeline.from_dict(data)
+        await Session(id="m", pipeline=pipeline).run()  # warm-up: caches
+        session = Session(id="m", pipeline=pipeline)
+        _, peak, held = await traced(session.run)
+        return {"case": name, "size": size, "peak_kib": peak, "held_kib": held,
+                "bytes_per_node": peak * 1024 / size,
+                "events_kept": len(session.event_history)}
+
+    rows = []
+    for n in (sizes(100, 1000, 10_000) if quick else sizes(100, 1000, 10_000, 50_000)):
+        rows.append(await case("chain", n, chain(n)))
+    for n in ([100, 1000] if quick else [100, 1000, 10_000]):
+        rows.append(await case("sequential map", n, map_graph(n, "sequential")))
+
+    # A ~1 MiB value walked through 1000 stages: a copy per node would be a
+    # gigabyte. The value is built before measuring, so only copies count.
+    data = chain(1000)
+    data["nodes"][0]["variables"] = {"x": list(range(130_000))}
+    rows.append(await case("1 MiB value, 1000 stages", 1000, data))
+    assert all(row["events_kept"] <= EVENT_HISTORY for row in rows)
+    return rows
+
+
 BENCHMARKS = {
     "chain": bench_chain,
     "overhead": bench_overhead,
@@ -326,6 +377,7 @@ BENCHMARKS = {
     "frame": bench_frame,
     "load": bench_load,
     "cel": bench_cel,
+    "memory": bench_memory,
 }
 
 
@@ -394,6 +446,11 @@ def main() -> int:
     asyncio.run(run_all())
     machine = machine_info()
     args.out.mkdir(parents=True, exist_ok=True)
+    previous = args.out / "results.json"
+    if args.only and previous.exists():
+        # a partial run updates the benchmarks it ran and keeps the rest
+        kept = json.loads(previous.read_text()).get("results", {})
+        results = {**kept, **results}
     (args.out / "results.json").write_text(
         json.dumps({"machine": machine, "quick": args.quick, "results": results}, indent=2))
     report = as_markdown(results, machine)

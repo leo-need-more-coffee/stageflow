@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: StageFlow 0.13.0\n"
+"Project-Id-Version: StageFlow 0.15.0\n"
 "Report-Msgid-Bugs-To: https://github.com/leo-need-more-coffee/stageflow/issues\n"
-"POT-Creation-Date: 2026-10-01 21:29+0000\n"
+"POT-Creation-Date: 2026-11-24 15:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,11 +43,11 @@ msgstr ""
 msgid "{stage}: argument '{field}' is required"
 msgstr ""
 
-#: stageflow/builtins/lists.py:172
+#: stageflow/builtins/lists.py:195
 msgid "PopListStage: cannot pop from an empty list"
 msgstr ""
 
-#: stageflow/builtins/lists.py:180
+#: stageflow/builtins/lists.py:203
 #, python-brace-format
 msgid "PopListStage: index {index} is out of range for a list of length {length}"
 msgstr ""
@@ -70,29 +70,46 @@ msgid ""
 "(available: {available})"
 msgstr ""
 
-#: stageflow/core/cel.py:32
+#: stageflow/core/cel.py:36
 msgid ""
 "No CEL backend found. Install 'common-expression-language' (recommended) or 'cel-"
 "python'."
 msgstr ""
 
-#: stageflow/core/cel.py:51
+#: stageflow/core/cel.py:55
 #, python-brace-format
 msgid "Cannot compile CEL {expr}: {reason}"
 msgstr ""
 
-#: stageflow/core/cel.py:82
+#: stageflow/core/cel.py:86
 #, python-brace-format
 msgid "Cannot evaluate CEL {expr}: {reason}"
 msgstr ""
 
-#: stageflow/core/context.py:43
+#: stageflow/core/context.py:47
 msgid "Snapshot contains the 'local' scope (pre-0.7.0); the frame is now called 'vars'"
 msgstr ""
 
-#: stageflow/core/debug.py:130
+#: stageflow/core/debug.py:134
 #, python-brace-format
 msgid "debugger before node '{node}'"
+msgstr ""
+
+#: stageflow/core/migrations.py:42
+#, python-brace-format
+msgid "Pipeline 'version' must be a positive integer, got {value}"
+msgstr ""
+
+#: stageflow/core/migrations.py:58
+#, python-brace-format
+msgid ""
+"The pipeline is format version {version}, but this StageFlow reads up to version "
+"{supported}: it was saved by a newer StageFlow"
+msgstr ""
+
+#: stageflow/core/migrations.py:70
+#, python-brace-format
+msgid "No upgrade from pipeline format version {version}"
 msgstr ""
 
 #: stageflow/core/payload_schema.py:24
@@ -110,162 +127,162 @@ msgstr ""
 msgid "{path} expected {expected}, got {got}"
 msgstr ""
 
-#: stageflow/core/pipeline.py:73
+#: stageflow/core/pipeline.py:164
 #, python-brace-format
 msgid "Invalid type declarations: {reason}"
 msgstr ""
 
-#: stageflow/core/pipeline.py:109
+#: stageflow/core/pipeline.py:189
 #, python-brace-format
 msgid "; and {more} more"
 msgstr ""
 
-#: stageflow/core/pipeline.py:113
+#: stageflow/core/pipeline.py:193
 #, python-brace-format
 msgid "Pipeline schema validation failed: {reason}"
 msgstr ""
 
-#: stageflow/core/pipeline.py:115
+#: stageflow/core/pipeline.py:195
 #, python-brace-format
 msgid "Subpipeline '{name}' schema validation failed: {reason}"
 msgstr ""
 
-#: stageflow/core/pipeline.py:127
+#: stageflow/core/pipeline.py:207
 #, python-brace-format
 msgid "Node with id '{node}' not found in pipeline"
 msgstr ""
 
-#: stageflow/core/pipeline.py:158
+#: stageflow/core/pipeline.py:238
 #, python-brace-format
 msgid "more than one entry node: {nodes} — there must be exactly one"
 msgstr ""
 
-#: stageflow/core/pipeline.py:163
+#: stageflow/core/pipeline.py:243
 #, python-brace-format
 msgid "{node}: this entry node is not the pipeline entry point (entry = '{entry}')"
 msgstr ""
 
-#: stageflow/core/pipeline.py:169
+#: stageflow/core/pipeline.py:249
 #, python-brace-format
 msgid "{node}: jumping into the entry node '{entry}' is not allowed"
 msgstr ""
 
-#: stageflow/core/pipeline.py:181
+#: stageflow/core/pipeline.py:261
 msgid "The pipeline has no entry"
 msgstr ""
 
-#: stageflow/core/pipeline.py:184
+#: stageflow/core/pipeline.py:264
 #, python-brace-format
 msgid "Entry node '{entry}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/pipeline.py:193
+#: stageflow/core/pipeline.py:273
 #, python-brace-format
 msgid "Duplicate node id: '{node}'"
 msgstr ""
 
-#: stageflow/core/pipeline.py:231
+#: stageflow/core/pipeline.py:316
 #, python-brace-format
 msgid "cycle in the graph: {cycle}"
 msgstr ""
 
-#: stageflow/core/policy.py:62
+#: stageflow/core/policy.py:55
 #, python-brace-format
 msgid "{where}: stage '{name}' is not allowed by the policy"
 msgstr ""
 
-#: stageflow/core/policy.py:69
+#: stageflow/core/policy.py:62
 #, python-brace-format
 msgid "{where}: node type '{type}' is not allowed by the policy"
 msgstr ""
 
-#: stageflow/core/policy.py:114
+#: stageflow/core/policy.py:96
 #, python-brace-format
 msgid ""
 "the shortest way through this graph is {nodes} nodes, and the policy allows {steps:g}"
 " steps"
 msgstr ""
 
-#: stageflow/core/policy.py:124
+#: stageflow/core/policy.py:106
 #, python-brace-format
 msgid "subpipelines nest {depth} deep, and the policy allows {allowed:g}"
 msgstr ""
 
-#: stageflow/core/policy.py:134
+#: stageflow/core/policy.py:116
 #, python-brace-format
 msgid "{node}: retry asks for {asked} attempts, and the policy allows {allowed}"
 msgstr ""
 
-#: stageflow/core/policy.py:142
+#: stageflow/core/policy.py:124
 #, python-brace-format
 msgid "{node}: retry waits {asked:g}s between attempts, and the policy allows {allowed:g}s"
 msgstr ""
 
-#: stageflow/core/policy.py:166
+#: stageflow/core/policy.py:148
 #, python-brace-format
 msgid "{where}{node}: node type '{type}' is not allowed by the policy"
 msgstr ""
 
-#: stageflow/core/policy.py:171
+#: stageflow/core/policy.py:153
 #, python-brace-format
 msgid "{where}{node}: stage '{stage}' is not allowed by the policy"
 msgstr ""
 
-#: stageflow/core/registry.py:22
+#: stageflow/core/registry.py:18
 #, python-brace-format
 msgid "stage '{name}' already registered"
 msgstr ""
 
-#: stageflow/core/registry.py:24
+#: stageflow/core/registry.py:20
 #, python-brace-format
 msgid "node type '{name}' already registered"
 msgstr ""
 
-#: stageflow/core/registry.py:25
+#: stageflow/core/registry.py:21
 #, python-brace-format
 msgid "{kind} '{name}' already registered"
 msgstr ""
 
-#: stageflow/core/registry.py:30
+#: stageflow/core/registry.py:26
 #, python-brace-format
 msgid "stage '{name}' not found in registry"
 msgstr ""
 
-#: stageflow/core/registry.py:32
+#: stageflow/core/registry.py:28
 #, python-brace-format
 msgid "node type '{name}' not found in registry"
 msgstr ""
 
-#: stageflow/core/registry.py:33
+#: stageflow/core/registry.py:29
 #, python-brace-format
 msgid "{kind} '{name}' not found in registry"
 msgstr ""
 
-#: stageflow/core/session.py:294
+#: stageflow/core/session.py:325
 #, python-brace-format
 msgid "{node}: reserve '{meter}' of stage {stage} is not a number: {value}"
 msgstr ""
 
-#: stageflow/core/session.py:341
+#: stageflow/core/session.py:355
 #, python-brace-format
 msgid "Subpipeline '{name}' not found"
 msgstr ""
 
-#: stageflow/core/session.py:516
+#: stageflow/core/session.py:537
 msgid "Pipeline is required to restore session"
 msgstr ""
 
-#: stageflow/core/stage.py:23
+#: stageflow/core/stage.py:22
 #, python-brace-format
 msgid "Event type '{type}' is not allowed for stage '{stage}'"
 msgstr ""
 
-#: stageflow/core/stage.py:26
+#: stageflow/core/stage.py:25
 #, python-brace-format
 msgid "Input type '{type}' is not allowed for stage '{stage}'"
 msgstr ""
 
-#: stageflow/core/stage.py:28
+#: stageflow/core/stage.py:27
 #, python-brace-format
 msgid "{kind} type '{type}' is not allowed for stage '{stage}'"
 msgstr ""
@@ -352,22 +369,22 @@ msgstr ""
 msgid "{where}: {reason}"
 msgstr ""
 
-#: stageflow/core/nodes/base.py:51
+#: stageflow/core/nodes/base.py:55
 #, python-brace-format
 msgid "Unknown node type: {type}"
 msgstr ""
 
-#: stageflow/core/nodes/base.py:86
+#: stageflow/core/nodes/base.py:89
 #, python-brace-format
 msgid "{node}: expose source '{path}' must be a variable name"
 msgstr ""
 
-#: stageflow/core/nodes/base.py:87
+#: stageflow/core/nodes/base.py:90
 #, python-brace-format
 msgid "{node}: expose destination '{path}' must be a variable name"
 msgstr ""
 
-#: stageflow/core/nodes/base.py:99
+#: stageflow/core/nodes/base.py:102
 #, python-brace-format
 msgid ""
 "{node}: expose {source} -> {target}: incompatible types '{source_type}' and "
@@ -384,27 +401,27 @@ msgstr ""
 msgid "Stage did not return field '{field}' (available: {available})"
 msgstr ""
 
-#: stageflow/core/nodes/branching.py:38
+#: stageflow/core/nodes/branching.py:40
 #, python-brace-format
 msgid "{node}: then '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/branching.py:43
+#: stageflow/core/nodes/branching.py:45
 #, python-brace-format
 msgid "{node}: else '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/branching.py:80
+#: stageflow/core/nodes/branching.py:84
 #, python-brace-format
 msgid "{node}: every case needs 'when' and 'next'"
 msgstr ""
 
-#: stageflow/core/nodes/branching.py:85
+#: stageflow/core/nodes/branching.py:89
 #, python-brace-format
 msgid "{node}: case next '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/branching.py:90
+#: stageflow/core/nodes/branching.py:94
 #, python-brace-format
 msgid "{node}: default '{target}' not found in the graph"
 msgstr ""
@@ -414,9 +431,9 @@ msgstr ""
 msgid "Node '{node}': 'variables' must be an object"
 msgstr ""
 
-#: stageflow/core/nodes/entry.py:94 stageflow/core/nodes/map_block.py:96
-#: stageflow/core/nodes/parallel.py:73 stageflow/core/nodes/stage.py:64
-#: stageflow/core/nodes/subpipeline.py:66 stageflow/core/nodes/try_block.py:128
+#: stageflow/core/nodes/entry.py:94 stageflow/core/nodes/map_block.py:94
+#: stageflow/core/nodes/parallel.py:78 stageflow/core/nodes/stage.py:67
+#: stageflow/core/nodes/subpipeline.py:70 stageflow/core/nodes/try_block.py:131
 #, python-brace-format
 msgid "{node}: next '{target}' not found in the graph"
 msgstr ""
@@ -441,166 +458,166 @@ msgstr ""
 msgid "{node}: cyclic variable dependency: {names}"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:63
+#: stageflow/core/nodes/map_block.py:61
 #, python-brace-format
 msgid "Node '{node}': field '{field}' is required"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:91 stageflow/core/nodes/try_block.py:108
+#: stageflow/core/nodes/map_block.py:89 stageflow/core/nodes/try_block.py:111
 #, python-brace-format
 msgid "{node}: body '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:101
+#: stageflow/core/nodes/map_block.py:99
 #, python-brace-format
 msgid "{node}: mode '{mode}' is not one of {allowed}"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:117
+#: stageflow/core/nodes/map_block.py:115
 #, python-brace-format
 msgid "{node}: {field} '{name}' is not a valid variable name"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:122
+#: stageflow/core/nodes/map_block.py:120
 #, python-brace-format
 msgid "{node}: item_var and index_var are the same name"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:127
+#: stageflow/core/nodes/map_block.py:125
 #, python-brace-format
 msgid "{node}: collect source '{name}' must be a variable name"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:128
+#: stageflow/core/nodes/map_block.py:126
 #, python-brace-format
 msgid "{node}: collect destination '{name}' must be a variable name"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:150
+#: stageflow/core/nodes/map_block.py:143
 #, python-brace-format
 msgid ""
 "{node}: '{from_node}' leads to '{target}', outside the loop body; a road inside the "
 "body must end inside it"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:193
+#: stageflow/core/nodes/map_block.py:186
 #, python-brace-format
 msgid "{node}: items '{items}' must be a list, got {got}"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:290
+#: stageflow/core/nodes/map_block.py:274
 #, python-brace-format
 msgid "{node}: item {index} did not write '{source}', collected as '{target}'"
 msgstr ""
 
-#: stageflow/core/nodes/parallel.py:63
+#: stageflow/core/nodes/parallel.py:68
 #, python-brace-format
 msgid "{node}: at least one branch is required"
 msgstr ""
 
-#: stageflow/core/nodes/parallel.py:67
+#: stageflow/core/nodes/parallel.py:72
 #, python-brace-format
 msgid "{node}: entry of branch '{branch}' -> '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/parallel.py:106
+#: stageflow/core/nodes/parallel.py:107
 #, python-brace-format
 msgid "branch '{branch}' failed: {reason}"
 msgstr ""
 
-#: stageflow/core/nodes/parallel.py:163
+#: stageflow/core/nodes/parallel.py:147
 #, python-brace-format
 msgid "{node}: branches '{first}' and '{second}' both write {name}"
 msgstr ""
 
-#: stageflow/core/nodes/stage.py:42
+#: stageflow/core/nodes/stage.py:45
 #, python-brace-format
 msgid "Node '{node}': field 'stage' is required"
 msgstr ""
 
-#: stageflow/core/nodes/stage.py:61
+#: stageflow/core/nodes/stage.py:64
 #, python-brace-format
 msgid "{node}: {reason}"
 msgstr ""
 
-#: stageflow/core/nodes/stage.py:71
+#: stageflow/core/nodes/stage.py:74
 #, python-brace-format
 msgid "{node}: arguments.{bucket} must be an object or a list"
 msgstr ""
 
-#: stageflow/core/nodes/stage.py:75
+#: stageflow/core/nodes/stage.py:78
 #, python-brace-format
 msgid "{node}: outputs must be an object"
 msgstr ""
 
-#: stageflow/core/nodes/stage.py:83
+#: stageflow/core/nodes/stage.py:86
 #, python-brace-format
 msgid ""
 "{node}: the '{scope}' scope level in outputs was removed in 0.7.0 — keys are flat: "
 "{{\"result_field\": \"variable\"}}"
 msgstr ""
 
-#: stageflow/core/nodes/stage.py:100
+#: stageflow/core/nodes/stage.py:103
 #, python-brace-format
 msgid "{node}: stage {stage} does not return field '{field}' (available: {available})"
 msgstr ""
 
-#: stageflow/core/nodes/stage.py:129
+#: stageflow/core/nodes/stage.py:132
 #, python-brace-format
 msgid ""
 "{node}: argument '{argument}' of stage {stage} expects '{expected}', but "
 "vars.{variable} is declared as '{declared}'"
 msgstr ""
 
-#: stageflow/core/nodes/stage.py:142
+#: stageflow/core/nodes/stage.py:145
 #, python-brace-format
 msgid ""
 "{node}: output '{output}' of stage {stage} has type '{type}', but is written to "
 "vars.{variable} typed '{declared}'"
 msgstr ""
 
-#: stageflow/core/nodes/subpipeline.py:40
+#: stageflow/core/nodes/subpipeline.py:44
 #, python-brace-format
 msgid "Node '{node}': field 'subpipeline_id' is required"
 msgstr ""
 
-#: stageflow/core/nodes/subpipeline.py:56
+#: stageflow/core/nodes/subpipeline.py:60
 #, python-brace-format
 msgid "{node}: subpipeline '{name}' not found"
 msgstr ""
 
-#: stageflow/core/nodes/subpipeline.py:61
+#: stageflow/core/nodes/subpipeline.py:65
 #, python-brace-format
 msgid "{node}: a subpipeline cannot reference the root entry node"
 msgstr ""
 
-#: stageflow/core/nodes/subpipeline.py:84
+#: stageflow/core/nodes/subpipeline.py:88
 #, python-brace-format
 msgid ""
 "{node}: subpipeline '{name}' did not return artifact '{artifact}' (available: "
 "{available})"
 msgstr ""
 
-#: stageflow/core/nodes/try_block.py:26
+#: stageflow/core/nodes/try_block.py:28
 msgid "except: field 'next' is required"
 msgstr ""
 
-#: stageflow/core/nodes/try_block.py:70
+#: stageflow/core/nodes/try_block.py:76
 #, python-brace-format
 msgid "Node '{node}': field 'body' is required"
 msgstr ""
 
-#: stageflow/core/nodes/try_block.py:113
+#: stageflow/core/nodes/try_block.py:116
 #, python-brace-format
 msgid "{node}: at least one handler is required in 'except'"
 msgstr ""
 
-#: stageflow/core/nodes/try_block.py:118
+#: stageflow/core/nodes/try_block.py:121
 #, python-brace-format
 msgid "{node}: except.next '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/try_block.py:123
+#: stageflow/core/nodes/try_block.py:126
 #, python-brace-format
 msgid "{node}: handler '{target}' is inside the block body"
 msgstr ""

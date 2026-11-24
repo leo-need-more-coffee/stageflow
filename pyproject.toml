@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stageflow-framework"
-version = "0.15.0"
+version = "0.16.0"
 description = "StageFlow: pipeline framework for stages"
 readme = "README.md"
 license = "MIT"
@@ -78,3 +78,13 @@ include = ["stageflow*"]
     "locale/*/LC_MESSAGES/*.po",
     "locale/*.pot",
 ]
+
+# Mutation testing: `pip install mutmut pytest && mutmut run`, then
+# `mutmut results`. See docs/testing.md.
+[tool.mutmut]
+source_paths = ["stageflow/core/", "stageflow/builtins/"]
+also_copy = ["stageflow/", "tests/", "docs/", "pyproject.toml", "requirements.txt", "README.md"]
+# property tests draw random inputs, so whether they kill a mutant would
+# change from run to run
+pytest_add_cli_args = ["-p", "no:cacheprovider", "--ignore=tests/test_property.py"]
+pytest_add_cli_args_test_selection = ["tests/"]

@@ -83,6 +83,7 @@ nav:
       - Schema and stage specs: schema-and-stage-specs.md
       - Assistants (MCP): mcp.md
   - Development:
+      - Testing: testing.md
       - Releasing: releasing.md
 
 markdown_extensions:
@@ -162,6 +163,7 @@ plugins:
             Schema and stage specs: Схема и спецификации
             Assistants (MCP): Ассистенты (MCP)
             Development: Разработка
+            Testing: Тестирование
             Releasing: Релизы
 
 validation:

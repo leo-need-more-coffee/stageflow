@@ -400,6 +400,72 @@
         "repeat": 5,
         "us_per_eval": 2.133253399915702
       }
+    ],
+    "memory": [
+      {
+        "case": "chain",
+        "size": 100,
+        "peak_kib": 69.0830078125,
+        "held_kib": 68.171875,
+        "bytes_per_node": 707.41,
+        "events_kept": 204
+      },
+      {
+        "case": "chain",
+        "size": 1000,
+        "peak_kib": 659.5859375,
+        "held_kib": 659.0234375,
+        "bytes_per_node": 675.416,
+        "events_kept": 2004
+      },
+      {
+        "case": "chain",
+        "size": 10000,
+        "peak_kib": 3296.53125,
+        "held_kib": 3295.96875,
+        "bytes_per_node": 337.5648,
+        "events_kept": 10000
+      },
+      {
+        "case": "chain",
+        "size": 50000,
+        "peak_kib": 3287.0390625,
+        "held_kib": 3286.4765625,
+        "bytes_per_node": 67.31856,
+        "events_kept": 10000
+      },
+      {
+        "case": "sequential map",
+        "size": 100,
+        "peak_kib": 155.296875,
+        "held_kib": 131.6650390625,
+        "bytes_per_node": 1590.24,
+        "events_kept": 406
+      },
+      {
+        "case": "sequential map",
+        "size": 1000,
+        "peak_kib": 1544.9013671875,
+        "held_kib": 1355.3525390625,
+        "bytes_per_node": 1581.979,
+        "events_kept": 4006
+      },
+      {
+        "case": "sequential map",
+        "size": 10000,
+        "peak_kib": 5873.5107421875,
+        "held_kib": 3761.6962890625,
+        "bytes_per_node": 601.4475,
+        "events_kept": 10000
+      },
+      {
+        "case": "1 MiB value, 1000 stages",
+        "size": 1000,
+        "peak_kib": 658.5,
+        "held_kib": 657.9375,
+        "bytes_per_node": 674.304,
+        "events_kept": 2004
+      }
     ]
   }
 }

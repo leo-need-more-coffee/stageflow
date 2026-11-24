@@ -13,6 +13,7 @@ The suite and its full results are in
 | one `map` iteration | 8–9 µs sequential, 11–13 µs parallel |
 | a write into the frame | 0.3–0.5 µs, whatever its size |
 | `from_dict` + `validate` | about 3 µs per node |
+| memory of a long run | about 3 MiB, and it stops growing |
 
 Against a real stage — a model call of hundreds of milliseconds, a query of a
 few — this is noise. The framework is not the bottleneck.
@@ -31,6 +32,15 @@ the cost of creating a real span per node in the SDK.
 
 A parallel `map` over 500 one-millisecond calls stays within a factor of two
 of the ideal throughput at every `concurrency` limit.
+
+## Memory
+
+![A long run's memory stops growing](img/bench-memory.png)
+
+A run keeps a window of its last 10 000 events — about 330 bytes each, two
+per stage — and little else, so its memory levels off at about 3 MiB however
+many nodes it walks. Values in the frame are shared, not copied: a megabyte
+list carried through a thousand stages costs nothing extra.
 
 ## How it got here
 

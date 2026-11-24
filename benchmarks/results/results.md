@@ -86,3 +86,16 @@ Medians of several repeats after a warm-up.
 | comparison | 10000 | 0.01464 | 1.464 |
 | macro over 100 | 10000 | 0.2294 | 22.9 |
 | string ops | 10000 | 0.02133 | 2.133 |
+
+## memory
+
+| case | size | peak_kib | held_kib | bytes_per_node | events_kept |
+|---|---|---|---|---|---|
+| chain | 100 | 69.1 | 68.2 | 707.4 | 204 |
+| chain | 1000 | 659.6 | 659.0 | 675.4 | 2004 |
+| chain | 10000 | 3,297 | 3,296 | 337.6 | 10000 |
+| chain | 50000 | 3,287 | 3,286 | 67.3 | 10000 |
+| sequential map | 100 | 155.3 | 131.7 | 1,590 | 406 |
+| sequential map | 1000 | 1,545 | 1,355 | 1,582 | 4006 |
+| sequential map | 10000 | 5,874 | 3,762 | 601.4 | 10000 |
+| 1 MiB value, 1000 stages | 1000 | 658.5 | 657.9 | 674.3 | 2004 |

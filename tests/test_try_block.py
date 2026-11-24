@@ -12,6 +12,7 @@ from stageflow import (
     register_stage,
 )
 from stageflow.exceptions import PipelineValidationError
+from stageflow.testing import isolated_stages
 
 
 @register_stage("BoomStage")
@@ -42,6 +43,10 @@ def _run(pipeline_data, variables=None):
 
 
 class TryBlockTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        # the tests register stages of their own
+        self.enterContext(isolated_stages())
+
     async def _run(self, data, variables=None):
         session = Session(
             id="try", pipeline=Pipeline.from_dict(data), context=Context(vars=variables or {})
@@ -76,6 +81,28 @@ class TryBlockTests(unittest.IsolatedAsyncioTestCase):
         # the node that failed, not the block: the handler hangs off the block
         # already, so `guard` here would be the one thing it already knows
         self.assertEqual(result.artifacts["err"]["node"], "step3")
+
+    async def test_a_branch_that_leaves_early_does_not_shrink_the_block(self):
+        """The block is everything its body reaches before `next`. A condition
+        in the body whose `else` jumps straight to `next` must not hide the
+        `then` branch from the block: found by mutation testing, where
+        `reachable` stopping at the first node outside went unnoticed."""
+        data = {
+            "entry": "guard",
+            "nodes": [
+                {"id": "guard", "type": "try", "body": "check", "next": "done",
+                 "except": [{"error_equals": ["*"], "next": "handler"}]},
+                {"id": "check", "type": "condition", "condition": "vars.risky",
+                 "then": "risky", "else": "done"},
+                {"id": "risky", "type": "stage", "stage": "BoomStage", "next": "done"},
+                {"id": "handler", "type": "terminal", "result": {"status": "handled"}},
+                {"id": "done", "type": "terminal", "result": {"status": "ok"}},
+            ],
+        }
+        result, _ = await self._run(data, {"risky": True})
+        self.assertEqual(result.result, {"status": "handled"})
+        result, _ = await self._run(data, {"risky": False})
+        self.assertEqual(result.result, {"status": "ok"})
 
     async def test_error_from_a_nested_block_names_the_node_of_this_scope(self):
         """A failure deeper than one scope is named by the node of THIS scope

@@ -6,6 +6,11 @@
     "nodes"
   ],
   "properties": {
+    "version": {
+      "description": "Format version of this document. Absent means 1. A newer StageFlow upgrades older versions when loading; an older one refuses newer versions.",
+      "type": "integer",
+      "minimum": 1
+    },
     "api_version": {
       "type": [
         "string",
