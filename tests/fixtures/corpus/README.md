@@ -22,12 +22,15 @@ runs every file through the public API — `Pipeline.from_dict`, `validate`,
 ```
 
 `vars`, `policy` and `inputs` are optional. `inputs` are given in order, each
-as soon as the run waits for that type.
+as soon as the run waits for that type. With `"durable": true` the run has a
+checkpoint store: each time it stops at a `wait` node it is restored as a new
+session, as another process would, and given the next input.
 
 `expect` takes any of:
 
 | Key | Means |
 |---|---|
+| `waiting_at` | the run ended saved at this `wait` node (durable runs) |
 | `invalid` | `validate(policy)` refuses the graph; every fragment is in the message |
 | `error` | the run raises `{"type": "ClassName", "match": "regex"}` |
 | `result` | the terminal's `result`, exactly (`null` for a road that just ended); for a budget result only the keys given are compared |

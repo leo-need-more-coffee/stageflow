@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Iterator
 
 from ..core.budget import BudgetExceeded
+from ..core.durable import RunSuspended
 from ..core.instrument import Instrument, Instruments
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -25,12 +26,13 @@ if TYPE_CHECKING:  # pragma: no cover
     from ..core.session import Session
 
 __all__ = ["Instrument", "Instruments", "LoggingInstrument", "Recorder", "Stats",
-           "outcome_of", "node_label"]
+           "outcome_of", "node_outcome", "node_label"]
 
 
 def outcome_of(session: "Session", error: BaseException | None = None) -> str:
-    """One word for how a run ended: finished, stopped, budget_exceeded, failed,
-    cancelled or ended (no terminal was reached)."""
+    """One word for how a run ended: finished, waiting (saved at a `wait`
+    node), stopped, budget_exceeded, failed, cancelled or ended (no terminal
+    was reached)."""
     if error is not None:
         if isinstance(error, BudgetExceeded):
             return "budget_exceeded"
@@ -40,6 +42,8 @@ def outcome_of(session: "Session", error: BaseException | None = None) -> str:
         return "budget_exceeded"
     if result.get("result") == "stopped":
         return "stopped"
+    if result.get("status") == "waiting":
+        return "waiting"
     return "finished" if session.finished else "ended"
 
 
@@ -52,6 +56,16 @@ def node_label(node: "Node") -> str:
 def _is_cancel(error: BaseException) -> bool:
     import asyncio
     return isinstance(error, asyncio.CancelledError)
+
+
+def node_outcome(error: BaseException) -> str:
+    """How a node that raised ended: cancelled, waiting (a `wait` node saved
+    the run), or the exception's class name."""
+    if _is_cancel(error):
+        return "cancelled"
+    if isinstance(error, RunSuspended):
+        return "waiting"
+    return type(error).__name__
 
 
 @dataclass
@@ -69,7 +83,7 @@ class Stats:
         self.total_seconds += seconds
         self.max_seconds = max(self.max_seconds, seconds)
         self.outcomes[outcome] = self.outcomes.get(outcome, 0) + 1
-        if outcome not in ("ok", "finished", "ended", "stopped"):
+        if outcome not in ("ok", "finished", "ended", "stopped", "waiting"):
             self.errors += 1
 
     @property
@@ -123,7 +137,7 @@ class Recorder(Instrument):
         try:
             yield
         except BaseException as exc:
-            outcome = "cancelled" if _is_cancel(exc) else type(exc).__name__
+            outcome = node_outcome(exc)
             raise
         finally:
             self.nodes.setdefault(node_label(node), Stats()).add(
@@ -196,7 +210,7 @@ class LoggingInstrument(Instrument):
         try:
             yield
         except BaseException as exc:
-            outcome = "cancelled" if _is_cancel(exc) else type(exc).__name__
+            outcome = node_outcome(exc)
             raise
         finally:
             seconds = time.perf_counter() - started

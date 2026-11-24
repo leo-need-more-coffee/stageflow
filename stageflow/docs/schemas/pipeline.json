@@ -346,6 +346,21 @@
           "then": {
             "$ref": "#/$defs/map_node"
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "wait"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/wait_node"
+          }
         }
       ]
     },
@@ -791,6 +806,62 @@
             "string",
             "null"
           ]
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "wait_node": {
+      "description": "Waits for an input of one type. With a checkpoint store the run is suspended and saved until the input arrives (see docs/long-running.md); without one, the session waits in memory.",
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "input"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "wait"
+        },
+        "input": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The input type to wait for, as sent with Session.input or Session.resume."
+        },
+        "outputs": {
+          "$ref": "#/$defs/outputs",
+          "description": "Payload fields -> variables, as for a stage."
+        },
+        "timeout": {
+          "description": "How long to wait: seconds, or a string such as '90s', '15m', '2h', '7d'. Needs on_timeout.",
+          "oneOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^\\s*\\d+(\\.\\d+)?\\s*[smhd]\\s*$"
+            }
+          ]
+        },
+        "on_timeout": {
+          "type": "string",
+          "description": "Node to go to when the timeout passes without the input."
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expose": {
+          "$ref": "#/$defs/expose"
         },
         "metadata": {
           "type": "object"

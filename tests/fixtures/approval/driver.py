@@ -1,22 +1,23 @@
 """A host in miniature, run as its own process by the system tests.
 
-    python driver.py run <lines.json> <state.json>
-        runs the approval; prints the outcome as JSON. If the run stops to
-        ask a person, the session is snapshotted into <state.json>, the
-        process exits, and the outcome is {"status": "waiting"}.
+    python driver.py run <lines.json> <runs.db>
+        runs the approval; prints the outcome as JSON. If the run reaches
+        the `wait` node and nobody has answered, it is saved in <runs.db>,
+        the process exits, and the outcome is {"status": "waiting"}.
 
-    python driver.py resume <state.json> <decision>
-        a new process: restores the snapshot under the host's policy, gives
-        the decision and prints the outcome.
+    python driver.py resume <runs.db> <run id> <decision>
+        a new process: restores the run under the host's policy, gives the
+        decision and prints the outcome.
 
 Everything a host does is here — its stages, its policy, loading a pipeline
-from disk, storing a session between two processes — and nothing else.
+from disk, keeping a run between two processes — and nothing else.
 """
 from __future__ import annotations
 
 import asyncio
 import json
 import sys
+import uuid
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -24,50 +25,45 @@ sys.path.insert(0, str(HERE))
 
 import stages  # noqa: E402,F401 - registers the host's stages
 
-from stageflow import Context, Limits, Pipeline, Policy, Session  # noqa: E402
+from stageflow import (  # noqa: E402
+    Context,
+    Limits,
+    Pipeline,
+    Policy,
+    Session,
+    SQLiteStore,
+)
 
 POLICY = Policy(
-    stages={"Total", "CheckLine", "Notify", "AskApproval"},
+    stages={"Total", "CheckLine", "Notify"},
     limits=Limits(counters={"steps": 60, "messages": 5, "checks": 20},
                   gauges={"concurrency": 2, "depth": 1}),
 )
 
 
-def outcome(result) -> dict:
+def outcome(result, run_id: str = "") -> dict:
+    if result.waiting:
+        return {"status": "waiting", "at": result.waiting["node"], "meters": result.meters,
+                "run": run_id}
     return {"status": "finished", "result": result.result,
             "artifacts": result.artifacts, "meters": result.meters,
             "events": [e.type for e in result.history]}
 
 
-async def run(lines_path: str, state_path: str) -> dict:
+async def run(lines_path: str, store_path: str) -> dict:
     pipeline = Pipeline.from_dict(json.loads((HERE / "pipeline.json").read_text()))
     pipeline.validate(POLICY)
     lines = json.loads(Path(lines_path).read_text())
-    session = Session(id="expense-1", pipeline=pipeline,
-                      context=Context(vars={"lines": lines}), policy=POLICY)
-    task = asyncio.create_task(session.run())
-    while not task.done():
-        if session.is_waiting_for("approval"):
-            snapshot = session.snapshot()
-            Path(state_path).write_text(json.dumps(snapshot, default=str))
-            session.stop()
-            await task
-            return {"status": "waiting", "at": snapshot["current_node_id"],
-                    "meters": snapshot["meters"]}
-        await asyncio.sleep(0.01)
-    return outcome(task.result())
+    session = Session(id=f"expense-{uuid.uuid4().hex[:8]}", pipeline=pipeline,
+                      context=Context(vars={"lines": lines}), policy=POLICY,
+                      store=SQLiteStore(store_path))
+    return outcome(await session.run(), session.id)
 
 
-async def resume(state_path: str, decision: str) -> dict:
-    snapshot = json.loads(Path(state_path).read_text())
-    session = Session.from_snapshot(snapshot, policy=POLICY)
-    task = asyncio.create_task(session.run())
-    while not session.is_waiting_for("approval"):
-        if task.done():
-            return outcome(task.result())
-        await asyncio.sleep(0.01)
+async def resume(store_path: str, run_id: str, decision: str) -> dict:
+    session = await Session.restore(SQLiteStore(store_path), run_id, policy=POLICY)
     await session.input("approval", {"decision": decision})
-    return outcome(await task)
+    return outcome(await session.run())
 
 
 if __name__ == "__main__":

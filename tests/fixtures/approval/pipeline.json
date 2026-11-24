@@ -1,5 +1,5 @@
 {
-  "metadata": {"name": "expense approval", "uses": "all nine node types"},
+  "metadata": {"name": "expense approval", "uses": "every node type"},
   "variables": {"total": "number", "decision": "string"},
   "nodes": [
     {"id": "start", "type": "entry", "variables": {"lines": []}, "next": "sum"},
@@ -23,7 +23,7 @@
      "then": "notify", "else": "approved_auto"},
     {"id": "notify", "type": "subpipeline", "subpipeline_id": "tell_everyone",
      "artifact_outputs": {"told": "sent"}, "next": "ask"},
-    {"id": "ask", "type": "stage", "stage": "AskApproval",
+    {"id": "ask", "type": "wait", "input": "approval",
      "outputs": {"decision": "decision"}, "next": "decided"},
     {"id": "decided", "type": "condition", "condition": "vars.decision == 'approve'",
      "then": "approved_by_hand", "else": "rejected"},

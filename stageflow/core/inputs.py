@@ -22,6 +22,21 @@ class InputHub:
         else:
             self._pending.setdefault(entry["type"], []).append(entry)
 
+    def take(self, type_: str) -> dict[str, Any] | None:
+        """The oldest input of this type that nobody waited for, or None."""
+        pending = self._pending.get(type_)
+        if not pending:
+            return None
+        entry = pending.pop(0)
+        if not pending:
+            del self._pending[type_]
+        return entry
+
+    @property
+    def pending(self) -> dict[str, list[dict[str, Any]]]:
+        """Inputs delivered before anyone waited for them, by type."""
+        return self._pending
+
     def start_wait(self, type_: str) -> asyncio.Future:
         loop = asyncio.get_running_loop()
         fut = loop.create_future()

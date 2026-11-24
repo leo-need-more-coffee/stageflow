@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: StageFlow VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-24 15:13+0000\n"
+"POT-Creation-Date: 2026-11-24 15:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: StageFlow\n"
 "Language: ru\n"
@@ -112,8 +112,8 @@ msgid ""
 "The pipeline is format version {version}, but this StageFlow reads up to version "
 "{supported}: it was saved by a newer StageFlow"
 msgstr ""
-"Пайплайн записан в формате версии {version}, а этот StageFlow читает версии "
-"до {supported}: его сохранил более новый StageFlow"
+"Пайплайн записан в формате версии {version}, а этот StageFlow читает версии до "
+"{supported}: его сохранил более новый StageFlow"
 
 #: stageflow/core/migrations.py:70
 #, python-brace-format
@@ -268,17 +268,22 @@ msgstr "типа узла '{name}' в реестре нет"
 msgid "{kind} '{name}' not found in registry"
 msgstr "{kind} '{name}': в реестре нет"
 
-#: stageflow/core/session.py:325
+#: stageflow/core/session.py:372
 #, python-brace-format
 msgid "{node}: reserve '{meter}' of stage {stage} is not a number: {value}"
 msgstr "{node}: резерв '{meter}' стадии {stage} — не число: {value}"
 
-#: stageflow/core/session.py:355
+#: stageflow/core/session.py:402
 #, python-brace-format
 msgid "Subpipeline '{name}' not found"
 msgstr "Субпайплайн '{name}' не найден"
 
-#: stageflow/core/session.py:537
+#: stageflow/core/session.py:474
+#, python-brace-format
+msgid "{node}: a wait node cannot be inside a block or a subpipeline"
+msgstr "{node}: узел wait не может стоять внутри блока или субпайплайна"
+
+#: stageflow/core/session.py:695
 msgid "Pipeline is required to restore session"
 msgstr "Чтобы восстановить сессию, нужен пайплайн"
 
@@ -386,17 +391,17 @@ msgstr "{where}: {reason}"
 msgid "Unknown node type: {type}"
 msgstr "Неизвестный тип узла: {type}"
 
-#: stageflow/core/nodes/base.py:89
+#: stageflow/core/nodes/base.py:94
 #, python-brace-format
 msgid "{node}: expose source '{path}' must be a variable name"
 msgstr "{node}: expose, источник '{path}': нужно имя переменной"
 
-#: stageflow/core/nodes/base.py:90
+#: stageflow/core/nodes/base.py:95
 #, python-brace-format
 msgid "{node}: expose destination '{path}' must be a variable name"
 msgstr "{node}: expose, приёмник '{path}': нужно имя переменной"
 
-#: stageflow/core/nodes/base.py:102
+#: stageflow/core/nodes/base.py:107
 #, python-brace-format
 msgid ""
 "{node}: expose {source} -> {target}: incompatible types '{source_type}' and "
@@ -445,9 +450,10 @@ msgstr "{node}: default '{target}' в графе не найден"
 msgid "Node '{node}': 'variables' must be an object"
 msgstr "Узел '{node}': 'variables' должен быть объектом"
 
-#: stageflow/core/nodes/entry.py:94 stageflow/core/nodes/map_block.py:94
-#: stageflow/core/nodes/parallel.py:78 stageflow/core/nodes/stage.py:67
-#: stageflow/core/nodes/subpipeline.py:70 stageflow/core/nodes/try_block.py:131
+#: stageflow/core/nodes/entry.py:94 stageflow/core/nodes/map_block.py:97
+#: stageflow/core/nodes/parallel.py:84 stageflow/core/nodes/stage.py:67
+#: stageflow/core/nodes/subpipeline.py:77 stageflow/core/nodes/try_block.py:137
+#: stageflow/core/nodes/wait.py:69
 #, python-brace-format
 msgid "{node}: next '{target}' not found in the graph"
 msgstr "{node}: next '{target}' в графе не найден"
@@ -477,37 +483,37 @@ msgstr "{node}: циклическая зависимость переменны
 msgid "Node '{node}': field '{field}' is required"
 msgstr "Узел '{node}': поле '{field}' обязательно"
 
-#: stageflow/core/nodes/map_block.py:89 stageflow/core/nodes/try_block.py:111
+#: stageflow/core/nodes/map_block.py:92 stageflow/core/nodes/try_block.py:117
 #, python-brace-format
 msgid "{node}: body '{target}' not found in the graph"
 msgstr "{node}: body '{target}' в графе не найден"
 
-#: stageflow/core/nodes/map_block.py:99
+#: stageflow/core/nodes/map_block.py:102
 #, python-brace-format
 msgid "{node}: mode '{mode}' is not one of {allowed}"
 msgstr "{node}: режим '{mode}' не входит в {allowed}"
 
-#: stageflow/core/nodes/map_block.py:115
+#: stageflow/core/nodes/map_block.py:118
 #, python-brace-format
 msgid "{node}: {field} '{name}' is not a valid variable name"
 msgstr "{node}: {field} '{name}' — недопустимое имя переменной"
 
-#: stageflow/core/nodes/map_block.py:120
+#: stageflow/core/nodes/map_block.py:123
 #, python-brace-format
 msgid "{node}: item_var and index_var are the same name"
 msgstr "{node}: item_var и index_var — одно и то же имя"
 
-#: stageflow/core/nodes/map_block.py:125
+#: stageflow/core/nodes/map_block.py:128
 #, python-brace-format
 msgid "{node}: collect source '{name}' must be a variable name"
 msgstr "{node}: collect, источник '{name}': нужно имя переменной"
 
-#: stageflow/core/nodes/map_block.py:126
+#: stageflow/core/nodes/map_block.py:129
 #, python-brace-format
 msgid "{node}: collect destination '{name}' must be a variable name"
 msgstr "{node}: collect, приёмник '{name}': нужно имя переменной"
 
-#: stageflow/core/nodes/map_block.py:143
+#: stageflow/core/nodes/map_block.py:146
 #, python-brace-format
 msgid ""
 "{node}: '{from_node}' leads to '{target}', outside the loop body; a road inside the "
@@ -516,32 +522,32 @@ msgstr ""
 "{node}: '{from_node}' ведёт в '{target}', за пределы тела цикла; дорога внутри тела "
 "должна заканчиваться внутри него"
 
-#: stageflow/core/nodes/map_block.py:186
+#: stageflow/core/nodes/map_block.py:189
 #, python-brace-format
 msgid "{node}: items '{items}' must be a list, got {got}"
 msgstr "{node}: в items '{items}' ожидался список, а пришло {got}"
 
-#: stageflow/core/nodes/map_block.py:274
+#: stageflow/core/nodes/map_block.py:277
 #, python-brace-format
 msgid "{node}: item {index} did not write '{source}', collected as '{target}'"
 msgstr "{node}: элемент {index} не записал '{source}', который собирается в '{target}'"
 
-#: stageflow/core/nodes/parallel.py:68
+#: stageflow/core/nodes/parallel.py:74
 #, python-brace-format
 msgid "{node}: at least one branch is required"
 msgstr "{node}: нужна хотя бы одна ветка"
 
-#: stageflow/core/nodes/parallel.py:72
+#: stageflow/core/nodes/parallel.py:78
 #, python-brace-format
 msgid "{node}: entry of branch '{branch}' -> '{target}' not found in the graph"
 msgstr "{node}: вход ветки '{branch}' -> '{target}' в графе не найден"
 
-#: stageflow/core/nodes/parallel.py:107
+#: stageflow/core/nodes/parallel.py:113
 #, python-brace-format
 msgid "branch '{branch}' failed: {reason}"
 msgstr "ветка '{branch}' упала: {reason}"
 
-#: stageflow/core/nodes/parallel.py:147
+#: stageflow/core/nodes/parallel.py:153
 #, python-brace-format
 msgid "{node}: branches '{first}' and '{second}' both write {name}"
 msgstr "{node}: ветки '{first}' и '{second}' обе пишут {name}"
@@ -608,12 +614,19 @@ msgstr "Узел '{node}': поле 'subpipeline_id' обязательно"
 msgid "{node}: subpipeline '{name}' not found"
 msgstr "{node}: субпайплайн '{name}' не найден"
 
-#: stageflow/core/nodes/subpipeline.py:65
+#: stageflow/core/nodes/subpipeline.py:66
+#, python-brace-format
+msgid ""
+"{node}: subpipeline '{name}' has a wait node: a saved run resumes at a node of the "
+"main graph"
+msgstr "{node}: в субпайплайне '{name}' есть узел wait: сохранённый прогон продолжается с узла основного графа"
+
+#: stageflow/core/nodes/subpipeline.py:72
 #, python-brace-format
 msgid "{node}: a subpipeline cannot reference the root entry node"
 msgstr "{node}: субпайплайн не может ссылаться на корневой входной узел"
 
-#: stageflow/core/nodes/subpipeline.py:88
+#: stageflow/core/nodes/subpipeline.py:95
 #, python-brace-format
 msgid ""
 "{node}: subpipeline '{name}' did not return artifact '{artifact}' (available: "
@@ -629,20 +642,44 @@ msgstr "except: поле 'next' обязательно"
 msgid "Node '{node}': field 'body' is required"
 msgstr "Узел '{node}': поле 'body' обязательно"
 
-#: stageflow/core/nodes/try_block.py:116
+#: stageflow/core/nodes/try_block.py:122
 #, python-brace-format
 msgid "{node}: at least one handler is required in 'except'"
 msgstr "{node}: в 'except' нужен хотя бы один обработчик"
 
-#: stageflow/core/nodes/try_block.py:121
+#: stageflow/core/nodes/try_block.py:127
 #, python-brace-format
 msgid "{node}: except.next '{target}' not found in the graph"
 msgstr "{node}: except.next '{target}' в графе не найден"
 
-#: stageflow/core/nodes/try_block.py:126
+#: stageflow/core/nodes/try_block.py:132
 #, python-brace-format
 msgid "{node}: handler '{target}' is inside the block body"
 msgstr "{node}: обработчик '{target}' стоит внутри тела блока"
+
+#: stageflow/core/nodes/wait.py:74
+#, python-brace-format
+msgid "{node}: on_timeout '{target}' not found in the graph"
+msgstr "{node}: on_timeout '{target}' в графе не найден"
+
+#: stageflow/core/nodes/wait.py:82
+#, python-brace-format
+msgid "{node}: timeout {value} is not a duration (seconds, or e.g. '90s', '15m', '2h', '7d')"
+msgstr "{node}: timeout {value} — не длительность (секунды или, например, '90s', '15m', '2h', '7d')"
+
+#: stageflow/core/nodes/wait.py:88
+#, python-brace-format
+msgid ""
+"{node}: timeout and on_timeout go together: say how long to wait and where to go when"
+" nothing came"
+msgstr "{node}: timeout и on_timeout задаются вместе: сколько ждать и куда идти, если ничего не пришло"
+
+#: stageflow/core/nodes/wait.py:94
+#, python-brace-format
+msgid ""
+"{node}: a wait node cannot be inside the {type} node '{block}': a saved run resumes "
+"at a node of the main graph"
+msgstr "{node}: узел wait не может стоять внутри узла {type} '{block}': сохранённый прогон продолжается с узла основного графа"
 
 #. the spec of a built-in stage
 #: ⁨stageflow/builtins (AppendListStage.description)⁩
@@ -956,4 +993,7 @@ msgstr "Список без повторов"
 
 #~ msgid "{what} schema validation failed: {reason}"
 #~ msgstr ""
+
+#~ msgid "{node}: {field} '{target}' not found in the graph"
+#~ msgstr "{node}: else '{target}' в графе не найден"
 

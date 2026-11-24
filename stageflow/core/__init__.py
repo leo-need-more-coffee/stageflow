@@ -2,6 +2,14 @@ from .budget import UNLIMITED, Budget, BudgetExceeded, Limits
 from .cel import CelEngine, CelError
 from .context import Context
 from .debug import RUN, STEP, StepDebugger
+from .durable import (
+    Checkpoint,
+    CheckpointConflict,
+    CheckpointError,
+    CheckpointStore,
+    MemoryStore,
+    SQLiteStore,
+)
 from .event import Event, EventSpec, InputSpec
 from .inputs import InputHub
 from .instrument import Instrument, Instruments
@@ -17,6 +25,7 @@ from .nodes import (
     SwitchNode,
     TerminalNode,
     TryNode,
+    WaitNode,
     ExceptHandler,
     get_node_types,
     register_node,
@@ -60,6 +69,13 @@ __all__ = [
     "ParallelNode",
     "SubPipelineNode",
     "TerminalNode",
+    "WaitNode",
+    "Checkpoint",
+    "CheckpointStore",
+    "CheckpointError",
+    "CheckpointConflict",
+    "MemoryStore",
+    "SQLiteStore",
     "Pipeline",
     "Policy",
     "OPEN",

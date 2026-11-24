@@ -60,6 +60,13 @@ class SubPipelineNode(Node):
                 _("{node}: subpipeline '{name}' not found",
                   node=self.id, name=self.subpipeline_id)
             )
+        elif any(isinstance(n, dict) and n.get("type") == "wait"
+                 for n in pipeline.subpipelines[self.subpipeline_id].get("nodes") or []):
+            errors.append(
+                _("{node}: subpipeline '{name}' has a wait node: a saved run "
+                  "resumes at a node of the main graph",
+                  node=self.id, name=self.subpipeline_id)
+            )
         elif self.subpipeline_id == pipeline.entry:
             errors.append(
                 _("{node}: a subpipeline cannot reference the root entry node",

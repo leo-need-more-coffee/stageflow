@@ -1,7 +1,7 @@
 """The stages of the expense-approval system test — a host's own stages."""
 from __future__ import annotations
 
-from stageflow import BaseStage, InputSpec, register_stage
+from stageflow import BaseStage, register_stage
 
 LIMIT_PER_LINE = 1000
 
@@ -52,19 +52,3 @@ class Notify(BaseStage):
     async def run(self):
         self.charge(messages=1)
         self.set_outputs({"sent": f"told {self.get_arguments()['who']}"})
-
-
-@register_stage("AskApproval")
-class AskApproval(BaseStage):
-    """
-    description: "Waits for a person to approve or reject"
-    outputs:
-      decision: string
-    """
-
-    allowed_inputs = [InputSpec(type="approval")]
-    timeout = None
-
-    async def run(self):
-        answer = await self.wait_input("approval")
-        self.set_outputs({"decision": answer["payload"]["decision"]})

@@ -1,0 +1,19 @@
+{
+  "description": "a wait inside a parallel branch: a saved run could not come back to it, so the graph is refused before it runs",
+  "pipeline": {
+    "nodes": [
+      {"id": "start", "type": "entry", "next": "both"},
+      {"id": "both", "type": "parallel", "branches": ["left", "right"], "next": "end"},
+      {"id": "left", "type": "wait", "input": "go"},
+      {"id": "right", "type": "stage", "stage": "LogStage",
+       "arguments": {"const": {"message": "right"}}},
+      {"id": "end", "type": "terminal"}
+    ]
+  },
+  "runs": [
+    {
+      "name": "refused by validation, naming the block",
+      "expect": {"invalid": ["left: a wait node cannot be inside the parallel node 'both'"]}
+    }
+  ]
+}

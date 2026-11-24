@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: StageFlow 0.15.0\n"
+"Project-Id-Version: StageFlow 0.16.0\n"
 "Report-Msgid-Bugs-To: https://github.com/leo-need-more-coffee/stageflow/issues\n"
-"POT-Creation-Date: 2026-11-24 15:13+0000\n"
+"POT-Creation-Date: 2026-11-24 15:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -258,17 +258,22 @@ msgstr ""
 msgid "{kind} '{name}' not found in registry"
 msgstr ""
 
-#: stageflow/core/session.py:325
+#: stageflow/core/session.py:372
 #, python-brace-format
 msgid "{node}: reserve '{meter}' of stage {stage} is not a number: {value}"
 msgstr ""
 
-#: stageflow/core/session.py:355
+#: stageflow/core/session.py:402
 #, python-brace-format
 msgid "Subpipeline '{name}' not found"
 msgstr ""
 
-#: stageflow/core/session.py:537
+#: stageflow/core/session.py:474
+#, python-brace-format
+msgid "{node}: a wait node cannot be inside a block or a subpipeline"
+msgstr ""
+
+#: stageflow/core/session.py:695
 msgid "Pipeline is required to restore session"
 msgstr ""
 
@@ -374,17 +379,17 @@ msgstr ""
 msgid "Unknown node type: {type}"
 msgstr ""
 
-#: stageflow/core/nodes/base.py:89
+#: stageflow/core/nodes/base.py:94
 #, python-brace-format
 msgid "{node}: expose source '{path}' must be a variable name"
 msgstr ""
 
-#: stageflow/core/nodes/base.py:90
+#: stageflow/core/nodes/base.py:95
 #, python-brace-format
 msgid "{node}: expose destination '{path}' must be a variable name"
 msgstr ""
 
-#: stageflow/core/nodes/base.py:102
+#: stageflow/core/nodes/base.py:107
 #, python-brace-format
 msgid ""
 "{node}: expose {source} -> {target}: incompatible types '{source_type}' and "
@@ -431,9 +436,10 @@ msgstr ""
 msgid "Node '{node}': 'variables' must be an object"
 msgstr ""
 
-#: stageflow/core/nodes/entry.py:94 stageflow/core/nodes/map_block.py:94
-#: stageflow/core/nodes/parallel.py:78 stageflow/core/nodes/stage.py:67
-#: stageflow/core/nodes/subpipeline.py:70 stageflow/core/nodes/try_block.py:131
+#: stageflow/core/nodes/entry.py:94 stageflow/core/nodes/map_block.py:97
+#: stageflow/core/nodes/parallel.py:84 stageflow/core/nodes/stage.py:67
+#: stageflow/core/nodes/subpipeline.py:77 stageflow/core/nodes/try_block.py:137
+#: stageflow/core/nodes/wait.py:69
 #, python-brace-format
 msgid "{node}: next '{target}' not found in the graph"
 msgstr ""
@@ -463,69 +469,69 @@ msgstr ""
 msgid "Node '{node}': field '{field}' is required"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:89 stageflow/core/nodes/try_block.py:111
+#: stageflow/core/nodes/map_block.py:92 stageflow/core/nodes/try_block.py:117
 #, python-brace-format
 msgid "{node}: body '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:99
+#: stageflow/core/nodes/map_block.py:102
 #, python-brace-format
 msgid "{node}: mode '{mode}' is not one of {allowed}"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:115
+#: stageflow/core/nodes/map_block.py:118
 #, python-brace-format
 msgid "{node}: {field} '{name}' is not a valid variable name"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:120
+#: stageflow/core/nodes/map_block.py:123
 #, python-brace-format
 msgid "{node}: item_var and index_var are the same name"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:125
+#: stageflow/core/nodes/map_block.py:128
 #, python-brace-format
 msgid "{node}: collect source '{name}' must be a variable name"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:126
+#: stageflow/core/nodes/map_block.py:129
 #, python-brace-format
 msgid "{node}: collect destination '{name}' must be a variable name"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:143
+#: stageflow/core/nodes/map_block.py:146
 #, python-brace-format
 msgid ""
 "{node}: '{from_node}' leads to '{target}', outside the loop body; a road inside the "
 "body must end inside it"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:186
+#: stageflow/core/nodes/map_block.py:189
 #, python-brace-format
 msgid "{node}: items '{items}' must be a list, got {got}"
 msgstr ""
 
-#: stageflow/core/nodes/map_block.py:274
+#: stageflow/core/nodes/map_block.py:277
 #, python-brace-format
 msgid "{node}: item {index} did not write '{source}', collected as '{target}'"
 msgstr ""
 
-#: stageflow/core/nodes/parallel.py:68
+#: stageflow/core/nodes/parallel.py:74
 #, python-brace-format
 msgid "{node}: at least one branch is required"
 msgstr ""
 
-#: stageflow/core/nodes/parallel.py:72
+#: stageflow/core/nodes/parallel.py:78
 #, python-brace-format
 msgid "{node}: entry of branch '{branch}' -> '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/parallel.py:107
+#: stageflow/core/nodes/parallel.py:113
 #, python-brace-format
 msgid "branch '{branch}' failed: {reason}"
 msgstr ""
 
-#: stageflow/core/nodes/parallel.py:147
+#: stageflow/core/nodes/parallel.py:153
 #, python-brace-format
 msgid "{node}: branches '{first}' and '{second}' both write {name}"
 msgstr ""
@@ -586,12 +592,19 @@ msgstr ""
 msgid "{node}: subpipeline '{name}' not found"
 msgstr ""
 
-#: stageflow/core/nodes/subpipeline.py:65
+#: stageflow/core/nodes/subpipeline.py:66
+#, python-brace-format
+msgid ""
+"{node}: subpipeline '{name}' has a wait node: a saved run resumes at a node of the "
+"main graph"
+msgstr ""
+
+#: stageflow/core/nodes/subpipeline.py:72
 #, python-brace-format
 msgid "{node}: a subpipeline cannot reference the root entry node"
 msgstr ""
 
-#: stageflow/core/nodes/subpipeline.py:88
+#: stageflow/core/nodes/subpipeline.py:95
 #, python-brace-format
 msgid ""
 "{node}: subpipeline '{name}' did not return artifact '{artifact}' (available: "
@@ -607,19 +620,43 @@ msgstr ""
 msgid "Node '{node}': field 'body' is required"
 msgstr ""
 
-#: stageflow/core/nodes/try_block.py:116
+#: stageflow/core/nodes/try_block.py:122
 #, python-brace-format
 msgid "{node}: at least one handler is required in 'except'"
 msgstr ""
 
-#: stageflow/core/nodes/try_block.py:121
+#: stageflow/core/nodes/try_block.py:127
 #, python-brace-format
 msgid "{node}: except.next '{target}' not found in the graph"
 msgstr ""
 
-#: stageflow/core/nodes/try_block.py:126
+#: stageflow/core/nodes/try_block.py:132
 #, python-brace-format
 msgid "{node}: handler '{target}' is inside the block body"
+msgstr ""
+
+#: stageflow/core/nodes/wait.py:74
+#, python-brace-format
+msgid "{node}: on_timeout '{target}' not found in the graph"
+msgstr ""
+
+#: stageflow/core/nodes/wait.py:82
+#, python-brace-format
+msgid "{node}: timeout {value} is not a duration (seconds, or e.g. '90s', '15m', '2h', '7d')"
+msgstr ""
+
+#: stageflow/core/nodes/wait.py:88
+#, python-brace-format
+msgid ""
+"{node}: timeout and on_timeout go together: say how long to wait and where to go when"
+" nothing came"
+msgstr ""
+
+#: stageflow/core/nodes/wait.py:94
+#, python-brace-format
+msgid ""
+"{node}: a wait node cannot be inside the {type} node '{block}': a saved run resumes "
+"at a node of the main graph"
 msgstr ""
 
 #. the spec of a built-in stage

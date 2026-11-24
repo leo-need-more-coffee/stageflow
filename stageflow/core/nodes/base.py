@@ -77,6 +77,11 @@ class Node:
     def order_targets(self) -> list[str]:
         return [self.next] if getattr(self, "next", None) else []
 
+    def enclosed(self, pipeline: "Pipeline") -> frozenset[str]:
+        """Nodes this node runs as part of itself (a block's body), as
+        opposed to nodes it moves on to. Empty for most nodes."""
+        return frozenset()
+
     def validate(self, pipeline: "Pipeline") -> list[str]:
         return self._validate_common(pipeline)
 

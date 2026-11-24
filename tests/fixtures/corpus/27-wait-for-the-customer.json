@@ -1,0 +1,65 @@
+{
+  "description": "a support ticket that waits for the customer, asks again once, and closes itself after three days of silence; run in memory and as a saved run restored after every wait",
+  "pipeline": {
+    "nodes": [
+      {"id": "start", "type": "entry", "variables": {"asked": 0}, "next": "ask"},
+      {"id": "ask", "type": "wait", "input": "reply",
+       "outputs": {"text": "reply"}, "timeout": "3d", "on_timeout": "closed_silent",
+       "next": "count"},
+      {"id": "count", "type": "stage", "stage": "IncrementStage",
+       "arguments": {"vars": {"current": "asked"}}, "outputs": {"value": "asked"},
+       "next": "triage"},
+      {"id": "triage", "type": "switch",
+       "cases": [{"when": "vars.reply == 'fixed'", "next": "solved"},
+                 {"when": "vars.asked < 2", "next": "ask"}],
+       "default": "escalated"},
+      {"id": "solved", "type": "terminal", "result": {"status": "solved"},
+       "artifacts": ["asked", "reply"]},
+      {"id": "escalated", "type": "terminal", "result": {"status": "escalated"},
+       "artifacts": ["asked", "reply"]},
+      {"id": "closed_silent", "type": "terminal", "result": {"status": "closed"},
+       "artifacts": ["asked"]}
+    ]
+  },
+  "runs": [
+    {
+      "name": "two replies, in memory",
+      "policy": {"allow_cycles": true},
+      "inputs": [{"type": "reply", "payload": {"text": "still broken"}},
+                 {"type": "reply", "payload": {"text": "fixed"}}],
+      "expect": {"result": {"status": "solved"},
+                 "artifacts": {"asked": 2, "reply": "fixed"},
+                 "events": {"count": {"waiting_started": 2, "wait_completed": 2}}}
+    },
+    {
+      "name": "two replies, saved and restored after each wait",
+      "policy": {"allow_cycles": true},
+      "durable": true,
+      "inputs": [{"type": "reply", "payload": {"text": "still broken"}},
+                 {"type": "reply", "payload": {"text": "fixed"}}],
+      "expect": {"result": {"status": "solved"},
+                 "artifacts": {"asked": 2, "reply": "fixed"},
+                 "events": {"include": ["session_restored"]}}
+    },
+    {
+      "name": "two replies that do not help: escalated; 8 nodes walked, and the wait counted again on each of the 2 restores",
+      "policy": {"allow_cycles": true},
+      "durable": true,
+      "inputs": [{"type": "reply", "payload": {"text": "no"}},
+                 {"type": "reply", "payload": {"text": "still no"}}],
+      "expect": {"result": {"status": "escalated"},
+                 "artifacts": {"asked": 2, "reply": "still no"},
+                 "meters": {"steps": 10}}
+    },
+    {
+      "name": "nobody answers yet: the run is saved at the wait",
+      "policy": {"allow_cycles": true},
+      "durable": true,
+      "expect": {"waiting_at": "ask"}
+    },
+    {
+      "name": "without a policy that allows the loop, the graph is refused",
+      "expect": {"invalid": ["cycle in the graph"]}
+    }
+  ]
+}

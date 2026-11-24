@@ -27,7 +27,7 @@ and how much it may spend.
 | Page | What it covers |
 |---|---|
 | [Quick start](quick-start.md) | installing, writing a stage, running a pipeline |
-| [Node types](node-types.md) | the nine node types and their fields |
+| [Node types](node-types.md) | the ten node types and their fields |
 | [Data model](data-model.md) | the frame, argument buckets, outputs |
 | [Expressions](expressions.md) | CEL, the `.$` suffix, the `vars` namespace |
 

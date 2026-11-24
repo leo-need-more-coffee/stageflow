@@ -94,6 +94,12 @@ class TryNode(Node):
             self._handler_scopes[handler.next] = self._region(pipeline, handler.next)
         return self._handler_scopes[handler.next]
 
+    def enclosed(self, pipeline: "Pipeline") -> frozenset[str]:
+        found = set(self.scope(pipeline))
+        for handler in self.handlers:
+            found |= self.handler_scope(pipeline, handler)
+        return frozenset(found)
+
     def _region(self, pipeline: "Pipeline", start: str) -> frozenset[str]:
         after = pipeline.reachable([self.next]) if self.next else frozenset()
         return pipeline.reachable([start], stop_at=after) - {self.id}

@@ -85,7 +85,8 @@ against it, so a wrong argument name is an error before anything runs.
 
 | | |
 |---|---|
-| **Nine node types** | `entry`, `stage`, `condition`, `switch`, `parallel`, `try`, `map`, `subpipeline`, `terminal` |
+| **Ten node types** | `entry`, `stage`, `condition`, `switch`, `parallel`, `try`, `map`, `wait`, `subpipeline`, `terminal` |
+| **Runs that last a week** | a `wait` node saves the run to a store and returns; any process continues it when the answer comes |
 | **One immutable frame** | variables travel along the path; a write produces a new frame, so branches never collide |
 | **CEL expressions** | in conditions, in switch cases, and in any argument or output through the `.$` suffix |
 | **Errors as roads** | `retry` on a node, `try`/`except` over a region of the graph derived from its shape |
@@ -124,6 +125,7 @@ One page per node type:
 [parallel](https://leo-need-more-coffee.github.io/stageflow/parallel-branches/) ·
 [try](https://leo-need-more-coffee.github.io/stageflow/try-node/) ·
 [map](https://leo-need-more-coffee.github.io/stageflow/map-node/) ·
+[wait](https://leo-need-more-coffee.github.io/stageflow/wait-node/) ·
 [subpipeline](https://leo-need-more-coffee.github.io/stageflow/subpipeline-node/) ·
 [terminal](https://leo-need-more-coffee.github.io/stageflow/terminal-node/)
 

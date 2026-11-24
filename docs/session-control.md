@@ -31,6 +31,10 @@ stopping and restoring is not a way to a fresh allowance.
 The node the snapshot names is run again from its start: a snapshot taken
 while a stage was running resumes before that stage, not halfway through it.
 
+A snapshot is the raw material; for a run that waits for a person for days,
+the [`wait` node](wait-node.md) with a store does the saving, the restoring
+and the locking between processes for you.
+
 The same commands are buttons in the editor's debug panel: continue, one step,
 stop, and the pause between nodes.
 

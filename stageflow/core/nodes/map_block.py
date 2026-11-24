@@ -73,6 +73,9 @@ class MapNode(Node):
             **Node._common(data),
         )
 
+    def enclosed(self, pipeline: "Pipeline") -> frozenset[str]:
+        return self.scope(pipeline)
+
     def scope(self, pipeline: "Pipeline") -> frozenset[str]:
         if self._scope is None:
             after = pipeline.reachable([self.next]) if self.next else frozenset()

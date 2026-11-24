@@ -8,6 +8,7 @@ from .stage import StageNode
 from .subpipeline import SubPipelineNode
 from .terminal import TerminalNode
 from .try_block import ExceptHandler, TryNode
+from .wait import WaitNode
 
 __all__ = [
     "Node",
@@ -25,4 +26,5 @@ __all__ = [
     "ParallelNode",
     "SubPipelineNode",
     "TerminalNode",
+    "WaitNode",
 ]

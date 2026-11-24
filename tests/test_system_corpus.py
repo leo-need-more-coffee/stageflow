@@ -27,6 +27,7 @@ from stageflow import (
     Context,
     InputSpec,
     Limits,
+    MemoryStore,
     Pipeline,
     Policy,
     Session,
@@ -137,6 +138,8 @@ def policy_of(spec: dict | None) -> Policy | None:
 
 
 async def execute(pipeline: Pipeline, run: dict, policy: Policy | None):
+    if run.get("durable"):
+        return await execute_durably(pipeline, run, policy)
     session = Session(id="corpus", pipeline=pipeline,
                       context=Context(vars=run.get("vars", {})), policy=policy)
     task = asyncio.create_task(session.run())
@@ -149,6 +152,21 @@ async def execute(pipeline: Pipeline, run: dict, policy: Policy | None):
             break
         await session.input(given["type"], given["payload"])
     return await asyncio.wait_for(task, RUN_TIMEOUT)
+
+
+async def execute_durably(pipeline: Pipeline, run: dict, policy: Policy | None):
+    """The run with a store: every time it stops at a wait, it is restored
+    as a new session (as in another process) and given the next input."""
+    store = MemoryStore()
+    result = await Session(id="corpus", pipeline=pipeline, policy=policy,
+                           context=Context(vars=run.get("vars", {})), store=store).run()
+    for given in run.get("inputs", []):
+        if result.waiting is None:
+            break
+        session = await Session.restore(store, "corpus", policy=policy or Policy())
+        await session.input(given["type"], given["payload"])
+        result = await asyncio.wait_for(session.run(), RUN_TIMEOUT)
+    return result
 
 
 def cases() -> list[tuple[str, dict]]:
@@ -192,6 +210,8 @@ class CorpusTests(unittest.TestCase):
             return
 
         result = asyncio.run(execute(pipeline, run, policy))
+        if "waiting_at" in expect:
+            self.assertEqual((result.waiting or {}).get("node"), expect["waiting_at"])
         if "result" in expect:
             if expect["result"] is not None and "status" in expect["result"] \
                     and result.result and result.result.get("status") == "budget_exceeded":

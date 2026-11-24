@@ -62,6 +62,12 @@ class ParallelNode(Node):
         targets = [b["entry"] for b in self.branches if b.get("entry")]
         return targets + ([self.next] if self.next else [])
 
+    def enclosed(self, pipeline: "Pipeline") -> frozenset[str]:
+        """The branches: everything reachable from their entries before the
+        node after the block."""
+        after = pipeline.reachable([self.next]) if self.next else frozenset()
+        return pipeline.reachable([b["entry"] for b in self.branches], stop_at=after)
+
     def validate(self, pipeline: "Pipeline") -> list[str]:
         errors = self._validate_common(pipeline)
         if not self.branches:

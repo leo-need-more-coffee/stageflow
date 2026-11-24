@@ -2,12 +2,13 @@
 
 Nothing here reaches inside the framework. A separate Python process — the
 host in `fixtures/approval/driver.py` — loads a pipeline from a JSON file,
-validates it against its policy, runs it with its own stages, and stores the
-session to disk when a person has to answer. A second process picks the
-session up, gives the answer and finishes the run. The tests only see what a
+validates it against its policy, runs it with its own stages, and when the
+run reaches its `wait` node with nobody to answer, saves it in an SQLite file
+and exits. A second process restores the run, gives the answer and finishes
+it. The tests only see what a
 host sees: what was printed and what was written.
 
-The pipeline uses all nine node types, so a run end to end is the whole
+The pipeline uses every node type, so a run end to end is the whole
 language at once rather than one feature at a time.
 """
 import json
@@ -34,7 +35,7 @@ class ApprovalSystemTests(unittest.TestCase):
     def setUp(self):
         self._dir = tempfile.TemporaryDirectory()
         self.dir = Path(self._dir.name)
-        self.state = str(self.dir / "state.json")
+        self.state = str(self.dir / "runs.db")
 
     def tearDown(self):
         self._dir.cleanup()
@@ -58,7 +59,8 @@ class ApprovalSystemTests(unittest.TestCase):
         self.assertEqual(out["result"], {"status": "approved", "by": "rules"})
         self.assertEqual(out["artifacts"], {"total": 55, "verdicts": ["ok", "ok"]})
         self.assertEqual(out["meters"]["checks"], 2, "one reserved check per line")
-        self.assertFalse(Path(self.state).exists(), "nobody was asked")
+        self.assertEqual(out["status"], "finished", "nobody was asked")
+        self.assertNotIn("waiting_started", out["events"])
 
     def test_a_high_line_waits_for_a_person_across_a_restart(self):
         lines = [{"what": "laptop", "amount": 1800}, {"what": "bag", "amount": 60}]
@@ -67,7 +69,7 @@ class ApprovalSystemTests(unittest.TestCase):
         self.assertEqual(first["at"], "ask")
         self.assertTrue(Path(self.state).exists())
 
-        second = host("resume", self.state, "approve")
+        second = host("resume", self.state, first["run"], "approve")
         self.assertEqual(second["result"], {"status": "approved", "by": "person"})
         self.assertEqual(second["artifacts"]["told"],
                          ["told manager", "told finance", "told requester"])
@@ -76,10 +78,13 @@ class ApprovalSystemTests(unittest.TestCase):
         # spending carried over from the first process instead of restarting
         self.assertGreater(second["meters"]["steps"], first["meters"]["steps"])
         self.assertEqual(second["meters"]["messages"], 3)
+        # the run is over: a second answer has nothing to continue
+        with self.assertRaisesRegex(AssertionError, "already finished"):
+            host("resume", self.state, first["run"], "reject")
 
     def test_a_person_can_say_no(self):
-        self.submit([{"what": "chair", "amount": 1200}])
-        out = host("resume", self.state, "reject")
+        first = self.submit([{"what": "chair", "amount": 1200}])
+        out = host("resume", self.state, first["run"], "reject")
         self.assertEqual(out["result"], {"status": "rejected", "why": "person"})
 
     def test_a_bad_line_is_caught_and_reported(self):

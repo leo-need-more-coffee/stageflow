@@ -9,6 +9,7 @@
 | [`parallel`](parallel-branches.md) | concurrent branches with independent frames | `branches`, `cancel_on_error`, `next` |
 | [`try`](try-node.md) | block-scoped error handling over a graph region | `body`, `except`, `next` |
 | [`map`](map-node.md) | run a graph region once per element of a list | `items`, `body`, `item_var`, `collect`, `mode`, `next` |
+| [`wait`](wait-node.md) | wait for an input — minutes in memory, or days with the run saved | `input`, `outputs`, `timeout`, `on_timeout`, `next` |
 | [`subpipeline`](subpipeline-node.md) | nested pipeline with a fresh frame | `subpipeline_id`, `inputs`, `artifact_outputs`, `result_output`, `next` |
 | [`terminal`](terminal-node.md) | end of execution | `result`, `artifacts` |
 

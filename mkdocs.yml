@@ -67,6 +67,7 @@ nav:
           - The parallel node: parallel-branches.md
           - The try node: try-node.md
           - The map node: map-node.md
+          - The wait node: wait-node.md
           - The subpipeline node: subpipeline-node.md
           - The terminal node: terminal-node.md
       - Errors: errors.md
@@ -147,6 +148,7 @@ plugins:
             The parallel node: Узел parallel
             The try node: Узел try
             The map node: Узел map
+            The wait node: Узел wait
             The subpipeline node: Узел subpipeline
             The terminal node: Узел terminal
             Errors: Ошибки

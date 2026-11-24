@@ -64,6 +64,11 @@ class BaseStage:
     allowed_events: list[EventSpec] = []
     allowed_inputs: list[InputSpec] = []
     timeout: float | None = 30
+    #: Stable across a crash and a `restore(takeover=True)`: the same node,
+    #: re-run after a crash, gets the same key. A stage with side effects (a
+    #: payment, an email) passes it on so the other side can drop a repeat.
+    #: `"<run id>:<node id>:<n>"`, n counting this node's runs in the run.
+    idempotency_key: str = ""
     #: gettext domain that translates this stage's descriptions. With None,
     #: descriptions are used as written, or as `{locale: text}` mappings.
     #: Register a domain with `stageflow.i18n.register_domain`.

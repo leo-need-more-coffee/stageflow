@@ -9,6 +9,7 @@
 | [`parallel`](parallel-branches.ru.md) | конкурентные ветки с независимыми фреймами | `branches`, `cancel_on_error`, `next` |
 | [`try`](try-node.ru.md) | блочная обработка ошибок области графа | `body`, `except`, `next` |
 | [`map`](map-node.ru.md) | область графа, исполняемая по разу на элемент списка | `items`, `body`, `item_var`, `collect`, `mode`, `next` |
+| [`wait`](wait-node.ru.md) | ожидание ввода — минуты в памяти или дни с сохранённым прогоном | `input`, `outputs`, `timeout`, `on_timeout`, `next` |
 | [`subpipeline`](subpipeline-node.ru.md) | вложенный пайплайн со свежим фреймом | `subpipeline_id`, `inputs`, `artifact_outputs`, `result_output`, `next` |
 | [`terminal`](terminal-node.ru.md) | конец исполнения | `result`, `artifacts` |
 

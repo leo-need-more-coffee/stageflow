@@ -36,8 +36,9 @@ from typing import TYPE_CHECKING, Any, Iterator
 
 from ..capabilities import __version__
 from ..core.budget import BudgetExceeded
+from ..core.durable import RunSuspended
 from ..core.instrument import Instrument
-from . import _is_cancel, outcome_of
+from . import _is_cancel, node_outcome, outcome_of
 
 try:
     from opentelemetry import metrics, trace
@@ -135,7 +136,7 @@ class OpenTelemetryInstrument(Instrument):
             try:
                 yield
             except BaseException as exc:
-                outcome = "cancelled" if _is_cancel(exc) else type(exc).__name__
+                outcome = node_outcome(exc)
                 self._mark_failed(span, exc)
                 raise
             finally:
@@ -155,6 +156,9 @@ class OpenTelemetryInstrument(Instrument):
 
     @staticmethod
     def _mark_failed(span, exc: BaseException) -> None:
+        if isinstance(exc, RunSuspended):
+            span.set_attribute("stageflow.waiting", True)
+            return
         if _is_cancel(exc):
             span.set_attribute("stageflow.cancelled", True)
             return
