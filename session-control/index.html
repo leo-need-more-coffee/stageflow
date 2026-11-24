@@ -1299,6 +1299,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../wait-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The wait node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../subpipeline-node/" class="md-nav__link">
         
   
@@ -1919,6 +1947,9 @@ snapshot carries <code>meters</code>, and the restored session goes on from them
 stopping and restoring is not a way to a fresh allowance.</p>
 <p>The node the snapshot names is run again from its start: a snapshot taken
 while a stage was running resumes before that stage, not halfway through it.</p>
+<p>A snapshot is the raw material; for a run that waits for a person for days,
+the <a href="../wait-node/"><code>wait</code> node</a> with a store does the saving, the restoring
+and the locking between processes for you.</p>
 <p>The same commands are buttons in the editor's debug panel: continue, one step,
 stop, and the pause between nodes.</p>
 <p><img alt="The run controls" src="../img/ref-debug-controls.png" /></p>
