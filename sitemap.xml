@@ -183,6 +183,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/terminal-node/"/>
     </url>
     <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/testing/</loc>
+        <lastmod>2026-11-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/testing/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/testing/"/>
+    </url>
+    <url>
         <loc>https://leo-need-more-coffee.github.io/stageflow/try-node/</loc>
         <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
@@ -475,6 +482,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/terminal-node/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/terminal-node/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/testing/</loc>
+        <lastmod>2026-11-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/testing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/testing/"/>
     </url>
     <url>
         <loc>https://leo-need-more-coffee.github.io/stageflow/ru/try-node/</loc>

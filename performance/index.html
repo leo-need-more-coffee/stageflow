@@ -1669,6 +1669,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-it-got-here" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1866,6 +1877,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../releasing/" class="md-nav__link">
         
   
@@ -1943,6 +1982,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-it-got-here" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2012,6 +2062,10 @@ The suite and its full results are in
 <td><code>from_dict</code> + <code>validate</code></td>
 <td>about 3 µs per node</td>
 </tr>
+<tr>
+<td>memory of a long run</td>
+<td>about 3 MiB, and it stops growing</td>
+</tr>
 </tbody>
 </table>
 <p>Against a real stage — a model call of hundreds of milliseconds, a query of a
@@ -2025,6 +2079,12 @@ the cost of creating a real span per node in the SDK.</p>
 <p><img alt="A parallel map of 500 × 1 ms calls" src="../img/bench-concurrency.png" /></p>
 <p>A parallel <code>map</code> over 500 one-millisecond calls stays within a factor of two
 of the ideal throughput at every <code>concurrency</code> limit.</p>
+<h2 id="memory">Memory<a class="headerlink" href="#memory" title="Permanent link">&para;</a></h2>
+<p><img alt="A long run's memory stops growing" src="../img/bench-memory.png" /></p>
+<p>A run keeps a window of its last 10 000 events — about 330 bytes each, two
+per stage — and little else, so its memory levels off at about 3 MiB however
+many nodes it walks. Values in the frame are shared, not copied: a megabyte
+list carried through a thousand stages costs nothing extra.</p>
 <h2 id="how-it-got-here">How it got here<a class="headerlink" href="#how-it-got-here" title="Permanent link">&para;</a></h2>
 <p>The first run of the benchmarks measured 160 µs per node. Profiling found the
 causes — a stage's docstring re-parsed as YAML on every validation and every

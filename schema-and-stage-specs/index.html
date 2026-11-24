@@ -1741,6 +1741,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#format-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format version
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1844,6 +1855,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../releasing/" class="md-nav__link">
         
   
@@ -1909,6 +1948,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#format-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format version
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1963,7 +2013,7 @@ one directly:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">capabilities</span><span class="p">,</span> <span class="n">__version__</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">capabilities</span><span class="p">()</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># {"stageflow": "0.13.0",</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># {"stageflow": "0.16.0", "format": 1,</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">#  "node_types": ["condition", "entry", "map", "parallel", "stage",</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">#                 "subpipeline", "switch", "terminal", "try"],</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">#  "stages": 17}</span>
@@ -1971,7 +2021,7 @@ one directly:</p>
 <p>With a <a href="../policy/">policy</a> the answer narrows to what that caller may use,
 which is what a backend should serve rather than a description of itself:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">capabilities</span><span class="p">(</span><span class="n">basic_plan</span><span class="p">)</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># {"stageflow": "0.13.0",</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># {"stageflow": "0.16.0", "format": 1,</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1">#  "node_types": ["condition", "entry", "stage", "switch", "terminal"],</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1">#  "stages": 5}</span>
 </code></pre></div>
@@ -1982,12 +2032,30 @@ it something a client can branch on, which a version range is not — a build
 with a custom node type belongs to no range.</p>
 <p>A backend is expected to hand this to its clients. The example backend serves
 it at <code>GET /api/meta</code>, together with the version of its own HTTP contract:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">"api"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"stageflow"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.13.0"</span><span class="p">,</span><span class="w"> </span><span class="nt">"node_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"condition"</span><span class="p">,</span><span class="w"> </span><span class="s2">"…"</span><span class="p">],</span><span class="w"> </span><span class="nt">"stages"</span><span class="p">:</span><span class="w"> </span><span class="mi">17</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">"api"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"stageflow"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.16.0"</span><span class="p">,</span><span class="w"> </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"node_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"condition"</span><span class="p">,</span><span class="w"> </span><span class="s2">"…"</span><span class="p">],</span><span class="w"> </span><span class="nt">"stages"</span><span class="p">:</span><span class="w"> </span><span class="mi">17</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p><code>__version__</code> is read from the installed distribution. In a source checkout
 that was never installed it reads <code>0.0.0+unknown</code> — deliberately not a
 plausible number, so that nobody compares it with one.</p>
 <p><img alt="The editor working off a backend's specs" src="../img/tut-final.png" /></p>
+<h2 id="format-version">Format version<a class="headerlink" href="#format-version" title="Permanent link">&para;</a></h2>
+<p>A pipeline document may say which format it is written in:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"nodes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>A document without <code>version</code> is version 1. <code>capabilities()["format"]</code> is the
+version this core reads and writes, and an editor should put it in every
+document it saves.</p>
+<p>When the format changes incompatibly, the version goes up and the core gets
+an upgrade from the previous one (<code>stageflow/core/migrations.py</code>).
+<code>Pipeline.from_dict</code> applies the upgrades in turn, so a pipeline saved years
+ago still loads; <code>pipeline.raw_json</code> holds the upgraded document, ready to be
+saved back. A document of a version newer than the core is refused with a
+message that says so — "saved by a newer StageFlow" — rather than with a
+complaint about whichever unknown field the schema trips on first.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">stageflow.core.migrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">FORMAT_VERSION</span><span class="p">,</span> <span class="n">migrate</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">migrate</span><span class="p">(</span><span class="n">old_document</span><span class="p">)</span>          <span class="c1"># a copy at FORMAT_VERSION; the input is untouched</span>
+</code></pre></div>
 
 
 

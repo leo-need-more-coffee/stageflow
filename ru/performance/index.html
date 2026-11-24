@@ -1672,6 +1672,17 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
+        Память
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         Как к этому пришли
       
     </span>
@@ -1866,6 +1877,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Тестирование
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../releasing/" class="md-nav__link">
         
   
@@ -1946,6 +1985,17 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
+        Память
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         Как к этому пришли
       
     </span>
@@ -2012,6 +2062,10 @@
 <td><code>from_dict</code> + <code>validate</code></td>
 <td>около 3 мкс на узел</td>
 </tr>
+<tr>
+<td>память длинного прогона</td>
+<td>около 3 МиБ, дальше не растёт</td>
+</tr>
 </tbody>
 </table>
 <p>На фоне настоящей стадии — вызова модели за сотни миллисекунд, запроса к базе
@@ -2025,7 +2079,14 @@
 <p><img alt="Параллельный map из 500 вызовов по 1 мс" src="../../img/bench-concurrency.png" /></p>
 <p>Параллельный <code>map</code> из 500 миллисекундных вызовов держится в пределах двух раз
 от идеальной пропускной способности при любом лимите <code>concurrency</code>.</p>
-<h2 id="_4">Как к этому пришли<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h2 id="_4">Память<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p><img alt="Память длинного прогона перестаёт расти" src="../../img/bench-memory.png" /></p>
+<p>Прогон хранит окно из последних 10 000 событий — около 330 байт каждое, по два
+на стадию — и почти ничего кроме, поэтому его память выходит на полку около
+3 МиБ, сколько бы узлов он ни прошёл. Значения во фрейме общие, а не
+копируются: список на мегабайт, пронесённый через тысячу стадий, ничего
+сверху не стоит.</p>
+<h2 id="_5">Как к этому пришли<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>Первый прогон бенчмарков показал 160 мкс на узел. Профилирование нашло
 причины: YAML из докстринга стадии разбирался заново при каждой валидации и
 каждом запуске стадии, главный цикл создавал по две задачи на узел, таймаут
