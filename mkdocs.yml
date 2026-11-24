@@ -77,6 +77,7 @@ nav:
       - Session control: session-control.md
       - Step debugging: step-debugging.md
       - Observability: observability.md
+      - Performance: performance.md
       - Built-in stages: built-in-stages.md
       - Stage specification: stage-specification.md
       - Schema and stage specs: schema-and-stage-specs.md
@@ -155,6 +156,7 @@ plugins:
             Session control: Управление сессией
             Step debugging: Пошаговая отладка
             Observability: Наблюдаемость
+            Performance: Производительность
             Built-in stages: Встроенные стадии
             Stage specification: Спецификация стадии
             Schema and stage specs: Схема и спецификации

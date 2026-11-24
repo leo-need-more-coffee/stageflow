@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from ...exceptions import PipelineDefinitionError, RegistryError
 from ...i18n import _
 from ..context import Context
+from ..spec import stage_contract
 from ..stage import BaseStage, get_stage
 from .base import Node, register_node
 from .bindings import CEL_SUFFIX, apply_outputs, normalize_bucket, resolve_arguments
@@ -88,11 +89,11 @@ class StageNode(Node):
 
     def _validate_output_fields(self) -> list[str]:
         try:
-            spec = get_stage(self.stage).get_specs()
-        except Exception:  # noqa: BLE001
+            contract = stage_contract(get_stage(self.stage))
+        except RegistryError:
             return []
 
-        declared = {field["name"] for field in spec.get("outputs", [])}
+        declared = set(contract.outputs)
         if not declared or "*" in declared:
             return []
 
@@ -109,12 +110,12 @@ class StageNode(Node):
         if not ts.has_declarations():
             return []
         try:
-            spec = get_stage(self.stage).get_specs()
-        except Exception:  # noqa: BLE001
+            contract = stage_contract(get_stage(self.stage))
+        except RegistryError:
             return []
 
-        arg_hints = {f["name"]: f.get("type") for f in spec.get("arguments", [])}
-        out_hints = {f["name"]: f.get("type") for f in spec.get("outputs", [])}
+        arg_hints = contract.arguments
+        out_hints = contract.outputs
         errors: list[str] = []
 
         bucket = self.arguments.get("vars")

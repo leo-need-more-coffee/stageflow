@@ -101,6 +101,29 @@ class NotCyclesTests(unittest.TestCase):
         self.assertEqual(Pipeline.from_dict(data).collect_errors(), [])
 
 
+class LongGraphTests(unittest.TestCase):
+    """The cycle check walks the graph without recursion: a long straight
+    pipeline used to hit Python's recursion limit at about a thousand nodes."""
+
+    @staticmethod
+    def chain(n, back_to=None):
+        nodes = [{"id": "start", "type": "entry", "next": "n0"}]
+        for i in range(n):
+            nxt = f"n{i + 1}" if i < n - 1 else (back_to or "end")
+            nodes.append({"id": f"n{i}", "type": "stage", "stage": "SetValueStage",
+                          "arguments": {"const": {"value": i}}, "next": nxt})
+        nodes.append({"id": "end", "type": "terminal"})
+        return {"nodes": nodes}
+
+    def test_a_long_chain_validates(self):
+        Pipeline.from_dict(self.chain(5000)).validate()
+
+    def test_a_long_cycle_is_found(self):
+        with self.assertRaisesRegex(PipelineValidationError,
+                                    r"cycle in the graph: n0 -> n1 -> .* -> n2999 -> n0"):
+            Pipeline.from_dict(self.chain(3000, back_to="n0")).validate()
+
+
 if __name__ == "__main__":
     unittest.main()
 

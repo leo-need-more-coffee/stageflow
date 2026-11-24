@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import copy
+from dataclasses import dataclass
+from functools import cache
+from typing import Any, Iterator
+
 from jsonschema import Draft202012Validator as _VALIDATOR
 
 from stageflow.docs.schema import load_pipeline_schema
@@ -17,6 +22,66 @@ from .typesys import TypeSystem
 
 #: How many shape problems are worth listing before the list stops helping.
 _MAX_SCHEMA_ERRORS = 10
+
+
+@dataclass(frozen=True)
+class _SchemaError:
+    """A schema error with its path made absolute (see `_schema_errors`)."""
+
+    absolute_path: list
+    message: str
+    cause: Exception
+
+
+@cache
+def _validators() -> tuple[Any, dict[str, Any]]:
+    """The pipeline schema split for speed: a shell, and one schema per node type.
+
+    The schema picks a node's rules with nine `if type == ... then ...` blocks,
+    and a generic validator evaluates all nine for every node. Here the shell
+    checks everything except those blocks, and each node is then checked
+    against the one schema its `type` names. Same errors, same paths, several
+    times faster on a large graph.
+    """
+    schema = load_pipeline_schema()
+    shell = copy.deepcopy(schema)
+    node = shell["$defs"]["node"]
+    per_type: dict[str, Any] = {}
+    for branch in node.pop("allOf"):
+        type_ = branch["if"]["properties"]["type"]["const"]
+        per_type[type_] = _VALIDATOR({"$ref": branch["then"]["$ref"],
+                                      "$defs": schema["$defs"]})
+    return _VALIDATOR(shell), per_type
+
+
+def _node_lists(data: Any, prefix: list) -> Iterator[tuple[list, list]]:
+    """Every `nodes` array in a document, subpipelines included, with its path."""
+    if not isinstance(data, dict):
+        return
+    if isinstance(data.get("nodes"), list):
+        yield prefix + ["nodes"], data["nodes"]
+    subpipelines = data.get("subpipelines")
+    if isinstance(subpipelines, dict):
+        for name, sub in subpipelines.items():
+            yield from _node_lists(sub, prefix + ["subpipelines", name])
+
+
+def _schema_errors(data: Any) -> list[_SchemaError]:
+    shell, per_type = _validators()
+    found = [_SchemaError(list(e.absolute_path), e.message, e) for e in shell.iter_errors(data)]
+    for path, nodes in _node_lists(data, []):
+        for index, node in enumerate(nodes):
+            type_ = node.get("type") if isinstance(node, dict) else None
+            if not isinstance(type_, str):
+                continue  # the shell already says what is wrong with it
+            validator = per_type.get(type_)
+            if validator is None:
+                continue
+            for e in validator.iter_errors(node):
+                found.append(_SchemaError(path + [index] + list(e.absolute_path),
+                                          e.message, e))
+    return sorted(found, key=lambda e: [(0, p, "") if isinstance(p, int) else (1, 0, str(p))
+                                        for p in e.absolute_path])
 
 
 def _located(data: dict, exc) -> str:
@@ -101,7 +166,7 @@ class Pipeline:
         places, and fixing them one round trip at a time is the difference
         between a correction and a conversation.
         """
-        found = sorted(_VALIDATOR(schema).iter_errors(data), key=lambda e: list(e.absolute_path))
+        found = _schema_errors(data)
         if not found:
             return
         reason = "; ".join(_located(data, exc) for exc in found[:_MAX_SCHEMA_ERRORS])
@@ -114,7 +179,7 @@ class Pipeline:
         else:
             message = _("Subpipeline '{name}' schema validation failed: {reason}",
                         name=sub_id, reason=reason)
-        raise PipelineDefinitionError(message) from found[0]
+        raise PipelineDefinitionError(message) from found[0].cause
 
     def has_node(self, node_id: str) -> bool:
         return node_id in self._nodes_map
@@ -213,28 +278,34 @@ class Pipeline:
         above — says so with `Policy(allow_cycles=True)`, and then this is not
         called at all. See `collect_errors`.
         """
-        colour: dict[str, int] = {}  # 0 — on the current path, 1 — done with
+        # iterative rather than recursive: a long straight graph is a deep
+        # walk, and recursion stops at about a thousand nodes
+        on_path: dict[str, int] = {}  # node -> its index in `path`
+        done: set[str] = set()
         found: list[str] = []
 
-        def walk(node_id: str, path: list[str]) -> None:
-            state = colour.get(node_id)
-            if state == 1:
-                return
-            if state == 0:
-                cycle = path[path.index(node_id):] + [node_id]
-                found.append(" -> ".join(cycle))
-                return
-            colour[node_id] = 0
-            path.append(node_id)
-            for target in self.get_node(node_id).order_targets():
-                if self.has_node(target):
-                    walk(target, path)
-            path.pop()
-            colour[node_id] = 1
-
         for node in self.nodes:
-            if node.id not in colour:
-                walk(node.id, [])
+            if node.id in done:
+                continue
+            path: list[str] = [node.id]
+            on_path[node.id] = 0
+            stack = [iter(self.get_node(node.id).order_targets())]
+            while stack:
+                target = next(stack[-1], None)
+                if target is None:
+                    finished = path.pop()
+                    del on_path[finished]
+                    done.add(finished)
+                    stack.pop()
+                    continue
+                if not self.has_node(target) or target in done:
+                    continue
+                if target in on_path:
+                    found.append(" -> ".join(path[on_path[target]:] + [target]))
+                    continue
+                on_path[target] = len(path)
+                path.append(target)
+                stack.append(iter(self.get_node(target).order_targets()))
         return [_("cycle in the graph: {cycle}", cycle=cycle)
                 for cycle in dict.fromkeys(found)]
 

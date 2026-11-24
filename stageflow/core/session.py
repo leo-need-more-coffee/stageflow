@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import time
 from collections import deque
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Callable
@@ -18,6 +17,7 @@ from .instrument import Instrument
 from .nodes import Node, StageNode, TerminalNode
 from .pipeline import Pipeline
 from .policy import OPEN, Policy
+from .spec import stage_contract
 
 if TYPE_CHECKING:  # pragma: no cover
     from .debug import StepDebugger
@@ -27,6 +27,14 @@ EventHandler = Callable[[Event], None]
 _STOPPED_RESULT = {"result": "stopped"}
 
 _NO_FRAME = Context()
+
+
+def _running_in(loop: asyncio.AbstractEventLoop) -> bool:
+    try:
+        return asyncio.get_running_loop() is loop
+    except RuntimeError:
+        return False
+
 
 #: How many events one session keeps. A cyclic graph emits tens of thousands
 #: a second, and an unbounded list is the cheapest way for a pipeline to take
@@ -117,6 +125,10 @@ class Session:
         self._running.set()
         self._skip_requested = False
         self._current_node_id: str | None = None
+        #: the task walking the graph while `run` is going, and its loop —
+        #: what `stop` cancels, from whichever thread it is called
+        self._walker: asyncio.Task | None = None
+        self._loop: asyncio.AbstractEventLoop | None = None
 
     def emit(self, event: Event) -> None:
         self.event_history.append(event)
@@ -186,10 +198,19 @@ class Session:
             handler()
 
     def stop(self) -> None:
+        """End the run: the node that is running is cancelled, and the result
+        is `{"result": "stopped"}`. Safe to call from another thread."""
+        loop = self._loop
+        if loop is not None and not loop.is_closed() and not _running_in(loop):
+            loop.call_soon_threadsafe(self.stop)
+            return
         if self._stop_requested.is_set():
             return
         self._stop_requested.set()
         self.emit(Event(type="session_stopped", session_id=self.id))
+        walker = self._walker
+        if walker is not None and not walker.done():
+            walker.cancel()
 
     def pause(self) -> None:
         if self._running.is_set():
@@ -294,7 +315,7 @@ class Session:
         """
         if self.budget.limits.unlimited:
             return {}
-        declared = stage_cls.get_specs().get("reserve") or {}
+        declared = stage_contract(stage_cls).reserve
         if not declared:
             return {}
         amounts: dict[str, float] = {}
@@ -321,35 +342,20 @@ class Session:
         self.emit_node_event("stage_charged", node, {"stage": node.stage, **charged})
 
     async def _run_stage_body(self, stage) -> None:
-        """Run the stage under a deadline that does not tick while it waits.
+        """Run the stage under its timeout, counted in busy time.
 
-        `wait_for` cannot express this: its clock is wall time, so a stage
-        that asks a human a question dies thirty seconds later. Here the
-        deadline is busy time — the wait wakes us, we see the stage was idle
-        for it, and we give the time back instead of killing the stage.
+        A plain `wait_for` counts wall time, so a stage that asks a person a
+        question would die thirty seconds later. The timeout here is put on
+        hold for as long as the session is idle (see `Budget.pausable`), and
+        the stage runs in the current task — no task of its own per stage.
         """
         timeout = self.budget.timeout_for(stage.timeout)
         if timeout is None:
             await stage.run()
             return
-
-        task = asyncio.ensure_future(stage.run())
-        started, idle_before = time.monotonic(), self.budget.idle_seconds
-        try:
-            while True:
-                idled = self.budget.idle_seconds - idle_before
-                left = timeout - ((time.monotonic() - started) - idled)
-                if left <= 0:
-                    raise asyncio.TimeoutError
-                done, _ = await asyncio.wait({task}, timeout=left)
-                if done:
-                    await task  # re-raises whatever the stage raised
-                    return
-        except BaseException:
-            if not task.done():
-                task.cancel()
-                await asyncio.gather(task, return_exceptions=True)
-            raise
+        async with asyncio.timeout(timeout) as deadline:
+            with self.budget.pausable(deadline):
+                await stage.run()
 
     async def run_subpipeline(self, node, child_ctx: Context) -> SessionResult:
         if node.subpipeline_id not in self.pipeline.subpipelines:
@@ -435,29 +441,23 @@ class Session:
             if self._current_node_id
             else self.pipeline.get_entry_node()
         )
-        ctx = self.context
 
+        # The graph is walked in a task of its own, so that `stop` can cancel
+        # whatever node is running by cancelling that one task. Racing every
+        # step against a stop event did the same at the price of two extra
+        # tasks per node.
+        self._loop = asyncio.get_running_loop()
+        walker = self._walker = asyncio.create_task(self._walk(node))
         try:
-            while node is not None:
-                self._current_node_id = node.id
-
-                await self._pause_gate()
-                if self.stopped:
-                    self.result = dict(_STOPPED_RESULT)
-                    break
-
-                if self._try_skip(node):
-                    node = self.pipeline.get_node(node.next) if node.next else None
-                    continue
-
-                step = asyncio.create_task(self.execute_node(node, ctx))
-                if await self._interrupted_by_stop(step):
-                    self.result = dict(_STOPPED_RESULT)
-                    break
-                node, ctx = step.result()
-                # kept current so that a snapshot taken between nodes resumes
-                # with the frame as it is, not as the run started
-                self.context = ctx
+            await walker
+        except asyncio.CancelledError:
+            current = asyncio.current_task()
+            if (current is not None and current.cancelling()) or not walker.done():
+                # `run` itself was cancelled: not a stop, pass it on
+                walker.cancel()
+                await asyncio.gather(walker, return_exceptions=True)
+                raise
+            self.result = dict(_STOPPED_RESULT)
         except BudgetExceeded as over:
             # the one place that catches it. A pipeline cannot: `try` blocks
             # and `run_with_retry` catch Exception, and this is not one. The
@@ -469,8 +469,10 @@ class Session:
             if not self._owns_budget:
                 raise
             self.result = over.as_result()
+        finally:
+            self._walker = None
 
-        self.context = ctx
+        ctx = self.context
         self._current_node_id = None
         if self._owns_budget:
             self.budget.stop()
@@ -483,30 +485,22 @@ class Session:
             meters=self.budget.report(),
         )
 
-    async def _pause_gate(self) -> None:
-        while not self._running.is_set() and not self.stopped:
-            await self._race(self._running.wait(), self._stop_requested.wait())
-
-    async def _interrupted_by_stop(self, step: asyncio.Task) -> bool:
-        await self._race(step, self._stop_requested.wait())
-        if step.done():
-            return False
-        step.cancel()
-        try:
-            await step
-        except asyncio.CancelledError:
-            pass
-        return True
-
-    @staticmethod
-    async def _race(*aws) -> None:
-        tasks = [aw if isinstance(aw, asyncio.Task) else asyncio.create_task(aw) for aw in aws]
-        try:
-            await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-        finally:
-            for task in tasks:
-                if not task.done():
-                    task.cancel()
+    async def _walk(self, node: "Node | None") -> None:
+        ctx = self.context
+        while node is not None:
+            self._current_node_id = node.id
+            if not self._running.is_set():
+                await self._running.wait()  # paused; a stop cancels this wait
+            if self.stopped:
+                self.result = dict(_STOPPED_RESULT)
+                return
+            if self._try_skip(node):
+                node = self.pipeline.get_node(node.next) if node.next else None
+                continue
+            node, ctx = await self.execute_node(node, ctx)
+            # kept current so that a snapshot taken between nodes resumes
+            # with the frame as it is, not as the run started
+            self.context = ctx
 
     def _try_skip(self, node: Node) -> bool:
         if not (self._skip_requested and isinstance(node, StageNode)):

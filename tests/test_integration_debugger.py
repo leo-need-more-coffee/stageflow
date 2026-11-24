@@ -106,5 +106,41 @@ class SteppingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.artifacts, {})
 
 
+SLEEPY = {"nodes": [
+    {"id": "start", "type": "entry", "next": "nap"},
+    {"id": "nap", "type": "stage", "stage": "SleepStage",
+     "arguments": {"const": {"seconds": 5}}, "next": "end"},
+    {"id": "end", "type": "terminal", "result": {"status": "slept"}},
+]}
+
+
+class StoppingTests(unittest.TestCase):
+    def test_stop_from_another_thread_interrupts_the_running_node(self):
+        import threading
+        import time
+        session = Session(id="x", pipeline=Pipeline.from_dict(SLEEPY))
+        out = {}
+        worker = threading.Thread(target=lambda: out.update(r=asyncio.run(session.run())))
+        started = time.monotonic()
+        worker.start()
+        time.sleep(0.1)
+        session.stop()
+        worker.join(3)
+        self.assertFalse(worker.is_alive())
+        self.assertEqual(out["r"].result, {"result": "stopped"})
+        self.assertLess(time.monotonic() - started, 2)
+
+    def test_cancelling_run_is_a_cancellation_not_a_stop(self):
+        async def go():
+            session = Session(id="x", pipeline=Pipeline.from_dict(SLEEPY))
+            task = asyncio.create_task(session.run())
+            await asyncio.sleep(0.05)
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+            self.assertFalse(session.stopped)
+        asyncio.run(go())
+
+
 if __name__ == "__main__":
     unittest.main()

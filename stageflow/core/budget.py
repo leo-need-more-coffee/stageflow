@@ -5,7 +5,7 @@ import contextvars
 import time
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
-from typing import AsyncIterator, Iterator
+from typing import Any, AsyncIterator, Iterator
 
 
 class _Ticket:
@@ -135,6 +135,9 @@ class Budget:
         #: busy time spent before this object existed — a session restored
         #: from a snapshot carries on from what it had already used
         self._carried: float = 0.0
+        #: the stage timeouts that are running, and what each had left when
+        #: an idle period began (None while the session is busy)
+        self._timeouts: dict[Any, float | None] = {}
 
     def restore(self, spent: dict[str, float] | None) -> None:
         """Carry the running total over from a snapshot's `meters`.
@@ -188,6 +191,8 @@ class Budget:
         """
         if self._idle_depth == 0:
             self._idle_since = time.monotonic()
+            for timeout in self._timeouts:
+                self._suspend(timeout)
         self._idle_depth += 1
 
     def end_idle(self) -> None:
@@ -195,6 +200,35 @@ class Budget:
         if self._idle_depth == 0 and self._idle_since is not None:
             self._idle += time.monotonic() - self._idle_since
             self._idle_since = None
+            loop = asyncio.get_running_loop()
+            for timeout, left in self._timeouts.items():
+                if left is not None:
+                    timeout.reschedule(loop.time() + left)
+                    self._timeouts[timeout] = None
+
+    @contextmanager
+    def pausable(self, timeout) -> Iterator[None]:
+        """Keep an `asyncio.timeout` from ticking while the session is idle.
+
+        A stage's timeout is busy time: a stage that asks a person a question
+        must not die while the person reads. While any idle period lasts,
+        every registered timeout is put on hold, and when it ends each gets
+        back exactly what it had left.
+        """
+        self._timeouts[timeout] = None
+        if self._idle_depth > 0:
+            self._suspend(timeout)
+        try:
+            yield
+        finally:
+            self._timeouts.pop(timeout, None)
+
+    def _suspend(self, timeout) -> None:
+        when = timeout.when()
+        if when is None:
+            return
+        self._timeouts[timeout] = when - asyncio.get_running_loop().time()
+        timeout.reschedule(None)
 
     @property
     def idle_seconds(self) -> float:

@@ -133,5 +133,32 @@ class AccountingTests(unittest.TestCase):
         self.assertEqual(Budget().timeout_for(60), 60)
 
 
+class PausableTimeoutTests(unittest.IsolatedAsyncioTestCase):
+    async def test_an_idle_period_holds_the_timeout(self):
+        budget = Budget()
+        loop = asyncio.get_running_loop()
+        started = loop.time()
+        with self.assertRaises(TimeoutError):
+            async with asyncio.timeout(0.1) as deadline:
+                with budget.pausable(deadline):
+                    await asyncio.sleep(0.05)
+                    budget.begin_idle()
+                    await asyncio.sleep(0.2)      # longer than the timeout
+                    budget.end_idle()
+                    await asyncio.sleep(1)        # the 0.05 left runs out here
+        elapsed = loop.time() - started
+        self.assertGreater(elapsed, 0.28)
+        self.assertLess(elapsed, 0.6)
+
+    async def test_a_timeout_started_while_idle_waits_for_the_idle_to_end(self):
+        budget = Budget()
+        budget.begin_idle()
+        async with asyncio.timeout(0.05) as deadline:
+            with budget.pausable(deadline):
+                await asyncio.sleep(0.15)
+                budget.end_idle()
+        self.assertEqual(budget._timeouts, {}, "unregistered on the way out")
+
+
 if __name__ == "__main__":
     unittest.main()

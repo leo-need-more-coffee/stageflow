@@ -36,3 +36,6 @@ htmlcov/
 
 # MkDocs build output
 site/
+
+# Hypothesis example database
+.hypothesis/

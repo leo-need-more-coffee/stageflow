@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Any
 
 import yaml
@@ -62,6 +64,14 @@ def parse_fields(raw: Any) -> list[FieldSpec]:
 
 
 def parse_docstring_spec(doc: str | None) -> dict[str, Any]:
+    """The spec a stage declares in its docstring, or an empty dict.
+
+    Returns a fresh copy; parsing is cached (see `_parsed`)."""
+    return copy.deepcopy(_parsed(doc))
+
+
+@lru_cache(maxsize=None)
+def _parsed(doc: str | None) -> dict[str, Any]:
     """The spec a stage declares in its docstring, or nothing.
 
     A docstring is first of all a docstring: plenty of them are prose, and
@@ -113,6 +123,36 @@ def _described(specs: list[Any], locale: str | None, domain: str | None) -> list
     return out
 
 
+@dataclass(frozen=True)
+class StageContract:
+    """What the runtime and the validator need from a stage spec: names, types
+    and reservations — no prose, so nothing to translate."""
+
+    arguments: dict[str, str | None]
+    outputs: dict[str, str | None]
+    reserve: dict[str, Any]
+
+
+def stage_contract(stage_cls: type) -> StageContract:
+    """The stage's contract, parsed once per class.
+
+    `get_specs()` builds the full card with every translation, which is what
+    an editor wants and far too much for checking a graph or reserving a
+    budget on every stage run.
+    """
+    return _contract(stage_cls, stage_cls.__doc__)
+
+
+@lru_cache(maxsize=None)
+def _contract(stage_cls: type, doc: str | None) -> StageContract:
+    raw = _parsed(doc)
+    return StageContract(
+        arguments={f.name: f.type for f in parse_fields(raw.get("arguments"))},
+        outputs={f.name: f.type for f in parse_fields(raw.get("outputs"))},
+        reserve=dict(raw.get("reserve") or {}),
+    )
+
+
 def build_stage_spec(stage_cls: type, locale: str | None = None) -> dict[str, Any]:
     """The card an editor draws this stage from.
 
@@ -131,7 +171,7 @@ def build_stage_spec(stage_cls: type, locale: str | None = None) -> dict[str, An
     one language, for a caller that really is answering one reader — the docs
     generator, mostly.
     """
-    doc = parse_docstring_spec(stage_cls.__doc__)
+    doc = _parsed(stage_cls.__doc__)
     domain = getattr(stage_cls, "i18n_domain", None)
     return {
         "stage_name": stage_cls.stage_name,
