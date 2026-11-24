@@ -7,6 +7,11 @@ from typing import Any, Iterator
 
 from jsonschema import Draft202012Validator as _VALIDATOR
 
+try:  # a Rust validator for the fast "is it valid" check; optional
+    import jsonschema_rs as _rs
+except ImportError:  # pragma: no cover - depends on the environment
+    _rs = None
+
 from stageflow.docs.schema import load_pipeline_schema
 
 from ..exceptions import (
@@ -53,6 +58,14 @@ def _validators() -> tuple[Any, dict[str, Any]]:
     return _VALIDATOR(shell), per_type
 
 
+@cache
+def _fast_validator() -> Any:
+    """The whole schema compiled by jsonschema-rs, or None without it."""
+    if _rs is None:
+        return None
+    return _rs.Draft202012Validator(load_pipeline_schema(), validate_formats=False)
+
+
 def _node_lists(data: Any, prefix: list) -> Iterator[tuple[list, list]]:
     """Every `nodes` array in a document, subpipelines included, with its path."""
     if not isinstance(data, dict):
@@ -66,6 +79,15 @@ def _node_lists(data: Any, prefix: list) -> Iterator[tuple[list, list]]:
 
 
 def _schema_errors(data: Any) -> list[_SchemaError]:
+    """All schema errors of a document, with absolute paths.
+
+    Valid documents (the common case) are confirmed by jsonschema-rs, which
+    is much faster. Errors are always collected by the Python validator, so
+    messages and paths do not depend on which library is installed.
+    """
+    fast = _fast_validator()
+    if fast is not None and fast.is_valid(data):
+        return []
     shell, per_type = _validators()
     found = [_SchemaError(list(e.absolute_path), e.message, e) for e in shell.iter_errors(data)]
     for path, nodes in _node_lists(data, []):

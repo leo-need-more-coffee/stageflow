@@ -29,7 +29,7 @@ found five causes:
 | The YAML in a stage's docstring was parsed again on every `get_specs()` — once per stage node at every validation (and `Session()` validates), and once per stage run whenever limits were set | `core/spec.py` | the parse is cached per docstring; validation and reservations read a small cached `StageContract` (names, types, `reserve`) instead of the full translated card |
 | The main loop raced every node against a stop event: two extra tasks and an `asyncio.wait` per node | `Session.run` | the graph is walked in one task; `stop()` cancels it (thread-safe) |
 | A stage with a timeout — every stage by default, `BaseStage.timeout = 30` — ran in a task of its own with a polling loop | `Session._run_stage_body` | `asyncio.timeout()` in the current task; idle periods put the timeout on hold with `reschedule()` |
-| JSON Schema evaluated nine `if type == … then …` blocks for every node | `Pipeline._check_schema` | the shell schema is checked once, then each node against the one schema its `type` names; same errors, same paths |
+| JSON Schema evaluated nine `if type == … then …` blocks for every node | `Pipeline._check_schema` | valid documents are confirmed by `jsonschema-rs` (Rust); errors are still collected by `jsonschema`, against the shell schema plus one schema per node `type`, so messages and paths are unchanged |
 | The cycle check was a recursive DFS: a straight graph of ~1000 nodes raised `RecursionError` | `Pipeline._cycle_errors` | iterative DFS with an explicit stack |
 
 ![Speed-up after profiling](results/speedup.png)
@@ -38,7 +38,7 @@ found five causes:
 |---|---|---|
 | straight chain | 159 µs/node, 6.3 k nodes/s | **5.8 µs/node, 172 k nodes/s** |
 | the same with policy and limits | 325 µs/node | **8.9 µs/node** |
-| `Pipeline.from_dict` + `validate`, 500 nodes | 146 ms | **37 ms** |
+| `Pipeline.from_dict` + `validate`, 500 nodes | 146 ms | **1.6 ms** |
 | largest straight graph that validates | ~1000 nodes | no limit found (20 000 tested) |
 
 ## What each feature costs

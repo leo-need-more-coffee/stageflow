@@ -252,5 +252,38 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(result.artifacts, {"a": a, "b": b, "c": c, "d": c - seed})
 
 
+class FastValidatorTests(unittest.TestCase):
+    """jsonschema-rs only answers "valid or not"; the Python validator stays the
+    authority. The one disagreement that would matter is the Rust side
+    accepting a document the Python side rejects."""
+
+    @settings(max_examples=800, deadline=None)
+    @given(documents)
+    def test_the_fast_check_never_accepts_what_the_full_one_rejects(self, document):
+        from stageflow.core import pipeline as module
+        fast = module._fast_validator()
+        if fast is None:
+            self.skipTest("jsonschema-rs is not installed")
+        if fast.is_valid(document):
+            shell, per_type = module._validators()
+            self.assertEqual(list(shell.iter_errors(document)), [])
+            for _, nodes in module._node_lists(document, []):
+                for node in nodes:
+                    validator = per_type.get(node.get("type")) if isinstance(node, dict) \
+                        and isinstance(node.get("type"), str) else None
+                    if validator is not None:
+                        self.assertEqual(list(validator.iter_errors(node)), [])
+
+    @settings(max_examples=200, deadline=None)
+    @given(blocks(max_leaves=8))
+    def test_both_accept_every_generated_graph(self, block):
+        from stageflow.core import pipeline as module
+        document, _ = pipeline_of(block)
+        fast = module._fast_validator()
+        if fast is not None:
+            self.assertTrue(fast.is_valid(document))
+        self.assertEqual(module._schema_errors(document), [])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -12,7 +12,7 @@ The suite and its full results are in
 | the same, with a policy and limits | 8.9 µs |
 | one `map` iteration | 8–9 µs sequential, 11–13 µs parallel |
 | a write into the frame | 0.3–0.5 µs, whatever its size |
-| `from_dict` + `validate` | about 75 µs per node |
+| `from_dict` + `validate` | about 3 µs per node |
 
 Against a real stage — a model call of hundreds of milliseconds, a query of a
 few — this is noise. The framework is not the bottleneck.
@@ -37,7 +37,8 @@ of the ideal throughput at every `concurrency` limit.
 The first run of the benchmarks measured 160 µs per node. Profiling found the
 causes — a stage's docstring re-parsed as YAML on every validation and every
 stage run, two tasks per node in the main loop, a task per stage for its
-timeout, JSON Schema evaluating nine conditional branches per node, and a
+timeout, JSON Schema evaluating nine conditional branches per node (valid
+documents are now checked by the Rust `jsonschema-rs`), and a
 recursive cycle check that failed on graphs of about a thousand nodes. After
 the fixes:
 

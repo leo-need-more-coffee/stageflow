@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stageflow-framework"
-version = "0.14.1"
+version = "0.15.0"
 description = "StageFlow: pipeline framework for stages"
 readme = "README.md"
 license = "MIT"
@@ -15,6 +15,9 @@ authors = [
 dependencies = [
     "pyyaml",
     "jsonschema>=4.0.0",
+    # fast validity check of pipeline documents (Rust); errors are still
+    # reported by `jsonschema`
+    "jsonschema-rs>=0.20",
     "immutables>=0.20",
     "common-expression-language>=0.9",
 ]

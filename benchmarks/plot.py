@@ -78,10 +78,12 @@ def speedup(new: dict, old: dict) -> None:
     factors = [o / n for _, o, n in cases]
     bars = ax.barh([c[0] for c in cases], factors, color=NEW, height=0.55)
     for bar, (_, o, n), f in zip(bars, cases, factors):
-        ax.text(bar.get_width() + 0.4, bar.get_y() + bar.get_height() / 2,
+        ax.text(bar.get_width() * 1.08, bar.get_y() + bar.get_height() / 2,
                 f"×{f:.1f}   {o:.0f} → {n:.1f}", va="center", color=INK_2, fontsize=9.5)
-    ax.set_xlim(0, max(factors) * 1.45)
-    ax.set_xlabel("times faster than 0.14.1")
+    ax.set_xscale("log")
+    ax.set_xlim(1, max(factors) * 12)
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"×{v:g}"))
+    ax.set_xlabel("times faster than 0.14.1 (log scale)")
     ax.grid(axis="y", visible=False)
     ax.set_title("Speed-up after profiling")
     save(fig, "speedup.png")
