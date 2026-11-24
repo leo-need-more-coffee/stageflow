@@ -16,7 +16,7 @@
         <link rel="prev" href="../4-metering/">
       
       
-        <link rel="next" href="../../entry-node/">
+        <link rel="next" href="../6-waiting/">
       
       
         
@@ -1085,6 +1085,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../6-waiting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Runs that wait
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2208,11 +2236,10 @@ many runs exist. Admission — the queue, the per-tenant pool, the monthly
 budget — is the platform's, and the core's part is to hold one run's ceiling
 and report honestly what it cost.</p>
 <hr />
-<p>That is the whole backend: <a href="../1-stages/">stages</a>, <a href="../2-endpoints/">endpoints</a>,
-a <a href="../3-policy/">policy</a>, <a href="../4-metering/">meters</a> and a credential. The
-finished thing is
-<a href="https://github.com/leo-need-more-coffee/stageflow-example">stageflow-example</a>,
-about six hundred lines of Python.</p>
+<p>That is a backend others can compose on: <a href="../1-stages/">stages</a>,
+<a href="../2-endpoints/">endpoints</a>, a <a href="../3-policy/">policy</a>, <a href="../4-metering/">meters</a>
+and a credential. What is left is runs that outlive the request that started
+them — a pipeline that waits a day for a person: <a href="../6-waiting/">6. Runs that wait</a>.</p>
 
 
 

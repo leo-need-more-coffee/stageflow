@@ -253,6 +253,13 @@
         <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/backend/5-tenants/"/>
     </url>
     <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/backend/6-waiting/</loc>
+        <lastmod>2026-11-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/backend/6-waiting/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/backend/6-waiting/"/>
+    </url>
+    <url>
         <loc>https://leo-need-more-coffee.github.io/stageflow/tutorial/</loc>
         <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
@@ -559,6 +566,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/backend/5-tenants/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/backend/5-tenants/"/>
+    </url>
+    <url>
+        <loc>https://leo-need-more-coffee.github.io/stageflow/ru/backend/6-waiting/</loc>
+        <lastmod>2026-11-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://leo-need-more-coffee.github.io/stageflow/ru/backend/6-waiting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://leo-need-more-coffee.github.io/stageflow/backend/6-waiting/"/>
     </url>
     <url>
         <loc>https://leo-need-more-coffee.github.io/stageflow/ru/tutorial/</loc>

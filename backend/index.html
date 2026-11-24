@@ -1057,6 +1057,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="6-waiting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Runs that wait
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2064,14 +2092,19 @@ knowledge base, and either write a reply or hand the ticket to a person.</p>
 <td>plans and a credential</td>
 <td>which of the above applies to whom</td>
 </tr>
+<tr>
+<td><a href="6-waiting/">6. Runs that wait</a></td>
+<td>a checkpoint store and <code>/input</code></td>
+<td>a run that waits a day for a person</td>
+</tr>
 </tbody>
 </table>
-<p>The first two are all you need for a backend of your own. The last three are
+<p>The first two are all you need for a backend of your own. The next three are
 what turns it into something you can let someone else compose pipelines on —
 and they are the ones worth reading even if you never serve a second tenant,
 because "the stage registry is global" is a sentence with consequences.</p>
 <h2 id="what-you-need">What you need<a class="headerlink" href="#what-you-need" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"stageflow-framework&gt;=0.12"</span><span class="w"> </span>fastapi<span class="w"> </span>uvicorn
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"stageflow-framework&gt;=0.17"</span><span class="w"> </span>fastapi<span class="w"> </span>uvicorn
 </code></pre></div>
 <p>Following along against the finished thing:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/leo-need-more-coffee/stageflow-example
