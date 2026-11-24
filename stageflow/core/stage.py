@@ -17,8 +17,7 @@ _stages: Registry[type["BaseStage"]] = Registry("stage")
 
 
 def _not_allowed(kind: str, type_: str, stage: str) -> str:
-    """Two whole sentences rather than one with the noun filled in — see the
-    same problem, with the reason, in `registry.py`."""
+    """Separate messages per kind so translations stay grammatical."""
     if kind == "Event":
         return _("Event type '{type}' is not allowed for stage '{stage}'",
                  type=type_, stage=stage)
@@ -54,17 +53,20 @@ def get_stages_by_category() -> dict[str, list[type["BaseStage"]]]:
 
 
 class BaseStage:
+    """Base class for stages. Subclass it, describe the arguments and outputs
+    in the docstring (YAML), implement `run`, and register it with
+    `@register_stage(name)`.
+    """
+
     stage_name: str = "BaseStage"
     category: str | None = None
     skipable: bool = False
     allowed_events: list[EventSpec] = []
     allowed_inputs: list[InputSpec] = []
     timeout: float | None = 30
-    #: the gettext domain whose catalog translates this stage's prose. `None`
-    #: — there is none, so the docstring's text is used as written, or is a
-    #: `{locale: text}` mapping resolved without any catalog at all. A host
-    #: that keeps .po files registers its domain once
-    #: (`stageflow.i18n.register_domain`) and names it here
+    #: gettext domain that translates this stage's descriptions. With None,
+    #: descriptions are used as written, or as `{locale: text}` mappings.
+    #: Register a domain with `stageflow.i18n.register_domain`.
     i18n_domain: str | None = None
 
     def __init__(self, stage_id: str, arguments: dict, session: "Session"):
@@ -72,20 +74,15 @@ class BaseStage:
         self.arguments = arguments or {}
         self.session = session
         self.collected_outputs: dict[str, Any] = {}
-        #: what this run actually spent, by meter — see `charge`
+        #: What this run actually spent, by meter (see `charge`).
         self.charged: dict[str, float] = {}
 
     def charge(self, **meters: float) -> None:
-        """Report what this run of the stage actually consumed.
+        """Report what this run consumed, in units such as `tokens` or
+        `http_calls` (pricing is up to the host).
 
-        Units, not money: `tokens`, `llm_calls`, `http_calls`, `rows`. What a
-        unit is worth is a price list, price lists change without any code
-        changing, and they belong to the host — a stage knows how much it
-        used, not what that costs.
-
-        The figure replaces whatever the spec's `reserve` held for the same
-        meter, so an amount both reserved and charged is not counted twice.
-        Call it as many times as you like; the amounts add up within one run.
+        Replaces the amount reserved for the same meter in the spec's
+        `reserve`. May be called several times; amounts add up.
         """
         for meter, amount in meters.items():
             self.charged[meter] = self.charged.get(meter, 0.0) + float(amount)
@@ -149,14 +146,10 @@ class BaseStage:
 
     @classmethod
     def get_specs(cls, locale: str | None = None) -> dict[str, Any]:
-        """This stage's card.
+        """The stage's spec, built from its docstring.
 
-        `None`, the default, puts every language the build can answer in into
-        the prose as a `{locale: text}` mapping, and whatever draws the card
-        chooses. A backend serving an editor wants exactly that: the reader
-        picks a language in the editor, long after the specs were fetched, and
-        nothing about that choice is the backend's to make.
-
-        Naming a locale collapses the prose to one language instead.
+        With `locale=None`, translatable text is a `{locale: text}` mapping
+        with every available language, so a client can pick one. With a
+        locale, it is a single string.
         """
         return build_stage_spec(cls, locale)

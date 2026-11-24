@@ -8,8 +8,8 @@ from .context import Context
 
 CelError = ExpressionError
 
-#: "No element is bound" — as opposed to an element that is `null`. A list
-#: can hold a `None`, and `item != null` has to be able to say so.
+#: Marks "no `item` bound", as opposed to an item that is None (a list may
+#: contain null, and `item != null` must work).
 _UNBOUND: Any = object()
 
 _BACKEND: str | None = None

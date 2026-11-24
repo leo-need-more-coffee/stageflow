@@ -141,12 +141,8 @@ class UniqueListStage(BuiltinStage):
 
 
 def _identity(value):
-    """What makes two JSON values the same value, as something hashable.
-
-    Equality the way JSON and CEL see it rather than Python: objects and lists
-    are compared by content (and cannot go into a set as they are), `1` and
-    `1.0` are one number, and `true` is not `1`, which Python considers equal.
-    """
+    """A hashable key for a JSON value, with JSON/CEL equality: objects and
+    lists compare by content, `1` equals `1.0`, but `true` is not `1`."""
     if isinstance(value, bool):
         return ("bool", value)
     if isinstance(value, (int, float)):

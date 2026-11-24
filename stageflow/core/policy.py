@@ -14,48 +14,23 @@ def _freeze(names: Iterable[str] | None) -> frozenset[str] | None:
 
 @dataclass(frozen=True)
 class Policy:
-    """The allowance of one session: which blocks, and how much of anything.
+    """What a session may use and how much it may spend. Set by the host.
 
-    The registry answers what the *process* can execute, which is not the
-    question a platform running pipelines for several tenants has. Each of
-    them gets a subset — these stages, these node types — and the subset is
-    the boundary the author of a graph cannot argue with, because they only
-    write the graph. Until this existed the subset could only be expressed by
-    running a separate process per set of stages, the registry being a
-    module-level global.
+    `stages` and `node_types` restrict the registry for one session, so
+    tenants can be given different sets of stages within one process. Nothing
+    in the pipeline JSON can widen a policy.
 
-    Given to `Session` by the host, next to the debugger. Nothing is read
-    from the pipeline JSON and nothing in it can widen a policy.
-
-    `None` and the empty set mean opposite things, and the difference is the
-    whole point: `None` is "no opinion, whatever the process has registered",
-    `frozenset()` is "nothing at all". A policy that forgot to list its stages
-    must not accidentally grant every stage the process happens to import.
+    `None` means "no restriction"; an empty set means "nothing allowed".
     """
 
     stages: frozenset[str] | None = None
     node_types: frozenset[str] | None = None
-    #: Whether a road may come back to where it has been.
-    #:
-    #: Off, and the only field here whose default is a restriction rather than
-    #: an absence of one. The reason is that a cycle in the order edges is not
-    #: a narrower version of something — it is a shape the language does not
-    #: otherwise have, and one nothing in the graph bounds. `map` loops over a
-    #: list and stops when the list does; a cycle stops when something outside
-    #: the graph stops it, and it is far more often a `next` pointed at the
-    #: wrong id than a loop somebody meant.
-    #:
-    #: Turning it on is a host saying "I have something that will stop this".
-    #: Usually that is `limits=Limits(counters={"steps": …})` — a run that
-    #: cannot be ended by its own graph is ended by its budget. It can also be
-    #: a timeout a layer above, which is why this does not refuse to be set
-    #: without a ceiling: a platform that already bounds its work should not
-    #: have to argue with a framework about it.
+    #: Allow cycles in the order edges. Off by default: a cycle is not bounded
+    #: by anything in the graph and is usually a mistake. Enable it when
+    #: something else stops runaway runs, typically a `steps` limit.
     allow_cycles: bool = False
-    #: how much a session under this policy may spend. A plan is one object:
-    #: which blocks, and how many of anything. Built fresh rather than shared
-    #: with every other default policy — one `Limits` handed round and then
-    #: written into would change the allowance of everything at once
+    #: How much a session may spend. A fresh `Limits` per policy, so that
+    #: mutating one cannot affect others.
     limits: Limits = field(default_factory=Limits)
 
     def __post_init__(self) -> None:
@@ -64,9 +39,7 @@ class Policy:
 
     @property
     def unrestricted(self) -> bool:
-        """Nothing is narrowed. `allow_cycles` is not part of this: it widens
-        what may be written rather than narrowing it, and a policy that permits
-        a loop is not thereby an absence of a policy."""
+        """True when nothing is restricted (`allow_cycles` is not considered)."""
         return (self.stages is None and self.node_types is None
                 and self.limits.unlimited)
 
@@ -91,19 +64,14 @@ class Policy:
             )
 
     def errors_for(self, pipeline) -> list[str]:
-        """Everything this policy refuses about a pipeline, at once.
+        """Everything this policy forbids in a pipeline, as a list of messages.
 
-        Collected rather than raised one at a time: a tenant saving a graph
-        wants the list of what to change, not the first thing that offended.
-
-        Subpipelines are walked too, and they have to be. A child graph
-        becomes a `Pipeline` only when it runs, so without this the answer to
-        "may I save this" would be yes and the answer to "may I run it" no —
-        the same refusal, hours apart, at the worst moment.
+        Subpipelines are checked too, so that a graph that can be saved can
+        also be run.
         """
         errors = self._limit_errors(pipeline)
         if self.stages is None and self.node_types is None:
-            return errors  # nothing is restricted about composition
+            return errors  # no restrictions on stages or node types
         errors += [
             message
             for node in pipeline.nodes
@@ -114,15 +82,9 @@ class Policy:
         return errors
 
     def _limit_errors(self, pipeline) -> list[str]:
-        """What the limits refuse about a graph before it runs.
-
-        Only what is soundly knowable from the JSON. A loop's cost is not:
-        the number of passes comes from the data and the reservation of a
-        pass from its arguments, so multiplying anything here would refuse
-        graphs that fit. What *is* knowable is the shape — how many nodes a
-        run must pass at the very least, how deep the subpipelines go, and
-        what the retries ask for.
-        """
+        """Limit violations that can be detected without running the graph:
+        the minimum number of steps, subpipeline depth, and retry settings.
+        Loop costs depend on data and are not checked here."""
         limits = self.limits
         errors: list[str] = []
 
@@ -167,7 +129,7 @@ class Policy:
         return errors
 
     def _graph_errors(self, graph: dict, where: str) -> list[str]:
-        """The same check over a graph that is still raw JSON."""
+        """Same check on a subpipeline that is still raw JSON."""
         errors: list[str] = []
         for node in graph.get("nodes") or []:
             errors.extend(self._node_errors(
@@ -194,18 +156,13 @@ class Policy:
         return errors
 
 
-#: Everything the process has registered — the default, and what a host that
-#: has no tenants to separate should keep using.
+#: No restrictions: everything registered in the process is allowed.
 OPEN = Policy()
 
 
 def _shortest_run(pipeline) -> int | None:
-    """The fewest nodes a run can pass before it can end.
-
-    A lower bound, and that is what makes it safe to refuse by: every real
-    run does at least this much, so a graph whose cheapest path does not fit
-    cannot finish at all. Ending means a terminal or a road that stops.
-    """
+    """The minimum number of nodes any run must pass through (a lower bound:
+    a graph whose shortest run exceeds the step limit cannot finish)."""
     entry = pipeline.entry
     if not entry or not pipeline.has_node(entry):
         return None
@@ -229,7 +186,7 @@ def _shortest_run(pipeline) -> int | None:
 
 
 def _subpipeline_depth(pipeline) -> int:
-    """How deep the declared subpipelines nest, counting from the root as 0."""
+    """How deeply subpipelines nest (the root is 0)."""
 
     def depth_of(graph: dict, seen: frozenset[str]) -> int:
         declared = graph.get("subpipelines") or {}
@@ -239,7 +196,7 @@ def _subpipeline_depth(pipeline) -> int:
                 continue
             child_id = node.get("subpipeline_id")
             if child_id in seen:
-                continue  # a self-reference is caught elsewhere; do not spin here
+                continue  # self-reference; reported elsewhere
             child = declared.get(child_id)
             inner = 1 if child is None else 1 + depth_of(
                 {**child, "subpipelines": {**declared, **(child.get("subpipelines") or {})}},

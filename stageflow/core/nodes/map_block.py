@@ -21,14 +21,12 @@ MODES = (SEQUENTIAL, PARALLEL)
 
 @register_node("map")
 class MapNode(Node):
-    """One region of the graph, run once per element of a list.
+    """Runs a region of the graph once per element of a list.
 
-    The body is a region exactly like the body of a `try` block: everything
-    reachable from `body` but not from `next`. Every iteration runs it on its
-    own copy of the frame, with the element bound to `item_var`, so iterations
-    never see each other's writes. The only way out is `collect`: a name
-    written by the body becomes a list outside, one entry per element, in the
-    order of the items — not the order in which the iterations finished.
+    The body is everything reachable from `body` but not from `next` (like a
+    `try` body). Each iteration gets its own copy of the frame with the
+    element in `item_var`, so iterations do not see each other's writes.
+    `collect` turns a variable written by the body into a list, in item order.
     """
 
     def __init__(
@@ -122,7 +120,7 @@ class MapNode(Node):
                 _("{node}: item_var and index_var are the same name", node=self.id)
             )
         for src, dst in self.collect.items():
-            # one sentence per side, not a noun dropped into one — `registry.py`
+            # Separate messages per side so translations stay grammatical.
             for name, message in (
                 (src, _("{node}: collect source '{name}' must be a variable name")),
                 (dst, _("{node}: collect destination '{name}' must be a variable name")),
@@ -132,14 +130,9 @@ class MapNode(Node):
         return errors
 
     def _validate_closed(self, pipeline: "Pipeline") -> list[str]:
-        """A road inside the loop must end inside it.
-
-        A `try` block lets a road leave — the block simply stops owning it.
-        A loop cannot: leaving mid-iteration would abandon the elements that
-        are still to come, and in parallel mode there would be no single frame
-        to continue with. So a way out is a mistake in the graph, and it is
-        better said at validation than discovered on the tenth element.
-        """
+        """Every road in the body must end inside the body. Leaving a loop
+        mid-iteration would skip the remaining items (and in parallel mode
+        there is no single frame to continue with)."""
         scope = self.scope(pipeline)
         errors: list[str] = []
         for node_id in sorted(scope):
@@ -156,8 +149,8 @@ class MapNode(Node):
     async def execute(self, session: "Session", ctx: Context) -> tuple[Node | None, Context]:
         async def body() -> tuple[Node | None, Context]:
             items = self._items_of(session, ctx)
-            # how many times a graph goes round is decided by the data, so
-            # this is the meter that makes a loop's cost knowable at all
+            # The number of iterations depends on the data; this meter is
+            # what makes it limitable.
             session.budget.charge("iterations", len(items))
             scope = self.scope(session.pipeline)
             session.emit_node_event(
@@ -253,10 +246,8 @@ class MapNode(Node):
             ctx = ctx.with_var(self.index_var, index)
 
         session.emit_node_event("map_item_started", self, {"index": index})
-        # one unit of concurrency per iteration: in parallel mode this is
-        # what stands between a list of ten thousand and ten thousand calls
-        # in the air. A list that is longer than the allowance waits its turn
-        # rather than failing — it is wide, not wrong
+        # One concurrency unit per item: a long list runs within the limit
+        # instead of failing.
         async with session.budget.slot("concurrency"):
             _, ctx = await session.run_scope(
                 session.pipeline.get_node(self.body), ctx, scope

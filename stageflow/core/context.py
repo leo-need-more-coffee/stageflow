@@ -9,6 +9,10 @@ from ..i18n import _
 
 
 class Context:
+    """The frame: an immutable map of variables. Every write returns a new
+    Context, so parallel branches never interfere.
+    """
+
     __slots__ = ("vars",)
 
     def __init__(self, vars: immutables.Map | dict | None = None):

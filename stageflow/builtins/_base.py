@@ -1,9 +1,7 @@
-"""The base of the stages that ship with the framework.
+"""Base class for the built-in stages.
 
-It exists for one attribute. The prose of a built-in stage is the framework's
-own text, translated in the framework's own catalog, while a host's stage is
-translated by whoever wrote it — and the difference has to be written down
-somewhere. Written here, it is written once.
+Its only purpose is `i18n_domain`: built-in stage descriptions are translated
+with the framework's own catalog, unlike a host's stages.
 """
 
 from __future__ import annotations

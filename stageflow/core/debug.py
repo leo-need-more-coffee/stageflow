@@ -12,6 +12,10 @@ STEP = "step"
 
 
 class StepDebugger:
+    """Step-by-step debugging: pause before each node, inspect and edit the
+    frame, step or resume. Its control methods are thread-safe.
+    """
+
     def __init__(
         self,
         *,

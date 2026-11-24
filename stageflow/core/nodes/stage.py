@@ -18,6 +18,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @register_node("stage")
 class StageNode(Node):
+    """Runs a stage: binds arguments from the frame, writes outputs back."""
+
     def __init__(
         self,
         id: str,

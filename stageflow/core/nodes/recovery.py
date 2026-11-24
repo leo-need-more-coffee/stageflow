@@ -28,6 +28,8 @@ def matches_error(error_equals: list[str], exc: BaseException) -> bool:
 
 @dataclass(slots=True)
 class Retrier:
+    """One `retry` rule: which errors, how many attempts, and the backoff."""
+
     error_equals: list[str]
     max_attempts: int = 3
     interval_seconds: float = 1.0
@@ -76,8 +78,7 @@ async def run_with_retry(
             )
             if retrier is None:
                 raise
-            # what the pipeline asked for is a request; the host's limits
-            # are what it gets. A policy with no opinion changes nothing
+            # The host's limits cap what the pipeline's retry asks for.
             allowed = retrier.max_attempts
             if limits.max_retries is not None:
                 allowed = min(allowed, limits.max_retries)

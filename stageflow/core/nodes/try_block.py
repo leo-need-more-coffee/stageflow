@@ -16,6 +16,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @dataclass(slots=True)
 class ExceptHandler:
+    """One `except` entry: which errors it catches and where to go."""
+
     error_equals: list[str]
     next: str
     result_var: str | None = None
@@ -34,9 +36,9 @@ class ExceptHandler:
         return matches_error(self.error_equals, exc)
 
     def error_payload(self, exc: BaseException, node_id: str) -> dict:
-        """@param node_id the node that raised, as far as the enclosing scope
-        knows it: a failure deeper inside a nested block is named by the node of
-        this scope that contained it."""
+        """Error details for the handler's `result_var`. `node_id` is the
+        node of this block's scope that failed (for a failure in a nested
+        block, the node containing it)."""
         return {
             "type": error_name(exc),
             "full_type": error_full_name(exc),
@@ -47,6 +49,10 @@ class ExceptHandler:
 
 @register_node("try")
 class TryNode(Node):
+    """Runs a region (everything reachable from `body` but not from `next`);
+    on an error, runs the first matching handler, then continues at `next`.
+    """
+
     def __init__(
         self,
         id: str,
@@ -82,11 +88,8 @@ class TryNode(Node):
         return self._scope
 
     def handler_scope(self, pipeline: "Pipeline", handler: ExceptHandler) -> frozenset[str]:
-        """The region of a handler, derived the same way as the body's.
-
-        A handler road is a part of the block too: when it ends, execution
-        continues where the block continues.
-        """
+        """The nodes of a handler: reachable from the handler, not from `next`.
+        When a handler's road ends, execution continues at the block's `next`."""
         if handler.next not in self._handler_scopes:
             self._handler_scopes[handler.next] = self._region(pipeline, handler.next)
         return self._handler_scopes[handler.next]
@@ -153,8 +156,7 @@ class TryNode(Node):
                 {"error": str(exc), "type": error_name(exc), "next": handler.next},
             )
             if handler.result_var:
-                # the node that failed, not this block: the handler is attached
-                # to the block already, so the block's own id tells it nothing
+                # Name the node that failed, not this block.
                 ctx = ctx.with_var(
                     handler.result_var,
                     handler.error_payload(exc, frame.node_id or self.id),
@@ -171,12 +173,10 @@ class TryNode(Node):
     def _after_region(
         self, session: "Session", node: Node | None, ctx: Context, payload: dict
     ) -> tuple[Node | None, Context]:
-        """Where to go once a road of the block has ended.
+        """Where to continue after the body or a handler finished.
 
-        A road that led out of the block says where it goes itself. A road that
-        simply ended hands control back to the block, which continues at its
-        own `next` — the body and the handlers alike. A terminal inside the
-        block ends the whole run, and then there is nowhere to continue.
+        If the road left the block, follow it; if it ended, continue at the
+        block's `next`; if a terminal ended the run, stop.
         """
         if node is not None:
             return node, ctx

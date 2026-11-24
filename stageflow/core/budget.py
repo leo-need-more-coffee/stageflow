@@ -9,7 +9,7 @@ from typing import Any, AsyncIterator, Iterator
 
 
 class _Ticket:
-    """One unit a task holds — or held, until it gave it back for a wait."""
+    """A concurrency unit held by a task. `held` is False while it is lent out."""
 
     __slots__ = ("held",)
 
@@ -17,27 +17,21 @@ class _Ticket:
         self.held = True
 
 
-#: The slots the current task holds, by meter. A context variable because a
-#: task is what holds one: `asyncio.create_task` copies the context, so a
-#: child task starts out believing it holds whatever its parent held — which
-#: is why children are only ever created inside `Budget.released`, where the
-#: parent has given its slot back and the copy says so.
+#: Concurrency units held by the current task, by meter. A context variable
+#: because `asyncio.create_task` copies the context: a child task would think
+#: it holds its parent's unit, which is why children are created only inside
+#: `Budget.released`, where the parent's unit has been removed from the copy.
 _HOLDING: contextvars.ContextVar[dict[str, _Ticket]] = contextvars.ContextVar(
     "stageflow_budget_holding", default={}
 )
 
 
 class BudgetExceeded(BaseException):
-    """A session ran past what it was allowed.
+    """A session exceeded its limits.
 
-    Deliberately **not** a `StageFlowError`, and deliberately a
-    `BaseException`: `try` blocks in a pipeline catch `Exception`, and so does
-    `run_with_retry`. A tenant who could wrap a graph in `try` and swallow
-    this would make the whole budget decoration. Uncatchability comes from the
-    class hierarchy rather than from a check somebody can forget to write.
-
-    `Session.run` is the one place that catches it, and turns it into a
-    result: the work already done is not thrown away with it.
+    Derives from `BaseException`, not `Exception`, on purpose: `try` nodes and
+    `retry` catch `Exception`, so a pipeline cannot catch and ignore its own
+    budget. `Session.run` catches it and turns it into a result.
     """
 
     def __init__(self, meter: str, limit: float, spent: float):
@@ -57,35 +51,28 @@ class BudgetExceeded(BaseException):
 
 @dataclass(frozen=True)
 class Limits:
-    """What a session may spend. Given by the host, never by the pipeline.
+    """How much a session may spend. Set by the host, never by the pipeline.
 
-    A `Policy` says what a pipeline may be made of; this says how much of
-    anything it may use, and the two are separate because a graph built
-    entirely of allowed stages can still loop, fan out into thousands of
-    tasks, or run until the process dies.
+    `Policy` restricts what a pipeline may use; `Limits` restricts how much.
+    There are two kinds of meters:
 
-    One mechanism rather than three, with two kinds of meter. **Counters**
-    grow and never fall — `seconds`, `steps`, `iterations`, `tokens`.
-    **Gauges** are instantaneous — `concurrency`, `depth`, `frame_bytes`.
-    The runtime charges `steps` and `iterations` and holds the gauges;
-    stages charge whatever they spent.
+    - **counters** only grow: `seconds`, `steps`, `iterations`, `tokens`, ...
+    - **gauges** are current values: `concurrency`, `depth`, `frame_bytes`.
 
-    Names are not fixed by the core: a host counts what is scarce for it, and
-    a meter nobody limits simply accumulates and comes back in the result,
-    which is what a bill is made of.
+    The runtime charges `steps` and `iterations` and tracks the gauges; stages
+    charge their own meters. Meter names are free-form: unlimited meters are
+    still counted and reported in `SessionResult.meters`.
 
-    Nothing is measured unless it is limited. A meter absent from here is not
-    computed at all — `frame_bytes` means serialising the frame — so the cost
-    of the whole mechanism to a host that sets no limits is one `if`.
+    Expensive measurements (like `frame_bytes`) only happen when limited.
     """
 
-    #: cumulative: {"seconds": 30, "steps": 10_000, "tokens": 400_000}
+    #: Cumulative limits, e.g. {"seconds": 30, "steps": 10_000, "tokens": 400_000}
     counters: dict[str, float] = field(default_factory=dict)
-    #: instantaneous: {"concurrency": 16, "depth": 8, "frame_bytes": 1_000_000}
+    #: Instantaneous limits, e.g. {"concurrency": 16, "depth": 8, "frame_bytes": 1_000_000}
     gauges: dict[str, float] = field(default_factory=dict)
-    #: the most attempts a node's own `retry` may ask for
+    #: Upper bound for `max_attempts` in a node's `retry`.
     max_retries: int | None = None
-    #: the longest a single pause between retries may be
+    #: Upper bound for a single delay between retries.
     max_delay_seconds: float | None = None
 
     @property
@@ -105,20 +92,15 @@ UNLIMITED = Limits()
 
 
 class Budget:
-    """The running total for one session tree.
+    """Running totals for one session and everything it starts.
 
-    One object is shared by a session, the branches of its `parallel` nodes,
-    the iterations of its `map` nodes and the child sessions of its
-    subpipelines. A copy per child would multiply the allowance by the depth
-    of nesting, which is the opposite of a limit.
+    Shared by the session, its `parallel` branches, its `map` items and its
+    subpipelines, so nesting cannot multiply the allowance.
 
-    `seconds` is the one hybrid: reported like a counter so that it lands in
-    the same table as everything else, enforced as a deadline because a
-    counter is only checked when something charges it, and a stage that hangs
-    charges nothing.
+    `seconds` is reported like a counter but enforced as a deadline, because
+    a hung stage never charges anything.
 
-    Not thread-safe, and does not need to be: everything drawing on one budget
-    runs in one event loop.
+    Not thread-safe; everything using one budget runs in one event loop.
     """
 
     def __init__(self, limits: Limits | None = None):
@@ -132,21 +114,15 @@ class Budget:
         self._idle: float = 0.0
         self._idle_since: float | None = None
         self._idle_depth = 0
-        #: busy time spent before this object existed — a session restored
-        #: from a snapshot carries on from what it had already used
+        #: Busy time used before this object was created (restored snapshots).
         self._carried: float = 0.0
-        #: the stage timeouts that are running, and what each had left when
-        #: an idle period began (None while the session is busy)
+        #: Running stage timeouts -> time they had left when the current idle
+        #: period began (None while the session is busy).
         self._timeouts: dict[Any, float | None] = {}
 
     def restore(self, spent: dict[str, float] | None) -> None:
-        """Carry the running total over from a snapshot's `meters`.
-
-        Without it a session restored mid-run starts from zero, and stopping
-        and restoring a session is a way to get a fresh allowance whenever the
-        old one runs out. Only counters travel: gauges are instantaneous and
-        nothing is being held by a session that is not running.
-        """
+        """Restore counters from a snapshot's `meters`, so that restoring a
+        session does not reset its allowance. Gauges are not restored."""
         for meter, amount in (spent or {}).items():
             if meter.startswith("peak_"):
                 continue
@@ -155,39 +131,29 @@ class Budget:
             else:
                 self.counters[meter] = float(amount)
 
-    # ------------------------------------------------------------- the clock
+    # ---------------------------------------------------------------- clock
 
     def start(self) -> None:
         if self._started is None:
             self._started = time.monotonic()
 
     def stop(self) -> None:
-        """Freeze the clock. Without this the reported `seconds` keeps
-        growing after the run is over, and a result read a minute later
-        claims the run took a minute."""
+        """Stop the clock so `seconds` stops growing after the run ends."""
         if self._started is not None and self._stopped is None:
             self._stopped = time.monotonic()
 
     @property
     def busy_seconds(self) -> float:
-        """Wall time minus time spent waiting for somebody to answer.
-
-        Waiting for a human is not work. A pipeline that asks a question and
-        sits there is not consuming the host, and a deadline that counted it
-        would make human-in-the-loop impossible to write.
-        """
+        """Wall time minus idle time (time spent waiting for input)."""
         if self._started is None:
             return 0.0
         until = self._stopped if self._stopped is not None else time.monotonic()
         return self._carried + until - self._started - self.idle_seconds
 
     def begin_idle(self) -> None:
-        """Stop the clock: from here the session is waiting, not working.
+        """Start an idle period: the session is waiting, not working.
 
-        Nested waits are one idle period, not several. Counting each waiter
-        separately would credit back more time than passed, and a session
-        that is waiting at all is usually waiting for the only thing it has
-        to do.
+        Nested calls form a single idle period.
         """
         if self._idle_depth == 0:
             self._idle_since = time.monotonic()
@@ -208,12 +174,11 @@ class Budget:
 
     @contextmanager
     def pausable(self, timeout) -> Iterator[None]:
-        """Keep an `asyncio.timeout` from ticking while the session is idle.
+        """Pause an `asyncio.timeout` while the session is idle.
 
-        A stage's timeout is busy time: a stage that asks a person a question
-        must not die while the person reads. While any idle period lasts,
-        every registered timeout is put on hold, and when it ends each gets
-        back exactly what it had left.
+        A stage's timeout counts busy time only, so a stage waiting for a
+        person does not time out. While idle, registered timeouts are put on
+        hold; afterwards each gets back the time it had left.
         """
         self._timeouts[timeout] = None
         if self._idle_depth > 0:
@@ -232,12 +197,7 @@ class Budget:
 
     @property
     def idle_seconds(self) -> float:
-        """Time spent waiting, including a wait that is still going on.
-
-        Crediting it only once the wait ends would be too late for the thing
-        it exists for: a deadline checked *during* the wait would already
-        have fired.
-        """
+        """Idle time so far, including an idle period still in progress."""
         if self._idle_since is None:
             return self._idle
         return self._idle + (time.monotonic() - self._idle_since)
@@ -247,7 +207,7 @@ class Budget:
         return self.limits.counters.get("seconds")
 
     def remaining_seconds(self) -> float | None:
-        """What is left of the deadline, or None when there is none."""
+        """Seconds left before the deadline, or None without a deadline."""
         limit = self.deadline_seconds
         return None if limit is None else limit - self.busy_seconds
 
@@ -257,23 +217,18 @@ class Budget:
             raise BudgetExceeded("seconds", self.deadline_seconds, self.busy_seconds)
 
     def timeout_for(self, wanted: float | None) -> float | None:
-        """A stage timeout, clamped by what is left of the deadline.
-
-        Without the clamp a stage allowed 60 seconds and started with two left
-        runs for sixty, and the budget leaks by the length of its last stage.
-        """
+        """A stage timeout capped by the time left before the deadline."""
         left = self.remaining_seconds()
         if left is None:
             return wanted
         return left if wanted is None else min(wanted, left)
 
-    # ----------------------------------------------------------- counters
+    # ------------------------------------------------------------- counters
 
     def charge(self, meter: str, amount: float) -> None:
-        """Add to a counter. Raises if that takes it past its limit.
+        """Add to a counter; raise BudgetExceeded if it goes over the limit.
 
-        A negative amount is a correction (a reservation settled for less) and
-        can never take anything over, so it is not checked.
+        Negative amounts (corrections) are never checked.
         """
         if not amount:
             return
@@ -295,10 +250,9 @@ class Budget:
         return None if limit is None else limit - self.spent(meter)
 
     def affordable(self, amounts: dict[str, float]) -> tuple[str, float, float] | None:
-        """The first meter that `amounts` would take over, if any.
+        """The first meter that `amounts` would push over its limit, or None.
 
-        Used to refuse an expensive stage **before** it runs: an operation
-        that cannot be paid for is better not begun than cut off halfway.
+        Used to refuse a stage before it runs.
         """
         for meter, amount in amounts.items():
             limit = self.limits.counters.get(meter)
@@ -309,24 +263,19 @@ class Budget:
                 return meter, limit, total
         return None
 
-    # ------------------------------------------------------------- gauges
+    # --------------------------------------------------------------- gauges
 
     @asynccontextmanager
     async def slot(self, meter: str = "concurrency") -> AsyncIterator[None]:
-        """Hold one unit of a gauge, waiting for a turn rather than failing.
+        """Hold one unit of a gauge, waiting if none is free.
 
-        The difference from `gauge` is deliberate and it is about what the
-        limit means. Depth is a property of the graph: too deep is too deep,
-        and waiting would not help. Concurrency is a property of the moment —
-        a hundred items to process is a perfectly good pipeline, it just may
-        not have a hundred calls in the air at once. Failing it would refuse
-        legitimate work for being wide; holding it back runs the same work
-        within the allowance.
+        Unlike `gauge`, this waits instead of failing: too many parallel items
+        is not an error, they just take turns. (Depth, on the other hand, fails:
+        waiting would not make a graph less deep.)
 
-        Re-entrant within a task: a sequential `map` inside a `parallel`
-        branch runs in the branch's own task and adds no concurrency, so it
-        does not take a second unit. A task waiting for children of its own
-        gives its unit back for the wait — see `released`.
+        Re-entrant within a task: a sequential `map` inside a branch runs in
+        the branch's task and does not take a second unit. A task waiting for
+        its own children lends its unit out, see `released`.
         """
         if meter in _HOLDING.get():
             yield
@@ -338,25 +287,21 @@ class Budget:
             yield
         finally:
             _HOLDING.reset(token)
-            # not held when taking it back after a wait was cut short — by a
-            # cancellation or the deadline — and then there is nothing to give
+            # Not held if re-acquiring after `released` was interrupted.
             if ticket.held:
                 self._release(meter)
 
     @asynccontextmanager
     async def released(self, meter: str = "concurrency") -> AsyncIterator[None]:
-        """Give this task's unit back while it waits for its children.
+        """Lend this task's unit out while it waits for its children.
 
-        A `parallel` branch that runs a `map` holds a unit and then waits for
-        items that each need one. With the limit at 1 that is a deadlock, and
-        with any limit it is one as soon as the nesting is wider than the
-        allowance — the waiting parent occupies the very unit its children
-        need. A task that is waiting is not working, so for the length of the
-        wait it is not counted: the limit bounds the work actually in the
-        air, and the parent takes its unit back once the children are done.
+        Without this, a `parallel` branch running a `map` holds a unit while
+        its items wait for units: a deadlock whenever nesting is wider than
+        the limit. A waiting task does no work, so it is not counted; it takes
+        its unit back when the children finish.
 
-        Children must be created *inside* this block: they copy the context,
-        and only here does it say the parent holds nothing.
+        Create the child tasks inside this block: they copy the context, and
+        only here does it show the parent holding nothing.
         """
         ticket = _HOLDING.get().get(meter)
         if ticket is None or not ticket.held:
@@ -377,11 +322,10 @@ class Budget:
         if limit is not None:
             slot = self._slots.get(meter)
             if slot is None:
-                # a throttle of nothing would deadlock, so nonsense serialises
+                # A limit below 1 would deadlock; treat it as 1.
                 slot = self._slots[meter] = asyncio.Semaphore(max(1, int(limit)))
             await self._within_deadline(slot.acquire())
-        # the semaphore is the enforcement; holding only records the peak, or
-        # the two would have to agree about the boundary twice
+        # The semaphore enforces the limit; `_held` only tracks the peak.
         held = self._held.get(meter, 0.0) + 1
         self._held[meter] = held
         self.peaks[meter] = max(self.peaks.get(meter, 0.0), held)
@@ -393,12 +337,8 @@ class Budget:
             slot.release()
 
     async def _within_deadline(self, waiting) -> None:
-        """Wait for a turn, but not past the session's deadline.
-
-        The deadline is otherwise checked between nodes, and a task waiting
-        for a unit is between nothing: without this, a run whose units are
-        all taken would wait for as long as they are, whatever `seconds` says.
-        """
+        """Await `waiting`, but no longer than the session deadline allows
+        (the deadline is otherwise only checked between nodes)."""
         left = self.remaining_seconds()
         if left is None:
             await waiting
@@ -411,10 +351,8 @@ class Budget:
 
     @contextmanager
     def gauge(self, meter: str, amount: float = 1) -> Iterator[None]:
-        """Take up an instantaneous quantity, refusing if it does not fit.
-
-        For what should wait rather than fail — concurrency — use `slot`.
-        """
+        """Take an instantaneous amount; raise BudgetExceeded if it does not
+        fit. Use `slot` for things that should wait instead (concurrency)."""
         limit = self.limits.gauges.get(meter)
         if limit is not None and self._held.get(meter, 0.0) + amount > limit:
             raise BudgetExceeded(meter, limit, self._held.get(meter, 0.0) + amount)
@@ -423,7 +361,7 @@ class Budget:
 
     @contextmanager
     def _hold(self, meter: str, amount: float = 1) -> Iterator[None]:
-        """Take the quantity up and remember the peak, checking nothing."""
+        """Take an amount and record the peak, without checking the limit."""
         held = self._held.get(meter, 0.0) + amount
         self._held[meter] = held
         self.peaks[meter] = max(self.peaks.get(meter, 0.0), held)
@@ -433,21 +371,20 @@ class Budget:
             self._held[meter] = self._held.get(meter, 0.0) - amount
 
     def observe(self, meter: str, value: float) -> None:
-        """Report an instantaneous value that nothing holds — a frame size."""
+        """Record an instantaneous value that is not held, such as a frame size."""
         limit = self.limits.gauges.get(meter)
         self.peaks[meter] = max(self.peaks.get(meter, 0.0), value)
         if limit is not None and value > limit:
             raise BudgetExceeded(meter, limit, value)
 
     def measures(self, meter: str) -> bool:
-        """Whether anything is limiting this at all — the cheap way out of a
-        measurement that costs something to take."""
+        """Whether this gauge is limited (and therefore worth measuring)."""
         return meter in self.limits.gauges
 
-    # ------------------------------------------------------------ the bill
+    # --------------------------------------------------------------- report
 
     def report(self) -> dict[str, float]:
-        """Every meter this session moved, for the host to bill or log."""
+        """Every meter used by the session, plus `peak_*` for gauges."""
         out = dict(self.counters)
         if self._started is not None:
             out["seconds"] = round(self.busy_seconds, 4)

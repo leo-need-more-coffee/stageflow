@@ -11,6 +11,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @register_node("terminal")
 class TerminalNode(Node):
+    """Ends the run with a `result` and the listed `artifacts`."""
+
     def __init__(
         self,
         id: str,

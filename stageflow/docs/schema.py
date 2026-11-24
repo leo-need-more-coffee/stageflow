@@ -12,13 +12,8 @@ def _collect_specs(stage_registry: dict, locale: str | None = None) -> dict:
 
 
 def generate_stages_yaml(stage_registry: dict, locale: str | None = None) -> str:
-    """The whole registry as YAML.
-
-    With no `locale` the prose carries every language it has, which is what a
-    client wants: one dump serves every reader, and choosing between them is the
-    business of whatever draws the palette. Naming a locale collapses the prose
-    to it — for a file meant to be read rather than drawn from.
-    """
+    """The specs of all stages as YAML. With `locale=None` descriptions
+    include every language; with a locale, only that one."""
     return yaml.dump(_collect_specs(stage_registry, locale),
                      allow_unicode=True, sort_keys=False, indent=2)
 

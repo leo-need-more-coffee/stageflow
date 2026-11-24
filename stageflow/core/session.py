@@ -36,29 +36,33 @@ def _running_in(loop: asyncio.AbstractEventLoop) -> bool:
         return False
 
 
-#: How many events one session keeps. A cyclic graph emits tens of thousands
-#: a second, and an unbounded list is the cheapest way for a pipeline to take
-#: a process down — the log is a window, not an archive.
+#: Maximum number of events kept per session. A cyclic graph can emit tens of
+#: thousands of events per second, so the history is a bounded window.
 EVENT_HISTORY = 10_000
 
 
 @dataclass(slots=True)
 class ScopeFrame:
+    """The frame and current node of a block (try body) while it runs."""
+
     ctx: Context
-    #: the node of this scope that is running. Kept so that a handler catching
-    #: an error can name what failed: by the time the exception is caught the
-    #: walker has unwound, and `_current_node_id` only follows the top-level
-    #: one, so inside a block it is somebody else's node
+    #: The node of this scope that is currently running. A `try` handler uses
+    #: it to report which node failed; `_current_node_id` only tracks the
+    #: top-level node.
     node_id: str | None = None
 
 
 @dataclass(slots=True)
 class SessionResult:
+    """What a finished run returns: artifacts, the terminal's result, the
+    event history, the final frame and the meters used.
+    """
+
     artifacts: dict[str, Any]
     result: dict | None
     history: list[Event]
     context: Context
-    #: every meter the run moved — what a host bills or logs by
+    #: Every meter the run used (steps, tokens, ...), for billing or logging.
     meters: dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
@@ -72,6 +76,13 @@ class SessionResult:
 
 
 class Session:
+    """One run of a pipeline.
+
+    Takes the host's `policy` and `limits`, optional `debugger` and
+    `instrument`, and an initial `context`. Call `run()` to execute; `stop`,
+    `pause`, `resume` and `input` control a run in progress.
+    """
+
     def __init__(
         self,
         id: str,
@@ -85,23 +96,17 @@ class Session:
         reports_budget: bool = True,
         instrument: Instrument | None = None,
     ):
-        # what this session may be made of, and how much it may spend. Both
-        # given by the host, never by the pipeline: a graph that could widen
-        # its own allowance has none. `budget` is how a child session shares
-        # the parent's running total instead of getting a fresh one
-        # a plan is one object, so the limits usually arrive inside the
-        # policy; the separate argument is for a host with nothing to
-        # restrict but something to bound, and it wins where both are given —
-        # including for validation, or the static checks and the running
-        # totals would answer to different numbers
+        # The policy (what the pipeline may use) and the limits (how much it
+        # may spend) always come from the host, never from the pipeline.
+        # Limits usually arrive inside the policy; the separate `limits`
+        # argument overrides them, including for validation. `budget` lets a
+        # child session share its parent's running totals.
         self.policy = policy or OPEN
         if limits is not None:
             self.policy = replace(self.policy, limits=limits)
         self.budget = budget or Budget(self.policy.limits)
-        # a child session of a subpipeline shares the budget and must let a
-        # ceiling travel up rather than answering for it. Said outright
-        # rather than inferred from "was a budget passed in", which gets a
-        # host handing its own budget to a top-level session backwards
+        # A subpipeline's child session shares the parent's budget and lets
+        # BudgetExceeded propagate instead of turning it into a result.
         self._owns_budget = reports_budget
         pipeline.validate(self.policy)
         self.id = id
@@ -110,12 +115,12 @@ class Session:
         self.cel = CelEngine()
         self._event_handler: EventHandler = event_handler or (lambda event: None)
         self.debugger = debugger
-        #: tracing, metrics, logs — see `core/instrument.py`. None costs nothing
+        #: Tracing/metrics/logging hooks (see `core/instrument.py`). Optional.
         self.instrument = instrument
 
         self.artifacts: dict[str, Any] = {}
         self.result: dict | None = None
-        #: a terminal node has ended the run; nothing else should be executed
+        #: Set when a terminal node has ended the run.
         self.finished = False
         self.event_history: deque[Event] = deque(maxlen=EVENT_HISTORY)
         self.inputs = InputHub(self._emit_input_event)
@@ -125,8 +130,8 @@ class Session:
         self._running.set()
         self._skip_requested = False
         self._current_node_id: str | None = None
-        #: the task walking the graph while `run` is going, and its loop —
-        #: what `stop` cancels, from whichever thread it is called
+        #: The task that walks the graph during `run`, and its event loop.
+        #: `stop` cancels this task, from any thread.
         self._walker: asyncio.Task | None = None
         self._loop: asyncio.AbstractEventLoop | None = None
 
@@ -162,11 +167,10 @@ class Session:
     async def finish_wait_input(
         self, type_: str, fut: asyncio.Future, timeout: float | None = None
     ) -> dict[str, Any] | None:
-        """Wait for an answer, and do not charge the session for the wait.
+        """Wait for an input without counting the wait against the budget.
 
-        A pipeline that asks a question and sits there is not consuming
-        anything. Counting that time would make the deadline a limit on how
-        fast the user reads.
+        Time spent waiting for a person is idle time, so it does not count
+        towards the `seconds` limit or the stage timeout.
         """
         self.budget.begin_idle()
         try:
@@ -198,8 +202,8 @@ class Session:
             handler()
 
     def stop(self) -> None:
-        """End the run: the node that is running is cancelled, and the result
-        is `{"result": "stopped"}`. Safe to call from another thread."""
+        """Stop the run: cancel the running node and finish with
+        `{"result": "stopped"}`. Safe to call from another thread."""
         loop = self._loop
         if loop is not None and not loop.is_closed() and not _running_in(loop):
             loop.call_soon_threadsafe(self.stop)
@@ -234,11 +238,9 @@ class Session:
         return not self._running.is_set()
 
     async def execute_node(self, node: Node, ctx: Context) -> tuple["Node | None", Context]:
-        """The one path every node takes, wherever it is being run from.
-
-        `run`, the body of a `try`, a branch of a `parallel` and an iteration
-        of a `map` all come through here, which is why the debugger hooks in
-        at this point — and why the budget does too.
+        """Execute one node. Every node goes through here, whether it runs in
+        the main loop, a `try` body, a `parallel` branch or a `map` item, so
+        this is where the policy, budget, instrument and debugger hook in.
         """
         self.policy.check_node_type(node.type, node.id)
         self.budget.check_deadline()
@@ -261,10 +263,8 @@ class Session:
         return next_node, ctx
 
     def _measure_frame(self, ctx: Context) -> None:
-        """How big the frame has grown — only when somebody limits it.
-
-        Measuring means serialising, which is the most expensive check here,
-        so it does not happen at all unless `frame_bytes` is in the limits.
+        """Record the frame size, but only if `frame_bytes` is limited:
+        measuring requires serializing the frame, which is expensive.
         """
         if not self.budget.measures("frame_bytes"):
             return
@@ -278,8 +278,8 @@ class Session:
         self.policy.check_stage(node.stage, node.id)
         stage_cls = node.get_stage_class()
 
-        # held before anything runs: a stage that cannot be paid for is better
-        # not begun than cut off halfway through a call that already went out
+        # Reserve before running: refuse a stage that cannot be paid for
+        # rather than cut it off halfway through.
         reserved = self._reservation(stage_cls, kwargs, node)
         over = self.budget.affordable(reserved)
         if over is not None:
@@ -291,8 +291,8 @@ class Session:
         try:
             await self._run_stage_body(stage)
         except asyncio.TimeoutError:
-            # a stage cut short by the session deadline rather than by its own
-            # timeout should say so: they are different problems
+            # A timeout caused by the session deadline is reported as
+            # BudgetExceeded, not as the stage's own timeout.
             self.budget.check_deadline()
             self.emit_node_event("stage_timeout", node, {"stage": node.stage})
             raise
@@ -300,19 +300,14 @@ class Session:
             self.emit_node_event("stage_failed", node, {"stage": node.stage, "error": str(exc)})
             raise
         finally:
-            # meters the stage charged replace what was reserved for them;
-            # meters it did not charge stay reserved, failure included — a
-            # call that went out and then timed out still spent what it spent
+            # Charged meters replace the reserved amounts. Meters the stage
+            # did not charge stay as reserved, even if the stage failed.
             self._settle(reserved, stage.charged, node)
         self.emit_node_event("stage_completed", node, {"stage": node.stage})
         return stage.collected_outputs
 
     def _reservation(self, stage_cls, kwargs: dict, node: StageNode) -> dict[str, float]:
-        """What the stage's spec asks to hold, with its expressions evaluated.
-
-        Nothing is evaluated when nothing is limited: a host with no budget
-        pays neither for the CEL nor for the lookup.
-        """
+        """Evaluate the stage's `reserve` spec. Skipped when nothing is limited."""
         if self.budget.limits.unlimited:
             return {}
         declared = stage_contract(stage_cls).reserve
@@ -320,8 +315,7 @@ class Session:
             return {}
         amounts: dict[str, float] = {}
         for meter, spec in declared.items():
-            # over `args` only, as documented: a reservation is read before
-            # the stage runs and has to be knowable from what it is given
+            # `reserve` expressions see `args` only (see docs/limits.md).
             value = (self.cel.eval(spec, _NO_FRAME, args=kwargs)
                      if isinstance(spec, str) else spec)
             try:
@@ -342,12 +336,10 @@ class Session:
         self.emit_node_event("stage_charged", node, {"stage": node.stage, **charged})
 
     async def _run_stage_body(self, stage) -> None:
-        """Run the stage under its timeout, counted in busy time.
+        """Run the stage under its timeout, measured in busy time.
 
-        A plain `wait_for` counts wall time, so a stage that asks a person a
-        question would die thirty seconds later. The timeout here is put on
-        hold for as long as the session is idle (see `Budget.pausable`), and
-        the stage runs in the current task — no task of its own per stage.
+        The timeout is paused while the session is idle (waiting for input),
+        see `Budget.pausable`. The stage runs in the current task.
         """
         timeout = self.budget.timeout_for(stage.timeout)
         if timeout is None:
@@ -382,8 +374,7 @@ class Session:
             event_handler=proxy_event,
             debugger=self.debugger,
             instrument=self.instrument,
-            # the allowance is the tenant's, not the graph's: a subpipeline
-            # is not a way out of it, and neither is it a fresh budget
+            # The child runs under the parent's policy and budget.
             policy=self.policy,
             budget=self.budget,
             reports_budget=False,
@@ -400,8 +391,7 @@ class Session:
     ) -> tuple["Node | None", Context]:
         while node is not None and node.id in scope and not self.finished:
             if frame is not None:
-                # before, not after: if this one raises, this is the answer to
-                # "which node failed"
+                # Set before executing, so that it names the failing node.
                 frame.node_id = node.id
             node, ctx = await self.execute_node(node, ctx)
             if frame is not None:
@@ -410,14 +400,13 @@ class Session:
 
     async def run_subgraph(self, start_id: str, ctx: Context) -> Context:
         node: Node | None = self.pipeline.get_node(start_id)
-        # a terminal elsewhere — in a sibling branch — has ended the run
+        # Stop if a terminal in another branch has already ended the run.
         while node is not None and not self.finished:
             node, ctx = await self.execute_node(node, ctx)
         return ctx
 
     def finish(self, node: TerminalNode, ctx: Context) -> None:
-        # two branches of a `parallel` can both reach a terminal; the first
-        # one ends the run, and the second is not allowed to rewrite it
+        # Two parallel branches may both reach a terminal; the first one wins.
         if self.finished:
             return
         self.artifacts = {name: ctx.get_var(name) for name in node.artifacts}
@@ -442,10 +431,8 @@ class Session:
             else self.pipeline.get_entry_node()
         )
 
-        # The graph is walked in a task of its own, so that `stop` can cancel
-        # whatever node is running by cancelling that one task. Racing every
-        # step against a stop event did the same at the price of two extra
-        # tasks per node.
+        # Walk the graph in a separate task so that `stop` can interrupt the
+        # running node by cancelling that task.
         self._loop = asyncio.get_running_loop()
         walker = self._walker = asyncio.create_task(self._walk(node))
         try:
@@ -453,17 +440,15 @@ class Session:
         except asyncio.CancelledError:
             current = asyncio.current_task()
             if (current is not None and current.cancelling()) or not walker.done():
-                # `run` itself was cancelled: not a stop, pass it on
+                # `run` itself was cancelled (not a stop): propagate.
                 walker.cancel()
                 await asyncio.gather(walker, return_exceptions=True)
                 raise
             self.result = dict(_STOPPED_RESULT)
         except BudgetExceeded as over:
-            # the one place that catches it. A pipeline cannot: `try` blocks
-            # and `run_with_retry` catch Exception, and this is not one. The
-            # run ends the way a stop does — with a result and whatever
-            # artifacts were already collected, rather than an exception
-            # thrown through work that did happen
+            # The only place BudgetExceeded is caught. Pipelines cannot catch
+            # it (it is not an Exception). The run ends with a budget result
+            # and keeps the artifacts collected so far.
             self.emit(Event(type="budget_exceeded", session_id=self.id,
                             payload=over.as_result()))
             if not self._owns_budget:
@@ -498,8 +483,7 @@ class Session:
                 node = self.pipeline.get_node(node.next) if node.next else None
                 continue
             node, ctx = await self.execute_node(node, ctx)
-            # kept current so that a snapshot taken between nodes resumes
-            # with the frame as it is, not as the run started
+            # Keep the current frame so that a snapshot resumes from it.
             self.context = ctx
 
     def _try_skip(self, node: Node) -> bool:
@@ -525,8 +509,7 @@ class Session:
             "paused": self.paused,
             "skip_requested": self._skip_requested,
             "pipeline": self.pipeline.raw_json,
-            # what the run has spent, so that a restored one goes on from it
-            # rather than from a fresh allowance
+            # Spent meters, so that a restored session continues from them.
             "meters": self.budget.report(),
         }
 
@@ -541,13 +524,11 @@ class Session:
         limits: Limits | None = None,
         instrument: Instrument | None = None,
     ) -> "Session":
-        """Restore a session, under the policy the host gives it now.
+        """Restore a session from `snapshot()`.
 
-        `policy` is required, and is deliberately not part of the snapshot. A
-        snapshot is data — stored, passed around, possibly edited — and an
-        allowance read back out of data is one the data can widen. The host
-        says again what this session may do; `OPEN` is a valid answer, but it
-        has to be given. The spent meters do travel, and are carried over.
+        `policy` is required and is not stored in the snapshot: a snapshot is
+        data and could be edited, so the host must supply the policy again
+        (`OPEN` for no restrictions). Spent meters are restored.
         """
         if pipeline is None:
             raw = snapshot.get("pipeline")

@@ -26,6 +26,11 @@ def _differs(left, right) -> bool:
 
 @register_node("parallel")
 class ParallelNode(Node):
+    """Runs branches concurrently, each on its own copy of the frame, then
+    merges the variables they created. Two branches writing the same new
+    variable is an error.
+    """
+
     def __init__(
         self,
         id: str,
@@ -94,16 +99,14 @@ class ParallelNode(Node):
             failure = first_failure(tasks)
             if failure is not None:
                 branch_id, exc = failure
-                # BranchError is an ordinary exception and a `try` block can
-                # catch it. Wrapping the budget in one would hand the tenant
-                # the way out the budget exists to close
+                # Re-raise BudgetExceeded as is: wrapping it in BranchError
+                # would let a `try` node catch it.
                 if isinstance(exc, BudgetExceeded):
                     raise exc
                 raise BranchError(
                     _("branch '{branch}' failed: {reason}", branch=branch_id, reason=exc)
                 ) from exc
-            # a terminal in a branch has ended the run: the other branches are
-            # cancelled, and there is no `next` to go on to
+            # A terminal in a branch ended the run.
             if session.finished:
                 return None, ctx
 
@@ -124,10 +127,8 @@ class ParallelNode(Node):
 
     @staticmethod
     async def _branch(session: "Session", entry: str, ctx: Context) -> Context:
-        """One branch, holding a unit of whatever concurrency is allowed.
-
-        More branches than the allowance is not an error: they take turns.
-        """
+        """Run one branch while holding a concurrency unit. Extra branches
+        wait for a free unit rather than fail."""
         async with session.budget.slot("concurrency"):
             return await session.run_subgraph(entry, ctx)
 

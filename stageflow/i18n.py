@@ -1,28 +1,17 @@
-"""Locale-aware text: the framework's own messages and what a stage says about
-itself.
+"""Translations: the framework's own messages and stage descriptions.
 
-Two audiences, two mechanisms, one lookup.
+The framework's strings (validation errors, built-in stage descriptions) are
+written in English and translated through a gettext catalog shipped in the
+package. Available locales are the catalogs found on disk.
 
-The framework's own strings — validation errors, refusals, the descriptions of
-the built-in stages — are written in English in the source and translated
-through a `gettext` catalog shipped inside the package. No language is named
-anywhere in the code: a locale exists here because a catalog for it exists on
-disk, so adding one is adding a file, not editing a list.
-
-A host's stages are not in that catalog and should not have to be. So a spec
-string may be a per-locale mapping instead of a string, which needs no
-catalog, no extraction and no build step::
+A host's stages can use a per-locale mapping instead of a catalog::
 
     description:
       en: "Takes a ticket out of the queue"
       ru: "Берёт тикет из очереди"
 
-The locale is not a global. It lives in a `ContextVar`, which is what makes it
-usable in a server: a request handler sets the locale it was asked for, two
-requests being answered at the same time get two languages, and a task
-started from a handler inherits the handler's locale. A process that never
-sets anything gets the source strings, which is why nothing has to be
-configured for the framework to work in English.
+The current locale is a `ContextVar`, so concurrent requests can use
+different languages. Without one, the English source strings are used.
 """
 
 from __future__ import annotations
@@ -34,35 +23,29 @@ from contextvars import ContextVar
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Mapping
 
-#: the language the strings in the source are written in. A catalog for it
-#: would be a catalog mapping every message to itself.
+#: The language of the source strings.
 SOURCE_LOCALE = "en"
 
-#: the framework's own catalog. A host with strings of its own registers a
-#: second domain rather than adding to this one — see `register_domain`.
+#: The framework's catalog. Hosts register their own domains (`register_domain`).
 DOMAIN = "stageflow"
 
 _DOMAINS: dict[str, Path] = {DOMAIN: Path(__file__).with_name("locale")}
 _CATALOGS: dict[tuple[str, str], _gettext.NullTranslations] = {}
 _NULL = _gettext.NullTranslations()
 
-#: set per request, not per process — see the module docstring
+#: Per request/task, not per process.
 _current: ContextVar[str | None] = ContextVar("stageflow_locale", default=None)
 
 _TAG_RE = re.compile(r"^([A-Za-z]{2,8})(?:[-_]([A-Za-z]{4}))?(?:[-_]([A-Za-z]{2}|\d{3}))?")
 
 
-# --------------------------------------------------------------- the domains
+# -------------------------------------------------------------------- domains
 
 
 def register_domain(domain: str, directory: str | Path) -> None:
-    """Point a gettext domain at the directory holding its catalogs.
-
-    The layout is the usual one, `<directory>/<locale>/LC_MESSAGES/<domain>.mo`,
-    so a host can keep its translations wherever it keeps them and hand the
-    path over once at startup. Registering the same domain again replaces the
-    path and drops what was cached from the old one.
-    """
+    """Register a gettext domain whose catalogs live in
+    `<directory>/<locale>/LC_MESSAGES/<domain>.mo`. Registering again replaces
+    the path and clears the cache."""
     _DOMAINS[domain] = Path(directory)
     for key in [key for key in _CATALOGS if key[1] == domain]:
         del _CATALOGS[key]
@@ -72,16 +55,11 @@ def domain_directory(domain: str = DOMAIN) -> Path | None:
     return _DOMAINS.get(domain)
 
 
-# --------------------------------------------------------------- the locales
+# -------------------------------------------------------------------- locales
 
 
 def normalize(tag: str) -> str:
-    """A locale tag in the shape gettext looks for on disk: `ru`, `pt_BR`.
-
-    Everything people actually send arrives here — `ru-RU`, `RU_ru`,
-    `ru_RU.UTF-8`, `zh-Hant-TW` — and the difference between those spellings
-    is not a difference anyone means.
-    """
+    """Normalize a locale tag to gettext's form: `ru-RU`, `ru_RU.UTF-8` -> `ru_RU`."""
     match = _TAG_RE.match((tag or "").strip())
     if not match:
         return ""
@@ -95,11 +73,7 @@ def normalize(tag: str) -> str:
 
 
 def candidates(tag: str) -> list[str]:
-    """A tag and the less specific tags it falls back to: `pt_BR` → `pt`.
-
-    A translation for the language is a better answer than no translation at
-    all: someone asking for `pt_BR` reads `pt` without noticing.
-    """
+    """A tag followed by its less specific fallbacks: `pt_BR` -> `pt_BR`, `pt`."""
     normalized = normalize(tag)
     if not normalized:
         return []
@@ -108,12 +82,7 @@ def candidates(tag: str) -> list[str]:
 
 
 def available_locales(domain: str = DOMAIN) -> list[str]:
-    """Locales this build can answer in, the source language first.
-
-    Read off the disk rather than declared, so a catalog dropped into the
-    package is available without a release, and a catalog deleted stops being
-    offered.
-    """
+    """Locales with a catalog on disk, the source language first."""
     directory = _DOMAINS.get(domain)
     found: set[str] = set()
     if directory and directory.is_dir():
@@ -124,11 +93,7 @@ def available_locales(domain: str = DOMAIN) -> list[str]:
 
 
 def parse_accept_language(header: str) -> list[str]:
-    """The tags of an `Accept-Language` header, best first.
-
-    `*` is dropped: it means "anything", and the answer to that is the
-    default, which is what an empty list already produces.
-    """
+    """Tags of an `Accept-Language` header, best first (`*` is ignored)."""
     weighted: list[tuple[float, int, str]] = []
     for position, part in enumerate(header.split(",")):
         tag, _, params = part.strip().partition(";")
@@ -154,13 +119,8 @@ def negotiate(
     domain: str = DOMAIN,
     available: Iterable[str] | None = None,
 ) -> str:
-    """The best locale on offer for what was asked for.
-
-    Takes one tag, a list of tags, or a whole `Accept-Language` header —
-    a backend passes along whatever it has without picking it apart first.
-    Nothing matches, or nothing was asked for: the source language, because
-    the alternative is refusing to answer over a preference.
-    """
+    """The best available locale for a tag, a list of tags or an
+    `Accept-Language` header. Falls back to the source language."""
     if requested is None:
         return SOURCE_LOCALE
     if isinstance(requested, str):
@@ -178,21 +138,17 @@ def negotiate(
     return SOURCE_LOCALE
 
 
-# ------------------------------------------------------- the current locale
+# ------------------------------------------------------------- current locale
 
 
 def get_locale() -> str:
-    """The locale in force here, or the source language if none was set."""
+    """The current locale, or the source language if none is set."""
     return _current.get() or SOURCE_LOCALE
 
 
 def set_locale(locale: str | None) -> Any:
-    """Set the locale for this context; returns the token to reset with.
-
-    `None` goes back to the source language. Prefer `use_locale` where the
-    scope is a block — a token that is never reset leaks the locale into
-    whatever runs next in the same task.
-    """
+    """Set the locale for the current context and return a reset token.
+    `None` means the source language. Prefer `use_locale` for a block."""
     return _current.set(locale or None)
 
 
@@ -202,7 +158,7 @@ def reset_locale(token: Any) -> None:
 
 @contextmanager
 def use_locale(locale: str | None) -> Iterator[str]:
-    """Answer in this locale for the duration of the block."""
+    """Use this locale for the duration of the block."""
     token = set_locale(locale)
     try:
         yield get_locale()
@@ -210,15 +166,11 @@ def use_locale(locale: str | None) -> Iterator[str]:
         reset_locale(token)
 
 
-# --------------------------------------------------------------- the lookup
+# --------------------------------------------------------------------- lookup
 
 
 def catalog(locale: str | None = None, domain: str = DOMAIN) -> _gettext.NullTranslations:
-    """The compiled catalog for a locale, or a catalog that translates nothing.
-
-    A missing catalog is not an error. A locale nobody has translated yet
-    still has to produce text, and the source strings are that text.
-    """
+    """The compiled catalog for a locale, or a null catalog if there is none."""
     resolved = locale or get_locale()
     key = (resolved, domain)
     cached = _CATALOGS.get(key)
@@ -239,16 +191,14 @@ def catalog(locale: str | None = None, domain: str = DOMAIN) -> _gettext.NullTra
 
 
 def gettext(message: str, /, locale: str | None = None, domain: str = DOMAIN, **params: Any) -> str:
-    """Translate a message, then fill in its parameters.
+    """Translate a message, then format it with the keyword arguments.
 
-    The formatting happens here on purpose. The message has to reach the
-    catalog whole — a message assembled from pieces cannot be translated into
-    a language that orders those pieces differently — and an f-string is
-    assembled before anything sees it, so the thing to write is::
+    Formatting happens after translation so that the whole message (with its
+    placeholders) reaches the catalog. Use::
 
         _("{node}: stage '{stage}' is not allowed", node=node.id, stage=name)
 
-    A literal brace in a message is doubled, as `str.format` expects.
+    not an f-string. Literal braces are doubled, as in `str.format`.
     """
     text = catalog(locale, domain).gettext(message)
     return text.format(**params) if params else text
@@ -263,31 +213,21 @@ def ngettext(
     domain: str = DOMAIN,
     **params: Any,
 ) -> str:
-    """The plural form for `n` — two forms in English, up to four elsewhere.
-
-    `n` is passed to the formatting as well, so a message can say it without
-    being handed the same number twice.
-    """
+    """Plural form of a message for `n`; `n` is also available to the format."""
     text = catalog(locale, domain).ngettext(singular, plural, n)
     return text.format(n=n, **params)
 
 
-#: the conventional short name, so a message reads as a message
+#: The conventional short name.
 _ = gettext
 
 
 def translate(value: Any, locale: str | None = None, domain: str | None = None) -> Any:
-    """A spec string: either a per-locale mapping or a catalog lookup.
+    """Translate a spec value.
 
-    A mapping is a translation table written on the spot, and the language of
-    its keys is negotiated exactly as an HTTP request's would be.
-
-    A plain string is looked up in `domain` — and `domain=None`, the default,
-    means there is none to look in, so the string is used as written. That is
-    the right default for a host's stages: passing their text through the
-    framework's catalog would be looking for someone else's strings in it.
-    Anything else is returned untouched, because a spec holds numbers and
-    booleans too.
+    A `{locale: text}` mapping is resolved for `locale`. A string is looked
+    up in `domain`; with `domain=None` it is returned as written. Other
+    values (numbers, booleans) are returned unchanged.
     """
     if isinstance(value, Mapping):
         return from_mapping(value, locale)
@@ -297,20 +237,11 @@ def translate(value: Any, locale: str | None = None, domain: str | None = None) 
 
 
 def translate_all(value: Any, domain: str | None = None) -> Any:
-    """A spec string in every language this build can answer in.
+    """A spec value in every available language, as `{locale: text}`.
 
-    The counterpart to `translate`, for a caller that is not answering one
-    reader. An editor holds one copy of the specs and draws them for whoever is
-    looking at it, possibly in a language chosen after the specs were fetched —
-    so what it wants is the choice, not the result of somebody else having
-    chosen. Hence `{locale: text}` back, and the picking happens where the
-    reader is.
-
-    A mapping written in a docstring already *is* that, and comes back as
-    written. A string with a catalog behind it becomes one. A string with no
-    catalog, or one nobody has translated, has nothing to choose and stays a
-    string — a mapping of one entry would only make every reader of the spec
-    handle a case that carries no information.
+    Used when the reader's language is not known yet (an editor picks it
+    later). A mapping is returned as is; a string with translations becomes
+    a mapping; a string without any stays a string.
     """
     if isinstance(value, Mapping):
         return dict(value)
@@ -326,12 +257,8 @@ def translate_all(value: Any, domain: str | None = None) -> Any:
 
 
 def from_mapping(mapping: Mapping[str, Any], locale: str | None = None) -> Any:
-    """Pick a value out of `{locale: text}`.
-
-    The source language is the fallback, and if even that is missing the
-    first entry wins: a mapping written only in one language is still an
-    answer, and an empty string would be a worse one.
-    """
+    """Pick a value from `{locale: text}`: the requested locale, then the
+    source language, then the first entry."""
     if not mapping:
         return ""
     keys = [str(key) for key in mapping]

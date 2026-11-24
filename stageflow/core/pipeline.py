@@ -20,7 +20,7 @@ from .policy import Policy
 from .typesys import TypeSystem
 
 
-#: How many shape problems are worth listing before the list stops helping.
+#: Maximum number of schema errors listed in one message.
 _MAX_SCHEMA_ERRORS = 10
 
 
@@ -35,13 +35,12 @@ class _SchemaError:
 
 @cache
 def _validators() -> tuple[Any, dict[str, Any]]:
-    """The pipeline schema split for speed: a shell, and one schema per node type.
+    """Validators for the pipeline schema, split for speed.
 
-    The schema picks a node's rules with nine `if type == ... then ...` blocks,
-    and a generic validator evaluates all nine for every node. Here the shell
-    checks everything except those blocks, and each node is then checked
-    against the one schema its `type` names. Same errors, same paths, several
-    times faster on a large graph.
+    The schema selects a node's rules with nine `if type == ... then ...`
+    blocks, which a generic validator evaluates for every node. Instead, a
+    shell schema without those blocks checks the document, and each node is
+    checked against the schema for its own `type`. The errors are the same.
     """
     schema = load_pipeline_schema()
     shell = copy.deepcopy(schema)
@@ -73,7 +72,7 @@ def _schema_errors(data: Any) -> list[_SchemaError]:
         for index, node in enumerate(nodes):
             type_ = node.get("type") if isinstance(node, dict) else None
             if not isinstance(type_, str):
-                continue  # the shell already says what is wrong with it
+                continue  # the shell schema reports a missing or invalid type
             validator = per_type.get(type_)
             if validator is None:
                 continue
@@ -85,12 +84,8 @@ def _schema_errors(data: Any) -> list[_SchemaError]:
 
 
 def _located(data: dict, exc) -> str:
-    """One schema complaint with the place it belongs to in front of it.
-
-    The place is the node's `id` when the path runs through `nodes`, because an
-    index is something the author has to count and an id is something they
-    wrote. Anything else keeps the dotted path it came with.
-    """
+    """Format a schema error with its location, using the node id instead of
+    `nodes[i]` where possible."""
     path = list(exc.absolute_path)
     where = ""
     if len(path) >= 2 and path[0] == "nodes" and isinstance(path[1], int):
@@ -105,6 +100,10 @@ def _located(data: dict, exc) -> str:
 
 
 class Pipeline:
+    """A parsed pipeline graph. Build it with `Pipeline.from_dict(data)`;
+    `validate(policy)` reports everything wrong with it at once.
+    """
+
     def __init__(
         self,
         entry: str,
@@ -150,21 +149,10 @@ class Pipeline:
 
     @staticmethod
     def _check_schema(data: dict, schema: dict, sub_id: str | None = None) -> None:
-        """Everything wrong with the SHAPE of a pipeline, at once and located.
+        """Check the pipeline against the JSON Schema.
 
-        Two things the first-error-only version could not do, and both of them
-        are what the author of a graph actually needs.
-
-        It says WHERE. `'next' is a required property` is a true sentence about
-        a graph with forty nodes and a useless one; `nodes[4].except[0]: 'next'
-        is a required property` names the thing to go and fix. The path is the
-        node's id where there is one, because that is what the author typed and
-        what the editor shows — an index means counting.
-
-        And it says everything, the way the cross-graph checks already do (see
-        `collect_errors`). A shape is usually wrong in the same way in several
-        places, and fixing them one round trip at a time is the difference
-        between a correction and a conversation.
+        Reports all errors at once (up to `_MAX_SCHEMA_ERRORS`), each with its
+        location, e.g. `classify.except[0]: 'next' is a required property`.
         """
         found = _schema_errors(data)
         if not found:
@@ -172,8 +160,8 @@ class Pipeline:
         reason = "; ".join(_located(data, exc) for exc in found[:_MAX_SCHEMA_ERRORS])
         if len(found) > _MAX_SCHEMA_ERRORS:
             reason += _("; and {more} more", more=len(found) - _MAX_SCHEMA_ERRORS)
-        # a whole sentence per case rather than a noun filled into one —
-        # the reason is in `registry.py`
+        # Separate messages per case rather than one template with a noun
+        # inserted, so that translations stay grammatical (see registry.py).
         if sub_id is None:
             message = _("Pipeline schema validation failed: {reason}", reason=reason)
         else:
@@ -258,28 +246,20 @@ class Pipeline:
                 errors.append(_("Duplicate node id: '{node}'", node=node.id))
             seen.add(node.id)
             errors.extend(node.validate(self))
-        # a road that comes back is refused unless the caller's policy says it
-        # has something to stop it with (see Policy.allow_cycles)
+        # Cycles are refused unless the policy allows them.
         if policy is None or not policy.allow_cycles:
             errors.extend(self._cycle_errors())
         return errors
 
     def _cycle_errors(self) -> list[str]:
-        """A road that comes back to where it has been.
+        """Report cycles in the order edges.
 
-        The language has a loop of its own — the `map` node — and it is
-        bounded by a list. A cycle in the order edges is not: it spins for as
-        long as the process lives, at tens of thousands of nodes a second,
-        and it is almost always a `next` pointed at the wrong id. Saying so
-        at validation costs one walk of the graph and saves finding out by
-        watching a server fall over.
-
-        A host with something to stop one with — a budget, a timeout a layer
-        above — says so with `Policy(allow_cycles=True)`, and then this is not
-        called at all. See `collect_errors`.
+        Loops over data use `map`, which is bounded by its list. A cycle is
+        unbounded and is usually a `next` pointing at the wrong node, so it
+        is an error unless the host allows it with `Policy(allow_cycles=True)`.
         """
-        # iterative rather than recursive: a long straight graph is a deep
-        # walk, and recursion stops at about a thousand nodes
+        # Iterative DFS: a recursive one hits the recursion limit on graphs
+        # of about a thousand nodes.
         on_path: dict[str, int] = {}  # node -> its index in `path`
         done: set[str] = set()
         found: list[str] = []
@@ -310,11 +290,10 @@ class Pipeline:
                 for cycle in dict.fromkeys(found)]
 
     def validate(self, policy: "Policy | None" = None) -> None:
-        """Everything wrong with this pipeline, as one error.
+        """Raise PipelineValidationError listing everything wrong.
 
-        A policy is checked here rather than at run time so that a tenant
-        saving a graph is told what to change before anything executes; the
-        session checks again while running, for a pipeline built by hand.
+        With a policy, also reports what the policy forbids, so a graph can be
+        checked before it is saved or run.
         """
         errors = self.collect_errors(policy)
         if errors:

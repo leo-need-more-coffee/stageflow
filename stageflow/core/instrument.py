@@ -1,21 +1,17 @@
-"""Hooks for observing a run: tracing, metrics, logs.
+"""Hooks for observing runs: tracing, metrics, logs.
 
-The core does not depend on any telemetry library. A session takes an
-optional `Instrument`, and calls it at three points:
+The core depends on no telemetry library. A session takes an optional
+`Instrument` and calls it at three points:
 
-- `session(session)` wraps a whole run (including a subpipeline's child run);
-- `node(session, node)` wraps every node, wherever it runs — the main loop,
-  a `try` body, a `parallel` branch, a `map` item;
-- `event(session, event)` sees every event the session emits.
+- `session(session)` around a whole run (subpipeline runs included);
+- `node(session, node)` around every node, wherever it runs;
+- `event(session, event)` for every event the session emits.
 
-Both context managers are entered and exited in the task that runs the work,
-so anything kept in a context variable — an OpenTelemetry span, for example —
-nests the way the graph does: a branch's nodes inside the `parallel` node, a
-subpipeline's run inside its node.
+The context managers run in the task doing the work, so context variables
+(such as an OpenTelemetry span) nest the same way the graph does.
 
-With no instrument the cost is one `if` per node.
-
-Ready-made instruments live in `stageflow.observability`.
+Without an instrument the cost is one `if` per node. Ready-made instruments
+are in `stageflow.observability`.
 """
 from __future__ import annotations
 
@@ -29,7 +25,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Instrument:
-    """Base class: every hook does nothing. Override the ones you need."""
+    """Base class: all hooks do nothing. Override the ones you need."""
 
     @contextmanager
     def session(self, session: "Session") -> Iterator[None]:
@@ -44,7 +40,7 @@ class Instrument:
 
 
 class Instruments(Instrument):
-    """Several instruments at once, called in the order given."""
+    """Several instruments, entered in the given order."""
 
     def __init__(self, *instruments: Instrument):
         self.instruments = [i for i in instruments if i is not None]

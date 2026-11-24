@@ -15,8 +15,7 @@ class FieldSpec:
     name: str
     type: str = "any"
     optional: bool = False
-    #: prose, and prose is translatable: as written in the docstring this is a
-    #: string, or a `{locale: string}` mapping that `build_stage_spec` resolves
+    #: A string, or a `{locale: string}` mapping resolved by `build_stage_spec`.
     description: Any = ""
     extra: dict[str, Any] = field(default_factory=dict)
 
@@ -64,23 +63,15 @@ def parse_fields(raw: Any) -> list[FieldSpec]:
 
 
 def parse_docstring_spec(doc: str | None) -> dict[str, Any]:
-    """The spec a stage declares in its docstring, or an empty dict.
-
-    Returns a fresh copy; parsing is cached (see `_parsed`)."""
+    """The spec declared in a docstring, or an empty dict. Returns a copy of
+    the cached parse."""
     return copy.deepcopy(_parsed(doc))
 
 
 @lru_cache(maxsize=None)
 def _parsed(doc: str | None) -> dict[str, Any]:
-    """The spec a stage declares in its docstring, or nothing.
-
-    A docstring is first of all a docstring: plenty of them are prose, and
-    prose is rarely valid YAML. That is not an error — the stage simply
-    declares no spec. Raising here would make `get_specs()` unusable on any
-    stage documented in sentences, which is why every caller used to wrap it
-    in `except Exception` and swallow the difference between "no spec" and
-    "the parser fell over".
-    """
+    """Parse a docstring as a YAML spec. A docstring that is plain prose (not
+    a YAML mapping) declares no spec, so the result is an empty dict."""
     if not doc:
         return {}
     try:
@@ -91,12 +82,8 @@ def _parsed(doc: str | None) -> dict[str, Any]:
 
 
 def _prose(locale: str | None, domain: str | None):
-    """How one piece of prose in a spec is resolved.
-
-    No locale asked for means the spec is not being built for a reader, so every
-    language goes in it and whatever draws it chooses — see `translate_all`. A
-    locale asked for means one reader, one string.
-    """
+    """A function that resolves translatable text: all languages when
+    `locale` is None (see `translate_all`), one language otherwise."""
     if locale is None:
         return lambda value: translate_all(value, domain)
     return lambda value: translate(value, locale, domain)
@@ -113,7 +100,7 @@ def _translated(raw: Any, locale: str | None, domain: str | None) -> list[dict[s
 
 
 def _described(specs: list[Any], locale: str | None, domain: str | None) -> list[dict[str, Any]]:
-    """Event and input specs, with their one line of prose resolved."""
+    """Event and input specs with their descriptions translated."""
     prose = _prose(locale, domain)
     out = []
     for spec in specs:
@@ -125,8 +112,8 @@ def _described(specs: list[Any], locale: str | None, domain: str | None) -> list
 
 @dataclass(frozen=True)
 class StageContract:
-    """What the runtime and the validator need from a stage spec: names, types
-    and reservations — no prose, so nothing to translate."""
+    """The parts of a stage spec the runtime needs: argument and output types
+    and `reserve`. No translatable text."""
 
     arguments: dict[str, str | None]
     outputs: dict[str, str | None]
@@ -134,12 +121,8 @@ class StageContract:
 
 
 def stage_contract(stage_cls: type) -> StageContract:
-    """The stage's contract, parsed once per class.
-
-    `get_specs()` builds the full card with every translation, which is what
-    an editor wants and far too much for checking a graph or reserving a
-    budget on every stage run.
-    """
+    """The stage's contract, cached per class. Cheaper than `get_specs()`,
+    which also builds every translation."""
     return _contract(stage_cls, stage_cls.__doc__)
 
 
@@ -154,22 +137,12 @@ def _contract(stage_cls: type, doc: str | None) -> StageContract:
 
 
 def build_stage_spec(stage_cls: type, locale: str | None = None) -> dict[str, Any]:
-    """The card an editor draws this stage from.
+    """Build the stage's spec (the "card" the editor shows).
 
-    Everything here but the prose is an identifier: a name, a type, a colour, a
-    meter. The prose — the stage's description and the description of every
-    argument, output, event and input — comes either out of the catalog of the
-    stage's `i18n_domain` or out of a per-locale mapping written in the
-    docstring. A stage with neither reads the same in every language, which is
-    the correct answer for a stage nobody has translated.
-
-    `locale=None`, the default, puts EVERY language in the spec as a `{locale:
-    text}` mapping and leaves the choosing to whatever draws it. That is what an
-    editor wants: it holds one copy of the specs and its reader may pick a
-    language long after they were fetched, so a backend that had chosen for them
-    would have to be asked again. Naming a locale collapses the prose to that
-    one language, for a caller that really is answering one reader — the docs
-    generator, mostly.
+    Descriptions are translated with the stage's `i18n_domain`, or taken
+    from `{locale: text}` mappings in the docstring. With `locale=None`
+    every language is included and the client picks one; with a locale, the
+    text is collapsed to that language.
     """
     doc = _parsed(stage_cls.__doc__)
     domain = getattr(stage_cls, "i18n_domain", None)
@@ -185,10 +158,8 @@ def build_stage_spec(stage_cls: type, locale: str | None = None) -> dict[str, An
         "description": _prose(locale, domain)(doc.get("description", "")),
         "arguments": _translated(doc.get("arguments"), locale, domain),
         "outputs": _translated(doc.get("outputs"), locale, domain),
-        # what the stage asks to be held before it runs: {meter: number or CEL
-        # over `args`}. Read before anything executes, which is why it is
-        # declared rather than computed — an editor can show it, and a host
-        # can refuse a graph without running it
+        # Amounts to reserve before the stage runs: {meter: number or CEL
+        # over `args`}. Declared, so it can be shown and checked up front.
         "reserve": dict(doc.get("reserve") or {}),
         "timeout": stage_cls.timeout,
     }

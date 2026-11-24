@@ -12,13 +12,8 @@ DISTRIBUTION = "stageflow-framework"
 
 
 def _installed_version() -> str:
-    """The version of the installed distribution.
-
-    Running from a source checkout that was never installed there is nothing
-    to read it from, and guessing would be worse than saying so: a client that
-    sees "0.0.0+unknown" knows not to compare it with anything, while a made-up
-    number would be compared and believed.
-    """
+    """The installed package version, or "0.0.0+unknown" when running from a
+    source checkout that was never installed."""
     try:
         return _package_version(DISTRIBUTION)
     except PackageNotFoundError:  # pragma: no cover - only in a bare checkout
@@ -29,33 +24,18 @@ __version__ = _installed_version()
 
 
 def capabilities(policy: Policy | None = None) -> dict[str, Any]:
-    """The language this build understands — or this caller may use.
+    """What this build supports, or what a caller may use under `policy`.
 
-    - `stageflow` — the version of the core, for a human reading a log;
-    - `node_types` — the types a pipeline may use here, sorted. This is the
-      field a client should branch on: a name that is not in the list will be
-      rejected by `Pipeline.from_dict` with `Unknown node type`, or by the
-      policy.
-    - `stages` — how many stages may be used. The specs themselves are a
-      separate, much larger answer (`get_stages`), so this is only a hint that
-      a registry is there at all.
-    - `locales` — the languages the core can put its own text into, the source
-      language first. A client cannot guess this: a catalog is a file in the
-      build, so the build has to say.
-    - `cycles` — whether this caller may write a road that comes back to where
-      it has been (`Policy.allow_cycles`). Off unless a policy says otherwise,
-      including when there is no policy at all.
+    - `stageflow`: the core version (informational);
+    - `node_types`: node types a pipeline may use, sorted. Clients should
+      check this rather than the version: other types are rejected;
+    - `stages`: how many stages may be used (the specs are served separately);
+    - `locales`: languages the core's own messages are available in, the
+      source language first;
+    - `cycles`: whether cycles are allowed (`Policy.allow_cycles`).
 
-    With a `policy` the answer narrows to what that policy allows, which is
-    what a backend should serve to a client: an editor needs to know what
-    *this* caller may draw, and the reason a node is unavailable — an older
-    core or a narrower allowance — is not a distinction it has to make.
-
-    This exists because a version number cannot answer the question a client
-    actually has. An editor built against one version and pointed at whatever
-    backend is running needs to know whether it may offer a `map` node here,
-    and a build with a node type from a plugin belongs to no range of
-    releases. So the registry answers for itself.
+    With a `policy`, the answer is narrowed to what it allows, which is what a
+    backend should report to its client.
     """
     node_types = sorted(get_node_types())
     stages = sorted(get_stages())
@@ -67,9 +47,7 @@ def capabilities(policy: Policy | None = None) -> dict[str, Any]:
         "node_types": node_types,
         "stages": len(stages),
         "locales": available_locales(),
-        # whether a road may come back to where it has been. A client that
-        # draws graphs needs this before it offers one: a back edge is refused
-        # at validation, and finding that out after writing it is the worst
-        # moment to learn a rule
+        # Clients need this before drawing a back edge: otherwise it is only
+        # refused at validation.
         "cycles": bool(policy is not None and policy.allow_cycles),
     }

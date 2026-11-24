@@ -1,17 +1,10 @@
-"""Running children concurrently: what `parallel` and a parallel `map` share.
+"""Running child tasks concurrently, shared by `parallel` and parallel `map`.
 
-Two things both of them have to get right, and used to get right separately
-or not at all.
-
-The parent gives its unit of concurrency back while it waits. A branch of a
-`parallel` that holds a unit and then waits for a `map` whose items each need
-one is a deadlock the moment the nesting is wider than the allowance — see
-`Budget.released`. The children are created inside that block, so they start
-out holding nothing.
-
-A terminal in one child ends the run, the way a terminal inside a `try` or a
-`map` does. The siblings are cancelled rather than left to run on into a
-graph that has finished, and the parent does not carry on to its `next`.
+- The parent lends its concurrency unit out while waiting for its children
+  (see `Budget.released`); otherwise nested fan-out deadlocks once it is wider
+  than the concurrency limit.
+- A terminal in one child ends the run: the other children are cancelled and
+  the parent does not continue to its `next`.
 """
 from __future__ import annotations
 
@@ -30,10 +23,10 @@ async def run_children(
     children: dict[K, Callable[[], Awaitable[T]]],
     cancel_on_error: bool,
 ) -> tuple[dict[K, asyncio.Task], list[K]]:
-    """Start every child, wait until they are done or no longer wanted.
+    """Start all children and wait until they finish or are no longer needed
+    (a failure with `cancel_on_error`, or a terminal ended the run).
 
-    @returns the tasks by key, and the keys of those that were cancelled.
-    The caller reads results and exceptions off the tasks.
+    Returns the tasks by key and the keys of the cancelled ones.
     """
     async with session.budget.released("concurrency"):
         tasks = {key: asyncio.create_task(make()) for key, make in children.items()}
@@ -61,8 +54,7 @@ async def run_children(
             task.cancel()
         if pending:
             await asyncio.gather(*pending, return_exceptions=True)
-    # the caller reports the first failure; reading every child's marks the
-    # others as seen, or asyncio logs each of them as "never retrieved"
+    # Retrieve every child's exception; asyncio logs unretrieved ones.
     for task in tasks.values():
         if not task.cancelled():
             task.exception()
@@ -70,7 +62,7 @@ async def run_children(
 
 
 def first_failure(tasks: dict[K, asyncio.Task]) -> tuple[K, BaseException] | None:
-    """The first child, in the order given, that raised — not one cancelled."""
+    """The first child (in order) that raised, ignoring cancelled ones."""
     for key, task in tasks.items():
         if not task.cancelled() and task.exception() is not None:
             return key, task.exception()

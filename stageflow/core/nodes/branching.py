@@ -13,6 +13,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @register_node("condition")
 class ConditionNode(Node):
+    """Goes to `then` or `else` depending on a CEL condition."""
+
     def __init__(self, id: str, condition: str, then: str, else_: str | None = None, **common):
         super().__init__(id, **common)
         self.condition = condition
@@ -55,6 +57,8 @@ class ConditionNode(Node):
 
 @register_node("switch")
 class SwitchNode(Node):
+    """Goes to the first case whose `when` is true, or to `default`."""
+
     def __init__(self, id: str, cases: list[dict], default: str | None = None, **common):
         super().__init__(id, **common)
         self.cases = cases

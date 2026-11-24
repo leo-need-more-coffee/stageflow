@@ -15,6 +15,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @register_node("subpipeline")
 class SubPipelineNode(Node):
+    """Runs a named subpipeline in a child session with a fresh frame, under
+    the same policy and budget, and copies its artifacts back.
+    """
+
     def __init__(
         self,
         id: str,

@@ -7,14 +7,10 @@ from ..i18n import _
 
 T = TypeVar("T")
 
-# The same sentence per kind of thing, written out rather than assembled from a
-# noun and a template.
-#
-# Dropping the English noun into a translated sentence is the classic way to get
-# an ungrammatical one: in Russian `стадия` is feminine and `тип узла` is
-# masculine, so "already registered" has two different endings and one template
-# cannot carry both. A kind nobody spelled out still gets a message — the
-# generic form, with the noun as it was written.
+# One full message per kind instead of a template with the noun inserted:
+# in other languages the rest of the sentence depends on the noun's gender,
+# so a single template would be ungrammatical. Unknown kinds get a generic
+# message.
 
 
 def _taken(kind: str, name: str) -> str:

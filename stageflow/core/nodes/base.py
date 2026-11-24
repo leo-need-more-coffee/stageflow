@@ -29,6 +29,10 @@ def get_node_types() -> dict[str, type["Node"]]:
 
 
 class Node:
+    """Base class for graph nodes. Subclasses implement `_parse`, `execute`
+    and `validate`; `register_node(type)` makes a type available in JSON.
+    """
+
     type: str = "node"
 
     def __init__(
@@ -80,8 +84,7 @@ class Node:
         errors: list[str] = []
         for src, dst in self.expose.items():
             malformed = False
-            # a whole sentence per side rather than the English noun dropped
-            # into one — see the reason in `registry.py`
+            # Separate messages per side so translations stay grammatical.
             for path, message in (
                 (src, _("{node}: expose source '{path}' must be a variable name")),
                 (dst, _("{node}: expose destination '{path}' must be a variable name")),
