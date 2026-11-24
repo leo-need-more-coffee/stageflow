@@ -1,0 +1,77 @@
+{
+  "description": "what a narrow plan refuses, all at once and before anything runs",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "each",
+        "variables": {
+          "xs": [
+            1
+          ]
+        }
+      },
+      {
+        "id": "each",
+        "type": "map",
+        "items": "vars.xs",
+        "body": "s",
+        "next": "end"
+      },
+      {
+        "id": "s",
+        "type": "stage",
+        "stage": "SleepStage",
+        "arguments": {
+          "const": {
+            "seconds": 0
+          }
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": []
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "no map, no sleep",
+      "policy": {
+        "stages": [
+          "SetValueStage"
+        ],
+        "node_types": [
+          "entry",
+          "stage",
+          "terminal"
+        ]
+      },
+      "expect": {
+        "invalid": [
+          "each: node type 'map' is not allowed by the policy",
+          "s: stage 'SleepStage' is not allowed by the policy"
+        ]
+      }
+    },
+    {
+      "name": "an empty allowance allows nothing",
+      "policy": {
+        "stages": []
+      },
+      "expect": {
+        "invalid": [
+          "s: stage 'SleepStage' is not allowed by the policy"
+        ]
+      }
+    },
+    {
+      "name": "the same graph on an open plan",
+      "expect": {
+        "result": null
+      }
+    }
+  ]
+}

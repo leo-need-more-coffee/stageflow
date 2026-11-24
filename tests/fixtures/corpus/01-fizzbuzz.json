@@ -1,0 +1,184 @@
+{
+  "description": "map over 1..15 in parallel, a switch with three cases and a default per item",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "each",
+        "variables": {
+          "nums": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        }
+      },
+      {
+        "id": "each",
+        "type": "map",
+        "items": "vars.nums",
+        "item_var": "n",
+        "body": "which",
+        "mode": "parallel",
+        "collect": {
+          "label": "labels"
+        },
+        "next": "end"
+      },
+      {
+        "id": "which",
+        "type": "switch",
+        "cases": [
+          {
+            "when": "vars.n % 15 == 0",
+            "next": "fb"
+          },
+          {
+            "when": "vars.n % 3 == 0",
+            "next": "fizz"
+          },
+          {
+            "when": "vars.n % 5 == 0",
+            "next": "buzz"
+          }
+        ],
+        "default": "num"
+      },
+      {
+        "id": "fb",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'FizzBuzz'"
+          }
+        },
+        "outputs": {
+          "value": "label"
+        }
+      },
+      {
+        "id": "fizz",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'Fizz'"
+          }
+        },
+        "outputs": {
+          "value": "label"
+        }
+      },
+      {
+        "id": "buzz",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'Buzz'"
+          }
+        },
+        "outputs": {
+          "value": "label"
+        }
+      },
+      {
+        "id": "num",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "string(vars.n)"
+          }
+        },
+        "outputs": {
+          "value": "label"
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "labels"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "1..15",
+      "expect": {
+        "artifacts": {
+          "labels": [
+            "1",
+            "2",
+            "Fizz",
+            "4",
+            "Buzz",
+            "Fizz",
+            "7",
+            "8",
+            "Fizz",
+            "Buzz",
+            "11",
+            "Fizz",
+            "13",
+            "14",
+            "FizzBuzz"
+          ]
+        },
+        "meters": {
+          "iterations": 15
+        }
+      }
+    },
+    {
+      "name": "under a concurrency of 2",
+      "policy": {
+        "limits": {
+          "gauges": {
+            "concurrency": 2
+          }
+        }
+      },
+      "expect": {
+        "artifacts_include": {
+          "labels": [
+            "1",
+            "2",
+            "Fizz",
+            "4",
+            "Buzz",
+            "Fizz",
+            "7",
+            "8",
+            "Fizz",
+            "Buzz",
+            "11",
+            "Fizz",
+            "13",
+            "14",
+            "FizzBuzz"
+          ]
+        },
+        "meters_at_most": {
+          "peak_concurrency": 2
+        }
+      }
+    }
+  ]
+}

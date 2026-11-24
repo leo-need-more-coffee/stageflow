@@ -1,0 +1,64 @@
+{
+  "description": "an assertion that fails stops the run with its message",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "check",
+        "variables": {
+          "stock": 3
+        }
+      },
+      {
+        "id": "check",
+        "type": "stage",
+        "stage": "AssertStage",
+        "arguments": {
+          "const": {
+            "condition": "vars.stock >= vars.wanted",
+            "message": "not enough stock"
+          },
+          "vars": {
+            "stock": "stock",
+            "wanted": "wanted"
+          }
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [],
+        "result": {
+          "status": "reserved"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "enough",
+      "vars": {
+        "wanted": 2
+      },
+      "expect": {
+        "result": {
+          "status": "reserved"
+        }
+      }
+    },
+    {
+      "name": "too many",
+      "vars": {
+        "wanted": 5
+      },
+      "expect": {
+        "error": {
+          "type": "AssertionError",
+          "match": "not enough stock"
+        }
+      }
+    }
+  ]
+}

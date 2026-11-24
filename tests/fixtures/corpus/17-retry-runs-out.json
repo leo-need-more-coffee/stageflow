@@ -1,0 +1,55 @@
+{
+  "description": "retry gives up and nothing catches: the error is the run's",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "call"
+      },
+      {
+        "id": "call",
+        "type": "stage",
+        "stage": "CorpusFlaky",
+        "arguments": {
+          "const": {
+            "key": "x",
+            "fail_times": 10
+          }
+        },
+        "retry": [
+          {
+            "error_equals": [
+              "CorpusFlakyError"
+            ],
+            "max_attempts": 3,
+            "interval_seconds": 0
+          }
+        ],
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": []
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "three attempts, then the error",
+      "expect": {
+        "error": {
+          "type": "CorpusFlakyError",
+          "match": "attempt 3"
+        },
+        "events": {
+          "count": {
+            "node_retry": 2,
+            "stage_failed": 3
+          }
+        }
+      }
+    }
+  ]
+}

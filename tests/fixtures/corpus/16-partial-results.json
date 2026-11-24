@@ -1,0 +1,137 @@
+{
+  "description": "every item runs, failures become rows instead of stopping the batch",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "each",
+        "variables": {
+          "values": [
+            4,
+            -1,
+            9,
+            -16
+          ]
+        }
+      },
+      {
+        "id": "each",
+        "type": "map",
+        "items": "vars.values",
+        "item_var": "v",
+        "body": "guard",
+        "mode": "parallel",
+        "cancel_on_error": false,
+        "collect": {
+          "row": "rows"
+        },
+        "next": "count"
+      },
+      {
+        "id": "guard",
+        "type": "try",
+        "body": "check",
+        "except": [
+          {
+            "error_equals": [
+              "ValueError"
+            ],
+            "next": "bad",
+            "result_var": "err"
+          }
+        ]
+      },
+      {
+        "id": "check",
+        "type": "stage",
+        "stage": "CorpusBoom",
+        "arguments": {
+          "vars": {
+            "value": "v"
+          }
+        },
+        "outputs": {
+          "value": "checked"
+        },
+        "next": "good"
+      },
+      {
+        "id": "good",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "{'ok': true, 'value': vars.checked}"
+          }
+        },
+        "outputs": {
+          "value": "row"
+        }
+      },
+      {
+        "id": "bad",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "{'ok': false, 'error': vars.err.message}"
+          }
+        },
+        "outputs": {
+          "value": "row"
+        }
+      },
+      {
+        "id": "count",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "vars.rows.filter(r, r.ok).size()"
+          }
+        },
+        "outputs": {
+          "value": "ok_count"
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "rows",
+          "ok_count"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "two good, two bad",
+      "expect": {
+        "artifacts": {
+          "rows": [
+            {
+              "ok": true,
+              "value": 4
+            },
+            {
+              "ok": false,
+              "error": "negative: -1"
+            },
+            {
+              "ok": true,
+              "value": 9
+            },
+            {
+              "ok": false,
+              "error": "negative: -16"
+            }
+          ],
+          "ok_count": 2
+        }
+      }
+    }
+  ]
+}

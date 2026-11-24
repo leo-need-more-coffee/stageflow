@@ -61,6 +61,11 @@ async def run_children(
             task.cancel()
         if pending:
             await asyncio.gather(*pending, return_exceptions=True)
+    # the caller reports the first failure; reading every child's marks the
+    # others as seen, or asyncio logs each of them as "never retrieved"
+    for task in tasks.values():
+        if not task.cancelled():
+            task.exception()
     return tasks, cancelled
 
 

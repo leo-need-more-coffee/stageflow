@@ -1,0 +1,172 @@
+{
+  "description": "macros, has(), ternaries and string functions deciding a route",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "facts",
+        "variables": {
+          "order": {
+            "customer": "Ann",
+            "coupon": "SPRING",
+            "items": [
+              {
+                "sku": "a",
+                "qty": 2,
+                "price": 10.0
+              },
+              {
+                "sku": "b",
+                "qty": 1,
+                "price": 99.5
+              },
+              {
+                "sku": "c",
+                "qty": 3,
+                "price": 1.0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "facts",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value": null
+          }
+        },
+        "outputs": {
+          "bulk.$": "vars.order.items.filter(i, i.qty > 1).map(i, i.sku)",
+          "has_coupon.$": "has(vars.order.coupon)",
+          "vip.$": "vars.order.customer.startsWith('A') && vars.order.items.exists(i, i.price > 50.0)",
+          "lines.$": "size(vars.order.items)",
+          "total.$": "vars.order.items.map(i, i.price * double(i.qty))[0] + vars.order.items.map(i, i.price * double(i.qty))[1] + vars.order.items.map(i, i.price * double(i.qty))[2]"
+        },
+        "next": "route"
+      },
+      {
+        "id": "route",
+        "type": "switch",
+        "cases": [
+          {
+            "when": "vars.vip && vars.has_coupon",
+            "next": "vip_coupon"
+          },
+          {
+            "when": "vars.vip",
+            "next": "vip"
+          }
+        ],
+        "default": "regular"
+      },
+      {
+        "id": "vip_coupon",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'vip+coupon, ' + string(vars.lines) + ' lines'"
+          }
+        },
+        "outputs": {
+          "value": "route"
+        },
+        "next": "end"
+      },
+      {
+        "id": "vip",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'vip'"
+          }
+        },
+        "outputs": {
+          "value": "route"
+        },
+        "next": "end"
+      },
+      {
+        "id": "regular",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'regular'"
+          }
+        },
+        "outputs": {
+          "value": "route"
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "bulk",
+          "has_coupon",
+          "vip",
+          "total",
+          "route"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "Ann with a coupon",
+      "expect": {
+        "artifacts": {
+          "bulk": [
+            "a",
+            "c"
+          ],
+          "has_coupon": true,
+          "vip": true,
+          "total": 122.5,
+          "route": "vip+coupon, 3 lines"
+        }
+      }
+    },
+    {
+      "name": "Bob without one",
+      "vars": {
+        "order": {
+          "customer": "Bob",
+          "items": [
+            {
+              "sku": "z",
+              "qty": 1,
+              "price": 5.0
+            },
+            {
+              "sku": "y",
+              "qty": 1,
+              "price": 5.0
+            },
+            {
+              "sku": "x",
+              "qty": 1,
+              "price": 5.0
+            }
+          ]
+        }
+      },
+      "expect": {
+        "artifacts": {
+          "bulk": [],
+          "has_coupon": false,
+          "vip": false,
+          "total": 15.0,
+          "route": "regular"
+        }
+      }
+    }
+  ]
+}

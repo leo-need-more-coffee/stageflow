@@ -1,0 +1,103 @@
+{
+  "description": "each call reserves tokens from its argument; the one that does not fit never starts",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "each",
+        "variables": {
+          "prompts": [
+            "aa",
+            "bbbb",
+            "cccccc"
+          ]
+        }
+      },
+      {
+        "id": "each",
+        "type": "map",
+        "items": "vars.prompts",
+        "item_var": "p",
+        "body": "call",
+        "collect": {
+          "spent": "spent"
+        },
+        "next": "end"
+      },
+      {
+        "id": "call",
+        "type": "stage",
+        "stage": "CorpusSpend",
+        "arguments": {
+          "const": {
+            "tokens.$": "size(vars.p) * 10"
+          }
+        },
+        "outputs": {
+          "tokens": "spent"
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "spent"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "fits",
+      "policy": {
+        "limits": {
+          "counters": {
+            "tokens": 200
+          }
+        }
+      },
+      "expect": {
+        "artifacts": {
+          "spent": [
+            20,
+            40,
+            60
+          ]
+        },
+        "meters": {
+          "tokens": 120
+        },
+        "events": {
+          "count": {
+            "stage_completed": 3
+          }
+        }
+      }
+    },
+    {
+      "name": "the third does not fit",
+      "policy": {
+        "limits": {
+          "counters": {
+            "tokens": 100
+          }
+        }
+      },
+      "expect": {
+        "result": {
+          "status": "budget_exceeded",
+          "meter": "tokens",
+          "limit": 100,
+          "spent": 120
+        },
+        "events": {
+          "count": {
+            "stage_completed": 2,
+            "stage_started": 2
+          }
+        }
+      }
+    }
+  ]
+}

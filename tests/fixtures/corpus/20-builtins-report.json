@@ -1,0 +1,278 @@
+{
+  "description": "a report assembled from the built-in stages only",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "pick",
+        "variables": {
+          "user": {
+            "name": "Ann",
+            "role": "admin",
+            "password": "hunter2",
+            "tags": [
+              "x",
+              "y",
+              "x"
+            ]
+          },
+          "extra": [
+            "z"
+          ]
+        }
+      },
+      {
+        "id": "pick",
+        "type": "stage",
+        "stage": "DropKeysStage",
+        "arguments": {
+          "vars": {
+            "src": "user"
+          },
+          "const": {
+            "keys": [
+              "password"
+            ]
+          }
+        },
+        "outputs": {
+          "result": "safe"
+        },
+        "next": "meta"
+      },
+      {
+        "id": "meta",
+        "type": "stage",
+        "stage": "PickKeysStage",
+        "arguments": {
+          "vars": {
+            "src": "user"
+          },
+          "const": {
+            "keys": [
+              "name",
+              "role"
+            ]
+          }
+        },
+        "outputs": {
+          "result": "who"
+        },
+        "next": "merge"
+      },
+      {
+        "id": "merge",
+        "type": "stage",
+        "stage": "MergeDictStage",
+        "arguments": {
+          "vars": {
+            "dst": "who"
+          },
+          "const": {
+            "src": {
+              "seen": true
+            }
+          }
+        },
+        "outputs": {
+          "merged": "card"
+        },
+        "next": "tags"
+      },
+      {
+        "id": "tags",
+        "type": "stage",
+        "stage": "UniqueListStage",
+        "arguments": {
+          "const": {
+            "items.$": "vars.user.tags"
+          }
+        },
+        "outputs": {
+          "list": "tags"
+        },
+        "next": "more"
+      },
+      {
+        "id": "more",
+        "type": "stage",
+        "stage": "ExtendListStage",
+        "arguments": {
+          "vars": {
+            "list": "tags",
+            "items": "extra"
+          }
+        },
+        "outputs": {
+          "list": "tags"
+        },
+        "next": "keep"
+      },
+      {
+        "id": "keep",
+        "type": "stage",
+        "stage": "FilterListStage",
+        "arguments": {
+          "vars": {
+            "items": "tags"
+          },
+          "const": {
+            "condition": "item != 'y'"
+          }
+        },
+        "outputs": {
+          "list": "tags"
+        },
+        "next": "last"
+      },
+      {
+        "id": "last",
+        "type": "stage",
+        "stage": "PopListStage",
+        "arguments": {
+          "vars": {
+            "items": "tags"
+          }
+        },
+        "outputs": {
+          "list": "tags",
+          "popped": "last_tag"
+        },
+        "next": "joined"
+      },
+      {
+        "id": "joined",
+        "type": "stage",
+        "stage": "ConcatStage",
+        "arguments": {
+          "vars": {
+            "parts": "tags"
+          },
+          "const": {
+            "separator": "+"
+          }
+        },
+        "outputs": {
+          "value": "tag_line"
+        },
+        "next": "count"
+      },
+      {
+        "id": "count",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "const": {
+            "current.$": "size(vars.tags)",
+            "delta": 10
+          }
+        },
+        "outputs": {
+          "value": "score"
+        },
+        "next": "copy"
+      },
+      {
+        "id": "copy",
+        "type": "stage",
+        "stage": "CopyValueStage",
+        "arguments": {
+          "vars": {
+            "value": "nothing_here"
+          },
+          "const": {
+            "default": "n/a"
+          }
+        },
+        "outputs": {
+          "value": "fallback"
+        },
+        "next": "check"
+      },
+      {
+        "id": "check",
+        "type": "stage",
+        "stage": "AssertStage",
+        "arguments": {
+          "const": {
+            "condition": "vars.n > 10",
+            "message": "too low"
+          },
+          "vars": {
+            "n": "score"
+          }
+        },
+        "next": "log"
+      },
+      {
+        "id": "log",
+        "type": "stage",
+        "stage": "LogStage",
+        "arguments": {
+          "const": {
+            "message": "report ready"
+          }
+        },
+        "next": "render"
+      },
+      {
+        "id": "render",
+        "type": "stage",
+        "stage": "TemplateStage",
+        "arguments": {
+          "const": {
+            "template": "{name} ({role}): {tags} last={last} score={score} {fb}"
+          },
+          "vars": {
+            "name": "safe",
+            "role": "who",
+            "tags": "tag_line",
+            "last": "last_tag",
+            "score": "score",
+            "fb": "fallback"
+          }
+        },
+        "outputs": {
+          "value": "report"
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "report",
+          "card",
+          "safe"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "assembled",
+      "expect": {
+        "artifacts_include": {
+          "card": {
+            "name": "Ann",
+            "role": "admin",
+            "seen": true
+          },
+          "safe": {
+            "name": "Ann",
+            "role": "admin",
+            "tags": [
+              "x",
+              "y",
+              "x"
+            ]
+          }
+        },
+        "artifacts_match": {
+          "report": "last=z score=11 n/a$"
+        }
+      }
+    }
+  ]
+}

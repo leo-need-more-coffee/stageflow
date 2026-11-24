@@ -1,0 +1,102 @@
+{
+  "description": "a handler that fails again: the inner block cannot catch its own handler, the outer one does",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "outer"
+      },
+      {
+        "id": "outer",
+        "type": "try",
+        "body": "inner",
+        "except": [
+          {
+            "error_equals": [
+              "*"
+            ],
+            "next": "report",
+            "result_var": "outer_err"
+          }
+        ],
+        "next": "end"
+      },
+      {
+        "id": "inner",
+        "type": "try",
+        "body": "boom",
+        "except": [
+          {
+            "error_equals": [
+              "RuntimeError"
+            ],
+            "next": "again",
+            "result_var": "inner_err"
+          }
+        ]
+      },
+      {
+        "id": "boom",
+        "type": "stage",
+        "stage": "FailStage",
+        "arguments": {
+          "const": {
+            "message": "first"
+          }
+        }
+      },
+      {
+        "id": "again",
+        "type": "stage",
+        "stage": "FailStage",
+        "arguments": {
+          "vars": {
+            "message.$": "'second, after ' + vars.inner_err.message"
+          }
+        }
+      },
+      {
+        "id": "report",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "vars.outer_err.message + ' @ ' + vars.outer_err.node"
+          }
+        },
+        "outputs": {
+          "value": "report"
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "report"
+        ],
+        "result": {
+          "status": "recovered"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "caught twice",
+      "expect": {
+        "result": {
+          "status": "recovered"
+        },
+        "artifacts": {
+          "report": "second, after first @ inner"
+        },
+        "events": {
+          "count": {
+            "try_caught": 2
+          }
+        }
+      }
+    }
+  ]
+}

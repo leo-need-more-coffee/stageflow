@@ -1,0 +1,53 @@
+{
+  "description": "a parent asking a subpipeline for an artifact it does not return",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "sub"
+      },
+      {
+        "id": "sub",
+        "type": "subpipeline",
+        "subpipeline_id": "child",
+        "artifact_outputs": {
+          "mine": "absent"
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": []
+      }
+    ],
+    "subpipelines": {
+      "child": {
+        "nodes": [
+          {
+            "id": "c",
+            "type": "entry",
+            "next": "c_end"
+          },
+          {
+            "id": "c_end",
+            "type": "terminal",
+            "artifacts": []
+          }
+        ]
+      }
+    }
+  },
+  "runs": [
+    {
+      "name": "named in the error",
+      "expect": {
+        "error": {
+          "type": "ArtifactNotFoundError",
+          "match": "'absent'"
+        }
+      }
+    }
+  ]
+}

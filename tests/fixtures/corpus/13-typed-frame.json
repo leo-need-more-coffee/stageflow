@@ -1,0 +1,66 @@
+{
+  "description": "declared types checked on every write, not only at validation",
+  "pipeline": {
+    "variables": {
+      "count": "int",
+      "names": "list<string>"
+    },
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "write",
+        "variables": {
+          "count": 0,
+          "names": []
+        }
+      },
+      {
+        "id": "write",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "vars.raw"
+          }
+        },
+        "outputs": {
+          "value": "count"
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "count"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "an int",
+      "vars": {
+        "raw": 7
+      },
+      "expect": {
+        "artifacts": {
+          "count": 7
+        }
+      }
+    },
+    {
+      "name": "a string is refused",
+      "vars": {
+        "raw": "seven"
+      },
+      "expect": {
+        "error": {
+          "type": "TypeCheckError",
+          "match": "count"
+        }
+      }
+    }
+  ]
+}

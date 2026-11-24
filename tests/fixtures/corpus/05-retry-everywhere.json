@@ -1,0 +1,132 @@
+{
+  "description": "flaky calls with retry, in parallel branches, inside a parallel map",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "each",
+        "variables": {
+          "keys": [
+            "a",
+            "b",
+            "c"
+          ]
+        }
+      },
+      {
+        "id": "each",
+        "type": "map",
+        "items": "vars.keys",
+        "item_var": "k",
+        "body": "both",
+        "mode": "parallel",
+        "collect": {
+          "left": "lefts",
+          "right": "rights"
+        },
+        "next": "end"
+      },
+      {
+        "id": "both",
+        "type": "parallel",
+        "branches": [
+          "l",
+          "r"
+        ]
+      },
+      {
+        "id": "l",
+        "type": "stage",
+        "stage": "CorpusFlaky",
+        "arguments": {
+          "const": {
+            "key.$": "vars.k + '-l'",
+            "fail_times": 1
+          }
+        },
+        "outputs": {
+          "attempts": "left"
+        },
+        "retry": [
+          {
+            "error_equals": [
+              "CorpusFlakyError"
+            ],
+            "max_attempts": 3,
+            "interval_seconds": 0
+          }
+        ]
+      },
+      {
+        "id": "r",
+        "type": "stage",
+        "stage": "CorpusFlaky",
+        "arguments": {
+          "const": {
+            "key.$": "vars.k + '-r'",
+            "fail_times": 2
+          }
+        },
+        "outputs": {
+          "attempts": "right"
+        },
+        "retry": [
+          {
+            "error_equals": [
+              "*"
+            ],
+            "max_attempts": 3,
+            "interval_seconds": 0
+          }
+        ]
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "lefts",
+          "rights"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "everything gets through",
+      "expect": {
+        "artifacts": {
+          "lefts": [
+            2,
+            2,
+            2
+          ],
+          "rights": [
+            3,
+            3,
+            3
+          ]
+        },
+        "events": {
+          "count": {
+            "node_retry": 9
+          }
+        }
+      }
+    },
+    {
+      "name": "the host allows two attempts",
+      "policy": {
+        "limits": {
+          "max_retries": 2
+        }
+      },
+      "expect": {
+        "invalid": [
+          "l: retry asks for 3 attempts, and the policy allows 2",
+          "r: retry asks for 3 attempts, and the policy allows 2"
+        ]
+      }
+    }
+  ]
+}

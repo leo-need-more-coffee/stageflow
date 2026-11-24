@@ -1,0 +1,152 @@
+{
+  "description": "a terminal deep inside try, map and parallel ends the run and cancels the slow sibling",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "both",
+        "variables": {
+          "haystack": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "id": "both",
+        "type": "parallel",
+        "branches": [
+          "search",
+          "slow"
+        ],
+        "next": "end"
+      },
+      {
+        "id": "search",
+        "type": "map",
+        "items": "vars.haystack",
+        "item_var": "x",
+        "body": "guard",
+        "mode": "parallel"
+      },
+      {
+        "id": "guard",
+        "type": "try",
+        "body": "is_it",
+        "except": [
+          {
+            "error_equals": [
+              "*"
+            ],
+            "next": "ignore"
+          }
+        ]
+      },
+      {
+        "id": "is_it",
+        "type": "condition",
+        "condition": "vars.x == 3",
+        "then": "found",
+        "else": "nope"
+      },
+      {
+        "id": "found",
+        "type": "terminal",
+        "artifacts": [],
+        "result": {
+          "status": "found"
+        }
+      },
+      {
+        "id": "nope",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "false"
+          }
+        },
+        "outputs": {
+          "value": "hit"
+        }
+      },
+      {
+        "id": "ignore",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "false"
+          }
+        },
+        "outputs": {
+          "value": "hit"
+        }
+      },
+      {
+        "id": "slow",
+        "type": "stage",
+        "stage": "SleepStage",
+        "arguments": {
+          "const": {
+            "seconds": 5
+          }
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [],
+        "result": {
+          "status": "searched everything"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "found",
+      "expect": {
+        "result": {
+          "status": "found"
+        },
+        "meters_at_most": {
+          "seconds": 2
+        },
+        "events": {
+          "include": [
+            "parallel_cancelled"
+          ],
+          "exclude": [
+            "parallel_completed"
+          ]
+        }
+      }
+    },
+    {
+      "name": "not there",
+      "vars": {
+        "haystack": [
+          7,
+          8
+        ]
+      },
+      "policy": {
+        "limits": {
+          "counters": {
+            "seconds": 0.3
+          }
+        }
+      },
+      "expect": {
+        "result": {
+          "status": "budget_exceeded",
+          "meter": "seconds"
+        }
+      }
+    }
+  ]
+}

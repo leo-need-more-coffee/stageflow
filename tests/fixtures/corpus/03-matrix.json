@@ -1,0 +1,128 @@
+{
+  "description": "a map inside a map, both parallel: the nesting that used to deadlock at concurrency 1",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "rows",
+        "variables": {
+          "matrix": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              4,
+              5
+            ],
+            [],
+            [
+              6
+            ]
+          ]
+        }
+      },
+      {
+        "id": "rows",
+        "type": "map",
+        "items": "vars.matrix",
+        "item_var": "row",
+        "body": "cells",
+        "mode": "parallel",
+        "collect": {
+          "scaled": "result"
+        },
+        "next": "end"
+      },
+      {
+        "id": "cells",
+        "type": "map",
+        "items": "vars.row",
+        "item_var": "cell",
+        "body": "times",
+        "mode": "parallel",
+        "collect": {
+          "x": "scaled"
+        }
+      },
+      {
+        "id": "times",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "vars.cell * 10"
+          }
+        },
+        "outputs": {
+          "value": "x"
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "result"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "unlimited",
+      "expect": {
+        "artifacts": {
+          "result": [
+            [
+              10,
+              20
+            ],
+            [
+              30,
+              40,
+              50
+            ],
+            [],
+            [
+              60
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "concurrency 1",
+      "policy": {
+        "limits": {
+          "gauges": {
+            "concurrency": 1
+          }
+        }
+      },
+      "expect": {
+        "artifacts": {
+          "result": [
+            [
+              10,
+              20
+            ],
+            [
+              30,
+              40,
+              50
+            ],
+            [],
+            [
+              60
+            ]
+          ]
+        },
+        "meters": {
+          "peak_concurrency": 1
+        }
+      }
+    }
+  ]
+}

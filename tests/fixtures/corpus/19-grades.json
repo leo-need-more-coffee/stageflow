@@ -1,0 +1,216 @@
+{
+  "description": "one switch, many runs: the first matching case wins",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "grade",
+        "variables": {
+          "score": 0
+        }
+      },
+      {
+        "id": "grade",
+        "type": "switch",
+        "cases": [
+          {
+            "when": "vars.score >= 90",
+            "next": "gA"
+          },
+          {
+            "when": "vars.score >= 80",
+            "next": "gB"
+          },
+          {
+            "when": "vars.score >= 70",
+            "next": "gC"
+          },
+          {
+            "when": "vars.score >= 60",
+            "next": "gD"
+          }
+        ],
+        "default": "gF"
+      },
+      {
+        "id": "gA",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'A'"
+          }
+        },
+        "outputs": {
+          "value": "grade"
+        },
+        "next": "end"
+      },
+      {
+        "id": "gB",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'B'"
+          }
+        },
+        "outputs": {
+          "value": "grade"
+        },
+        "next": "end"
+      },
+      {
+        "id": "gC",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'C'"
+          }
+        },
+        "outputs": {
+          "value": "grade"
+        },
+        "next": "end"
+      },
+      {
+        "id": "gD",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'D'"
+          }
+        },
+        "outputs": {
+          "value": "grade"
+        },
+        "next": "end"
+      },
+      {
+        "id": "gF",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "'F'"
+          }
+        },
+        "outputs": {
+          "value": "grade"
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "grade"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "score 100",
+      "vars": {
+        "score": 100
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "A"
+        }
+      }
+    },
+    {
+      "name": "score 90",
+      "vars": {
+        "score": 90
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "A"
+        }
+      }
+    },
+    {
+      "name": "score 89",
+      "vars": {
+        "score": 89
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "B"
+        }
+      }
+    },
+    {
+      "name": "score 80",
+      "vars": {
+        "score": 80
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "B"
+        }
+      }
+    },
+    {
+      "name": "score 75",
+      "vars": {
+        "score": 75
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "C"
+        }
+      }
+    },
+    {
+      "name": "score 60",
+      "vars": {
+        "score": 60
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "D"
+        }
+      }
+    },
+    {
+      "name": "score 59",
+      "vars": {
+        "score": 59
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "F"
+        }
+      }
+    },
+    {
+      "name": "score 0",
+      "vars": {
+        "score": 0
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "F"
+        }
+      }
+    },
+    {
+      "name": "score -5",
+      "vars": {
+        "score": -5
+      },
+      "expect": {
+        "artifacts": {
+          "grade": "F"
+        }
+      }
+    }
+  ]
+}

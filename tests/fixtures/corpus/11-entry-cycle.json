@@ -1,0 +1,32 @@
+{
+  "description": "two entry variables defined through each other",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "end",
+        "variables": {
+          "a.$": "vars.b + 1",
+          "b.$": "vars.a + 1"
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": []
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "refused",
+      "expect": {
+        "invalid": [
+          "a",
+          "b"
+        ]
+      }
+    }
+  ]
+}

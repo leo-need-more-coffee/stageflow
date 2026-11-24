@@ -1,0 +1,67 @@
+{
+  "description": "a road through the body that never writes the collected name",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "each",
+        "variables": {
+          "xs": [
+            1,
+            2,
+            3
+          ]
+        }
+      },
+      {
+        "id": "each",
+        "type": "map",
+        "items": "vars.xs",
+        "item_var": "x",
+        "body": "odd",
+        "collect": {
+          "y": "ys"
+        },
+        "next": "end"
+      },
+      {
+        "id": "odd",
+        "type": "condition",
+        "condition": "vars.x % 2 == 1",
+        "then": "write"
+      },
+      {
+        "id": "write",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "vars.x"
+          }
+        },
+        "outputs": {
+          "value": "y"
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "ys"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "item 1 wrote nothing",
+      "expect": {
+        "error": {
+          "type": "StageOutputError",
+          "match": "item 1 did not write 'y'"
+        }
+      }
+    }
+  ]
+}

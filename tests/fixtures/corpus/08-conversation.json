@@ -1,0 +1,124 @@
+{
+  "description": "a person answering in a loop until they say bye",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "ask",
+        "variables": {
+          "heard": []
+        }
+      },
+      {
+        "id": "ask",
+        "type": "stage",
+        "stage": "CorpusAsk",
+        "outputs": {
+          "text": "said"
+        },
+        "next": "check"
+      },
+      {
+        "id": "check",
+        "type": "condition",
+        "condition": "vars.said == 'bye'",
+        "then": "end",
+        "else": "keep"
+      },
+      {
+        "id": "keep",
+        "type": "stage",
+        "stage": "AppendListStage",
+        "arguments": {
+          "vars": {
+            "list": "heard",
+            "value": "said"
+          }
+        },
+        "outputs": {
+          "list": "heard"
+        },
+        "next": "ask"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "heard"
+        ],
+        "result": {
+          "status": "done"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "three messages",
+      "policy": {
+        "allow_cycles": true,
+        "limits": {
+          "counters": {
+            "steps": 200
+          }
+        }
+      },
+      "inputs": [
+        {
+          "type": "answer",
+          "payload": {
+            "text": "hi"
+          }
+        },
+        {
+          "type": "answer",
+          "payload": {
+            "text": "how are you"
+          }
+        },
+        {
+          "type": "answer",
+          "payload": {
+            "text": "bye"
+          }
+        }
+      ],
+      "expect": {
+        "result": {
+          "status": "done"
+        },
+        "artifacts": {
+          "heard": [
+            "hi",
+            "how are you"
+          ]
+        }
+      }
+    },
+    {
+      "name": "bye at once",
+      "policy": {
+        "allow_cycles": true,
+        "limits": {
+          "counters": {
+            "steps": 200
+          }
+        }
+      },
+      "inputs": [
+        {
+          "type": "answer",
+          "payload": {
+            "text": "bye"
+          }
+        }
+      ],
+      "expect": {
+        "artifacts": {
+          "heard": []
+        }
+      }
+    }
+  ]
+}

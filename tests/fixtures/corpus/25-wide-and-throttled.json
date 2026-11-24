@@ -1,0 +1,83 @@
+{
+  "description": "twenty sleepers in parallel, three at a time",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "each",
+        "variables": {
+          "xs": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ]
+        }
+      },
+      {
+        "id": "each",
+        "type": "map",
+        "items": "vars.xs",
+        "body": "nap",
+        "mode": "parallel",
+        "next": "end"
+      },
+      {
+        "id": "nap",
+        "type": "stage",
+        "stage": "SleepStage",
+        "arguments": {
+          "const": {
+            "seconds": 0.01
+          }
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [],
+        "result": {
+          "status": "rested"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "concurrency 3",
+      "policy": {
+        "limits": {
+          "gauges": {
+            "concurrency": 3
+          }
+        }
+      },
+      "expect": {
+        "result": {
+          "status": "rested"
+        },
+        "meters": {
+          "peak_concurrency": 3,
+          "iterations": 20
+        }
+      }
+    }
+  ]
+}

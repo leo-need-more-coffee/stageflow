@@ -1,0 +1,143 @@
+{
+  "description": "a real cycle: condition -> body -> increment -> back to the condition",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "loop",
+        "variables": {
+          "i": 0,
+          "squares": []
+        }
+      },
+      {
+        "id": "loop",
+        "type": "condition",
+        "condition": "vars.i < 5",
+        "then": "square",
+        "else": "end"
+      },
+      {
+        "id": "square",
+        "type": "stage",
+        "stage": "AppendListStage",
+        "arguments": {
+          "vars": {
+            "list": "squares"
+          },
+          "const": {
+            "value.$": "vars.i * vars.i"
+          }
+        },
+        "outputs": {
+          "list": "squares"
+        },
+        "next": "inc"
+      },
+      {
+        "id": "inc",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "i"
+          },
+          "const": {
+            "delta": 1
+          }
+        },
+        "outputs": {
+          "value": "i"
+        },
+        "next": "loop"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "squares",
+          "i"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "five turns",
+      "policy": {
+        "allow_cycles": true,
+        "limits": {
+          "counters": {
+            "steps": 200
+          }
+        }
+      },
+      "expect": {
+        "artifacts": {
+          "squares": [
+            0,
+            1,
+            4,
+            9,
+            16
+          ],
+          "i": 5
+        },
+        "meters": {
+          "steps": 18
+        }
+      }
+    },
+    {
+      "name": "seeded to start at three",
+      "policy": {
+        "allow_cycles": true,
+        "limits": {
+          "counters": {
+            "steps": 200
+          }
+        }
+      },
+      "vars": {
+        "i": 3
+      },
+      "expect": {
+        "artifacts": {
+          "squares": [
+            9,
+            16
+          ],
+          "i": 5
+        }
+      }
+    },
+    {
+      "name": "the step ceiling ends it",
+      "policy": {
+        "allow_cycles": true,
+        "limits": {
+          "counters": {
+            "steps": 10
+          }
+        }
+      },
+      "expect": {
+        "result": {
+          "status": "budget_exceeded",
+          "meter": "steps",
+          "limit": 10,
+          "spent": 11
+        }
+      }
+    },
+    {
+      "name": "a cycle is refused unless the host allows it",
+      "expect": {
+        "invalid": [
+          "cycle in the graph: loop -> square -> inc -> loop"
+        ]
+      }
+    }
+  ]
+}

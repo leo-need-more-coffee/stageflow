@@ -1,0 +1,109 @@
+{
+  "description": "three branches, two of them writing the same name; a try turns it into a road",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "guard"
+      },
+      {
+        "id": "guard",
+        "type": "try",
+        "body": "fan",
+        "except": [
+          {
+            "error_equals": [
+              "BranchError"
+            ],
+            "next": "explain",
+            "result_var": "why"
+          }
+        ],
+        "next": "end"
+      },
+      {
+        "id": "fan",
+        "type": "parallel",
+        "branches": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "id": "a",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "1"
+          }
+        },
+        "outputs": {
+          "value": "x"
+        }
+      },
+      {
+        "id": "b",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "2"
+          }
+        },
+        "outputs": {
+          "value": "y"
+        }
+      },
+      {
+        "id": "c",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "3"
+          }
+        },
+        "outputs": {
+          "value": "x"
+        }
+      },
+      {
+        "id": "explain",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "vars.why.message"
+          }
+        },
+        "outputs": {
+          "value": "explained"
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "explained",
+          "y"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "caught",
+      "expect": {
+        "artifacts_match": {
+          "explained": "branches 'a' and 'c' both write x"
+        },
+        "artifacts_include": {
+          "y": null
+        }
+      }
+    }
+  ]
+}

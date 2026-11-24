@@ -1,0 +1,1070 @@
+{
+  "description": "sixty nodes in a row; a ceiling below the shortest road is refused up front",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "n0",
+        "variables": {
+          "total": 0
+        }
+      },
+      {
+        "id": "n0",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 0
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n1"
+      },
+      {
+        "id": "n1",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 1
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n2"
+      },
+      {
+        "id": "n2",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 2
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n3"
+      },
+      {
+        "id": "n3",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 3
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n4"
+      },
+      {
+        "id": "n4",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 4
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n5"
+      },
+      {
+        "id": "n5",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 5
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n6"
+      },
+      {
+        "id": "n6",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 6
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n7"
+      },
+      {
+        "id": "n7",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 7
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n8"
+      },
+      {
+        "id": "n8",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 8
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n9"
+      },
+      {
+        "id": "n9",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 9
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n10"
+      },
+      {
+        "id": "n10",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 10
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n11"
+      },
+      {
+        "id": "n11",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 11
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n12"
+      },
+      {
+        "id": "n12",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 12
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n13"
+      },
+      {
+        "id": "n13",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 13
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n14"
+      },
+      {
+        "id": "n14",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 14
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n15"
+      },
+      {
+        "id": "n15",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 15
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n16"
+      },
+      {
+        "id": "n16",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 16
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n17"
+      },
+      {
+        "id": "n17",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 17
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n18"
+      },
+      {
+        "id": "n18",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 18
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n19"
+      },
+      {
+        "id": "n19",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 19
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n20"
+      },
+      {
+        "id": "n20",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 20
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n21"
+      },
+      {
+        "id": "n21",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 21
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n22"
+      },
+      {
+        "id": "n22",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 22
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n23"
+      },
+      {
+        "id": "n23",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 23
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n24"
+      },
+      {
+        "id": "n24",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 24
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n25"
+      },
+      {
+        "id": "n25",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 25
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n26"
+      },
+      {
+        "id": "n26",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 26
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n27"
+      },
+      {
+        "id": "n27",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 27
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n28"
+      },
+      {
+        "id": "n28",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 28
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n29"
+      },
+      {
+        "id": "n29",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 29
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n30"
+      },
+      {
+        "id": "n30",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 30
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n31"
+      },
+      {
+        "id": "n31",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 31
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n32"
+      },
+      {
+        "id": "n32",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 32
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n33"
+      },
+      {
+        "id": "n33",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 33
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n34"
+      },
+      {
+        "id": "n34",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 34
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n35"
+      },
+      {
+        "id": "n35",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 35
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n36"
+      },
+      {
+        "id": "n36",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 36
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n37"
+      },
+      {
+        "id": "n37",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 37
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n38"
+      },
+      {
+        "id": "n38",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 38
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n39"
+      },
+      {
+        "id": "n39",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 39
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n40"
+      },
+      {
+        "id": "n40",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 40
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n41"
+      },
+      {
+        "id": "n41",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 41
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n42"
+      },
+      {
+        "id": "n42",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 42
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n43"
+      },
+      {
+        "id": "n43",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 43
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n44"
+      },
+      {
+        "id": "n44",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 44
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n45"
+      },
+      {
+        "id": "n45",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 45
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n46"
+      },
+      {
+        "id": "n46",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 46
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n47"
+      },
+      {
+        "id": "n47",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 47
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n48"
+      },
+      {
+        "id": "n48",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 48
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n49"
+      },
+      {
+        "id": "n49",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 49
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n50"
+      },
+      {
+        "id": "n50",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 50
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n51"
+      },
+      {
+        "id": "n51",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 51
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n52"
+      },
+      {
+        "id": "n52",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 52
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n53"
+      },
+      {
+        "id": "n53",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 53
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n54"
+      },
+      {
+        "id": "n54",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 54
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n55"
+      },
+      {
+        "id": "n55",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 55
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n56"
+      },
+      {
+        "id": "n56",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 56
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n57"
+      },
+      {
+        "id": "n57",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 57
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n58"
+      },
+      {
+        "id": "n58",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 58
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "n59"
+      },
+      {
+        "id": "n59",
+        "type": "stage",
+        "stage": "IncrementStage",
+        "arguments": {
+          "vars": {
+            "current": "total"
+          },
+          "const": {
+            "delta": 59
+          }
+        },
+        "outputs": {
+          "value": "total"
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "total"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "runs",
+      "expect": {
+        "artifacts": {
+          "total": 1770
+        },
+        "meters": {
+          "steps": 62
+        }
+      }
+    },
+    {
+      "name": "cannot fit",
+      "policy": {
+        "limits": {
+          "counters": {
+            "steps": 50
+          }
+        }
+      },
+      "expect": {
+        "invalid": [
+          "the shortest way through this graph is 62 nodes"
+        ]
+      }
+    }
+  ]
+}

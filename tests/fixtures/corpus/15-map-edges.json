@@ -1,0 +1,112 @@
+{
+  "description": "an empty list, an index variable, two collected names",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "each",
+        "variables": {
+          "items": [
+            "a",
+            "b",
+            "c"
+          ]
+        }
+      },
+      {
+        "id": "each",
+        "type": "map",
+        "items": "vars.items",
+        "index_var": "i",
+        "body": "tag",
+        "collect": {
+          "tagged": "tags",
+          "pos": "positions"
+        },
+        "next": "end"
+      },
+      {
+        "id": "tag",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "string(vars.i) + ':' + vars.item"
+          }
+        },
+        "outputs": {
+          "value": "tagged"
+        },
+        "next": "pos"
+      },
+      {
+        "id": "pos",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "vars.i"
+          }
+        },
+        "outputs": {
+          "value": "pos"
+        }
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "tags",
+          "positions"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "three",
+      "expect": {
+        "artifacts": {
+          "tags": [
+            "0:a",
+            "1:b",
+            "2:c"
+          ],
+          "positions": [
+            0,
+            1,
+            2
+          ]
+        }
+      }
+    },
+    {
+      "name": "none",
+      "vars": {
+        "items": []
+      },
+      "expect": {
+        "artifacts": {
+          "tags": [],
+          "positions": []
+        },
+        "meters_at_most": {
+          "iterations": 0
+        }
+      }
+    },
+    {
+      "name": "not a list",
+      "vars": {
+        "items": "abc"
+      },
+      "expect": {
+        "error": {
+          "type": "TypeCheckError",
+          "match": "must be a list"
+        }
+      }
+    }
+  ]
+}

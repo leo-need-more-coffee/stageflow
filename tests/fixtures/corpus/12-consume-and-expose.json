@@ -1,0 +1,75 @@
+{
+  "description": "a temporary variable consumed, a result exposed under a second name",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "tmp"
+      },
+      {
+        "id": "tmp",
+        "type": "stage",
+        "stage": "SetValueStage",
+        "arguments": {
+          "const": {
+            "value.$": "[3, 1, 3, 2]"
+          }
+        },
+        "outputs": {
+          "value": "scratch"
+        },
+        "next": "uniq"
+      },
+      {
+        "id": "uniq",
+        "type": "stage",
+        "stage": "UniqueListStage",
+        "arguments": {
+          "vars": {
+            "items": "scratch"
+          }
+        },
+        "outputs": {
+          "list": "clean"
+        },
+        "consume": [
+          "scratch"
+        ],
+        "expose": {
+          "clean": "public"
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "clean",
+          "public",
+          "scratch"
+        ]
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "scratch is gone",
+      "expect": {
+        "artifacts": {
+          "clean": [
+            3,
+            1,
+            2
+          ],
+          "public": [
+            3,
+            1,
+            2
+          ],
+          "scratch": null
+        }
+      }
+    }
+  ]
+}

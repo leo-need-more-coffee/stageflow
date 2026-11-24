@@ -1,0 +1,155 @@
+{
+  "description": "a subpipeline calling a subpipeline; inputs in, artifacts and results out",
+  "pipeline": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "entry",
+        "next": "down",
+        "variables": {
+          "n": 5
+        }
+      },
+      {
+        "id": "down",
+        "type": "subpipeline",
+        "subpipeline_id": "double_then",
+        "inputs": {
+          "x": "n"
+        },
+        "artifact_outputs": {
+          "answer": "y"
+        },
+        "result_output": "how",
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "terminal",
+        "artifacts": [
+          "answer",
+          "how"
+        ]
+      }
+    ],
+    "subpipelines": {
+      "double_then": {
+        "nodes": [
+          {
+            "id": "d_start",
+            "type": "entry",
+            "next": "d_double"
+          },
+          {
+            "id": "d_double",
+            "type": "stage",
+            "stage": "SetValueStage",
+            "arguments": {
+              "const": {
+                "value.$": "vars.x * 2"
+              }
+            },
+            "outputs": {
+              "value": "x2"
+            },
+            "next": "d_deeper"
+          },
+          {
+            "id": "d_deeper",
+            "type": "subpipeline",
+            "subpipeline_id": "plus_one",
+            "inputs": {
+              "v": "x2"
+            },
+            "artifact_outputs": {
+              "y": "out"
+            },
+            "next": "d_end"
+          },
+          {
+            "id": "d_end",
+            "type": "terminal",
+            "artifacts": [
+              "y"
+            ],
+            "result": {
+              "via": "double_then"
+            }
+          }
+        ]
+      },
+      "plus_one": {
+        "nodes": [
+          {
+            "id": "p_start",
+            "type": "entry",
+            "next": "p_add"
+          },
+          {
+            "id": "p_add",
+            "type": "stage",
+            "stage": "SetValueStage",
+            "arguments": {
+              "const": {
+                "value.$": "vars.v + 1"
+              }
+            },
+            "outputs": {
+              "value": "out"
+            },
+            "next": "p_end"
+          },
+          {
+            "id": "p_end",
+            "type": "terminal",
+            "artifacts": [
+              "out"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "runs": [
+    {
+      "name": "5 * 2 + 1",
+      "expect": {
+        "artifacts": {
+          "answer": 11,
+          "how": {
+            "via": "double_then"
+          }
+        },
+        "meters": {
+          "peak_depth": 2
+        }
+      }
+    },
+    {
+      "name": "seeded",
+      "vars": {
+        "n": 20
+      },
+      "expect": {
+        "artifacts_include": {
+          "answer": 41
+        }
+      }
+    },
+    {
+      "name": "the host allows one level",
+      "policy": {
+        "limits": {
+          "gauges": {
+            "depth": 1
+          }
+        }
+      },
+      "expect": {
+        "invalid": [
+          "subpipelines nest 2 deep, and the policy allows 1"
+        ]
+      }
+    }
+  ]
+}
