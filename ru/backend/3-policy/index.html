@@ -2145,16 +2145,17 @@
 <a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"api"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"plan"</span><span class="p">:</span> <span class="n">caller</span><span class="p">,</span> <span class="o">**</span><span class="n">capabilities</span><span class="p">(</span><span class="n">policy</span><span class="p">),</span> <span class="s2">"limits"</span><span class="p">:</span> <span class="n">_limits_of</span><span class="p">(</span><span class="n">policy</span><span class="p">)}</span>
 </code></pre></div>
 <p>Отдать спецификацию запрещённой стадии — значит заставить редактор нарисовать
-её в палитре, а прогон потом её отвергнуть. Ради устранения такого
+её в меню добавления, а прогон потом её отвергнуть. Ради устранения такого
 расхождения политику и завели — а здесь оно воспроизводится на один эндпоинт
 позже. <code>capabilities(policy)</code> делает то же самое для типов узлов.</p>
 <p>Вот что это даёт на дешёвом тарифе из примера, если открыть пайплайн,
 которому нужен <code>map</code>:</p>
 <p><img alt="Граф, который тариф не запустит, — сказано до запуска" src="../../../img/be-plan-refuses.png" /></p>
-<p>Четыре типа узлов в палитре погашены, на проблемном узле стоит метка, а
-в строке состояния написано
+<p>На проблемном узле стоит метка, верхняя панель говорит о проблеме, а сама
+проблема звучит как
 <code>per_ticket: plan 'basic' does not include a 'map' node</code> — и всё это до того,
-как кто-нибудь нажал «Run».</p>
+как кто-нибудь нажал «Run». В меню добавления четыре типа узлов, которых нет
+в тарифе, погашены с той же причиной.</p>
 <h2 id="_3">Что валидация проверяет, а что отказывается угадывать<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p>Из <code>limits</code> статическая валидация берёт только то, что <strong>достоверно следует
 из JSON</strong>:</p>

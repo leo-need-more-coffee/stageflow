@@ -2151,7 +2151,7 @@ catalog for a backend with too many stages to repeat themselves. <code>get_specs
 then serves every language at once and the editor picks for its reader, so
 nothing about this endpoint or this docstring has to know which language anybody
 wanted (<a href="../../localization/">Localization</a>).</p>
-<p><img alt="The palette, built from the specs the backend serves" src="../../img/be-plan-palette.png" width="240" /></p>
+<p><img alt="The add menu, built from the specs the backend serves" src="../../img/be-plan-palette.png" width="560" /></p>
 <h2 id="small-and-about-one-thing">Small, and about one thing<a class="headerlink" href="#small-and-about-one-thing" title="Permanent link">&para;</a></h2>
 <p>The stages in the example are deliberately tiny: load a ticket, classify it,
 search the knowledge base, render a reply, send it, escalate. That is not
@@ -2206,7 +2206,7 @@ typo in an event name is caught rather than silently producing an event nobody
 listens for.</p>
 <p>One payload shape is a contract rather than a convention. Anything with
 <code>{"stream": true, "text": "…"}</code> is treated by the editor as a piece of text
-the node is writing right now, and shown in a column of the debug panel as it
+the node is writing right now, and shown in the events of the run panel as it
 arrives:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">reply</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">):</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">"reply_chunk"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"stream"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">:</span> <span class="n">word</span> <span class="o">+</span> <span class="s2">" "</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">:</span> <span class="s2">"Reply"</span><span class="p">})</span>

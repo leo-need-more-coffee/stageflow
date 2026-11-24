@@ -2145,15 +2145,16 @@ being refused. So both read-only endpoints are narrowed by it:</p>
 <a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"api"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"plan"</span><span class="p">:</span> <span class="n">caller</span><span class="p">,</span> <span class="o">**</span><span class="n">capabilities</span><span class="p">(</span><span class="n">policy</span><span class="p">),</span> <span class="s2">"limits"</span><span class="p">:</span> <span class="n">_limits_of</span><span class="p">(</span><span class="n">policy</span><span class="p">)}</span>
 </code></pre></div>
 <p>Sending the specs of a stage the policy forbids would have the editor draw it
-in the palette and the run refuse it — exactly the mismatch the policy exists
+in the add menu and the run refuse it — exactly the mismatch the policy exists
 to remove, reintroduced one endpoint later. <code>capabilities(policy)</code> does the
 same for node types.</p>
 <p>What that buys, on the cheap plan of the example, looking at a pipeline that
 needs a <code>map</code>:</p>
 <p><img alt="A graph the plan cannot run, said before the run" src="../../img/be-plan-refuses.png" /></p>
-<p>Four node types are dim in the palette, the offending node carries a marker,
-and the status bar reads <code>per_ticket: plan 'basic' does not include a 'map'
-node</code> — before anybody presses Run.</p>
+<p>The offending node carries a marker, the top bar says there is a problem, and
+the problem reads <code>per_ticket: plan 'basic' does not include a 'map' node</code> —
+before anybody presses Run. The add menu shows the four node types the plan
+lacks greyed out, each with the same reason.</p>
 <h2 id="what-validation-checks-and-what-it-refuses-to-guess">What validation checks, and what it refuses to guess<a class="headerlink" href="#what-validation-checks-and-what-it-refuses-to-guess" title="Permanent link">&para;</a></h2>
 <p>Against <code>limits</code>, static validation checks only what is <strong>soundly knowable
 from the JSON</strong>:</p>

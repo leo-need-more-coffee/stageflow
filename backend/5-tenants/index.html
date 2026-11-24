@@ -2167,7 +2167,7 @@ destroys everything the previous two steps built.</p>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>            <span class="s2">"plans"</span><span class="p">:</span> <span class="n">plan_names</span><span class="p">(),</span> <span class="o">**</span><span class="n">capabilities</span><span class="p">(</span><span class="n">policy</span><span class="p">),</span> <span class="s2">"limits"</span><span class="p">:</span> <span class="n">_limits_of</span><span class="p">(</span><span class="n">policy</span><span class="p">)}</span>
 </code></pre></div>
 <p>A name is not a permission. Drawing is not running, and an editor that has to
-authenticate before it can grey out a palette entry is an editor nobody
+authenticate before it can grey out a menu entry is an editor nobody
 configures — so "what would this graph look like on the cheaper tier" is a
 question anybody may ask. <code>plans</code> is the list to offer, so no client has to
 hard-code names it cannot know.</p>
@@ -2189,14 +2189,13 @@ and every ceiling in the previous two steps becomes a query parameter. The
 example's <code>check_pipelines.py</code> checks that nobody did; it is the kind of
 property that no endpoint test notices being broken.</p>
 <h2 id="what-the-editor-makes-of-it">What the editor makes of it<a class="headerlink" href="#what-the-editor-makes-of-it" title="Permanent link">&para;</a></h2>
-<p>All of it lands in one dialog — "File" → "Connection…", or a click on the
-backend line in the status bar:</p>
+<p>All of it lands in one dialog — <strong>⋯ → Connection…</strong> in the editor's top bar:</p>
 <p><img alt="The connection dialog" src="../../img/be-connection.png" width="520" /></p>
 <p>The address (changing it reloads; it is the ground the session stands on), the
 credential (applied in place — a token goes stale <em>during</em> the work, and a
 refused one is rolled back so the session survives), the plan to draw against,
 and what the backend answered. <code>?plan=basic</code> on the editor's own URL opens it
-that way, and the status bar marks a preview as a preview so it cannot be
+that way, and the dialog marks a preview as a preview so it cannot be
 mistaken for an allowance.</p>
 <h2 id="where-the-line-falls">Where the line falls<a class="headerlink" href="#where-the-line-falls" title="Permanent link">&para;</a></h2>
 <table>

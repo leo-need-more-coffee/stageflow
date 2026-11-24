@@ -2151,7 +2151,7 @@
 редактор выбирает за своего читателя — так что ни этому эндпоинту, ни этому
 докстрингу не надо знать, какой язык кто-то хотел
 (<a href="../../localization/">Локализация</a>).</p>
-<p><img alt="Палитра собрана из спецификаций, которые отдал бэкенд" src="../../../img/be-plan-palette.png" width="240" /></p>
+<p><img alt="Меню добавления собрано из спецификаций, которые отдал бэкенд" src="../../../img/be-plan-palette.png" width="560" /></p>
 <h2 id="_1">Маленькие и об одном<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>Стадии в примере намеренно крошечные: загрузить тикет, определить тему,
 поискать в базе знаний, собрать ответ, отправить, эскалировать. И дело тут
@@ -2208,7 +2208,7 @@
 которого никто не ждёт.</p>
 <p>Одна форма payload — это уже не соглашение, а контракт. Всё, в чём есть
 <code>{"stream": true, "text": "…"}</code>, редактор считает куском текста, который узел
-пишет прямо сейчас, и выводит в отдельной колонке отладочной панели по мере
+пишет прямо сейчас, и выводит в событиях панели прогона по мере
 поступления:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">reply</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">):</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">"reply_chunk"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"stream"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">:</span> <span class="n">word</span> <span class="o">+</span> <span class="s2">" "</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">:</span> <span class="s2">"Reply"</span><span class="p">})</span>

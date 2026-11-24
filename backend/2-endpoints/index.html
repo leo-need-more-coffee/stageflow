@@ -2202,7 +2202,7 @@ connection drops.</p>
 </code></pre></div>
 <p>The browser learns that <code>OPENAI_API_KEY</code> exists. The value is substituted into
 the starting frame on the server and scrubbed back out of every event on the
-way to the page, so a key does not return through the debug log. The full
+way to the page, so a key does not return through the event log. The full
 story is on <a href="https://github.com/leo-need-more-coffee/stageflow-ui/blob/main/docs/secrets.md">Secrets</a>.</p>
 <h2 id="saying-what-you-can-run">Saying what you can run<a class="headerlink" href="#saying-what-you-can-run" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/meta"</span><span class="p">)</span>
@@ -2218,7 +2218,7 @@ editor newer than your backend would offer a node your runs reject — as
 exactly a name a run would refuse, and the editor greys it out instead of
 guessing.</p>
 <p>A backend that does not serve <code>/meta</code> is not second-guessed: nothing is
-marked, everything works, and the editor says the version is unknown.</p>
+marked and everything works.</p>
 <h2 id="cors-twice">CORS, twice<a class="headerlink" href="#cors-twice" title="Permanent link">&para;</a></h2>
 <p>The editor is on another origin, so every answer needs
 <code>Access-Control-Allow-Origin</code> and the preflight of a JSON POST needs
