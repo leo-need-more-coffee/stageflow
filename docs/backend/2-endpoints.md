@@ -94,7 +94,7 @@ async def secrets() -> dict:
 
 The browser learns that `OPENAI_API_KEY` exists. The value is substituted into
 the starting frame on the server and scrubbed back out of every event on the
-way to the page, so a key does not return through the debug log. The full
+way to the page, so a key does not return through the event log. The full
 story is on [Secrets](https://github.com/leo-need-more-coffee/stageflow-ui/blob/main/docs/secrets.md).
 
 ## Saying what you can run
@@ -115,7 +115,7 @@ exactly a name a run would refuse, and the editor greys it out instead of
 guessing.
 
 A backend that does not serve `/meta` is not second-guessed: nothing is
-marked, everything works, and the editor says the version is unknown.
+marked and everything works.
 
 ## CORS, twice
 

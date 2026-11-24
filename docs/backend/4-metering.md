@@ -93,7 +93,7 @@ ceiling on nothing.
 
 ## What it looks like
 
-The debug panel shows what the run has spent against what it was allowed,
+The run panel shows what the run has spent against what it was allowed,
 during the run and after it:
 
 ![Meters after a run on the cheap plan](../img/be-meters.png)

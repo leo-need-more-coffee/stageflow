@@ -77,7 +77,7 @@ async def meta(caller: CallerPlan) -> dict:
 ```
 
 Sending the specs of a stage the policy forbids would have the editor draw it
-in the palette and the run refuse it — exactly the mismatch the policy exists
+in the add menu and the run refuse it — exactly the mismatch the policy exists
 to remove, reintroduced one endpoint later. `capabilities(policy)` does the
 same for node types.
 
@@ -86,9 +86,10 @@ needs a `map`:
 
 ![A graph the plan cannot run, said before the run](../img/be-plan-refuses.png)
 
-Four node types are dim in the palette, the offending node carries a marker,
-and the status bar reads `per_ticket: plan 'basic' does not include a 'map'
-node` — before anybody presses Run.
+The offending node carries a marker, the top bar says there is a problem, and
+the problem reads `per_ticket: plan 'basic' does not include a 'map' node` —
+before anybody presses Run. The add menu shows the four node types the plan
+lacks greyed out, each with the same reason.
 
 ## What validation checks, and what it refuses to guess
 

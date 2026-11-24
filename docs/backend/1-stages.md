@@ -49,7 +49,7 @@ then serves every language at once and the editor picks for its reader, so
 nothing about this endpoint or this docstring has to know which language anybody
 wanted ([Localization](../localization.md)).
 
-![The palette, built from the specs the backend serves](../img/be-plan-palette.png){ width="240" }
+![The add menu, built from the specs the backend serves](../img/be-plan-palette.png){ width="560" }
 
 ## Small, and about one thing
 
@@ -123,7 +123,7 @@ listens for.
 
 One payload shape is a contract rather than a convention. Anything with
 `{"stream": true, "text": "…"}` is treated by the editor as a piece of text
-the node is writing right now, and shown in a column of the debug panel as it
+the node is writing right now, and shown in the events of the run panel as it
 arrives:
 
 ```python

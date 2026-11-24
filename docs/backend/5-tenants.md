@@ -78,7 +78,7 @@ async def meta(caller: CallerPlan, plan: ShownPlan = None) -> dict:
 ```
 
 A name is not a permission. Drawing is not running, and an editor that has to
-authenticate before it can grey out a palette entry is an editor nobody
+authenticate before it can grey out a menu entry is an editor nobody
 configures — so "what would this graph look like on the cheaper tier" is a
 question anybody may ask. `plans` is the list to offer, so no client has to
 hard-code names it cannot know.
@@ -108,8 +108,7 @@ property that no endpoint test notices being broken.
 
 ## What the editor makes of it
 
-All of it lands in one dialog — "File" → "Connection…", or a click on the
-backend line in the status bar:
+All of it lands in one dialog — **⋯ → Connection…** in the editor's top bar:
 
 ![The connection dialog](../img/be-connection.png){ width="520" }
 
@@ -117,7 +116,7 @@ The address (changing it reloads; it is the ground the session stands on), the
 credential (applied in place — a token goes stale *during* the work, and a
 refused one is rolled back so the session survives), the plan to draw against,
 and what the backend answered. `?plan=basic` on the editor's own URL opens it
-that way, and the status bar marks a preview as a preview so it cannot be
+that way, and the dialog marks a preview as a preview so it cannot be
 mistaken for an allowance.
 
 ## Where the line falls
