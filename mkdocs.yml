@@ -76,6 +76,7 @@ nav:
       - Localization: localization.md
       - Session control: session-control.md
       - Step debugging: step-debugging.md
+      - Observability: observability.md
       - Built-in stages: built-in-stages.md
       - Stage specification: stage-specification.md
       - Schema and stage specs: schema-and-stage-specs.md
@@ -153,6 +154,7 @@ plugins:
             Localization: Локализация
             Session control: Управление сессией
             Step debugging: Пошаговая отладка
+            Observability: Наблюдаемость
             Built-in stages: Встроенные стадии
             Stage specification: Спецификация стадии
             Schema and stage specs: Схема и спецификации

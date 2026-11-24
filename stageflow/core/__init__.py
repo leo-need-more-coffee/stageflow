@@ -4,6 +4,7 @@ from .context import Context
 from .debug import RUN, STEP, StepDebugger
 from .event import Event, EventSpec, InputSpec
 from .inputs import InputHub
+from .instrument import Instrument, Instruments
 from .nodes import (
     ConditionNode,
     EntryNode,
@@ -43,6 +44,8 @@ __all__ = [
     "EventSpec",
     "InputSpec",
     "InputHub",
+    "Instrument",
+    "Instruments",
     "Node",
     "register_node",
     "get_node_types",

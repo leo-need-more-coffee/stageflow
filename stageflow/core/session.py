@@ -14,6 +14,7 @@ from .cel import CelEngine
 from .context import Context
 from .event import Event
 from .inputs import InputHub
+from .instrument import Instrument
 from .nodes import Node, StageNode, TerminalNode
 from .pipeline import Pipeline
 from .policy import OPEN, Policy
@@ -74,6 +75,7 @@ class Session:
         limits: Limits | None = None,
         budget: Budget | None = None,
         reports_budget: bool = True,
+        instrument: Instrument | None = None,
     ):
         # what this session may be made of, and how much it may spend. Both
         # given by the host, never by the pipeline: a graph that could widen
@@ -100,6 +102,8 @@ class Session:
         self.cel = CelEngine()
         self._event_handler: EventHandler = event_handler or (lambda event: None)
         self.debugger = debugger
+        #: tracing, metrics, logs — see `core/instrument.py`. None costs nothing
+        self.instrument = instrument
 
         self.artifacts: dict[str, Any] = {}
         self.result: dict | None = None
@@ -117,6 +121,8 @@ class Session:
     def emit(self, event: Event) -> None:
         self.event_history.append(event)
         self._event_handler(event)
+        if self.instrument is not None:
+            self.instrument.event(self, event)
 
     def emit_node_event(self, type_: str, node: Node, payload: dict | None = None) -> None:
         self.emit(
@@ -217,6 +223,12 @@ class Session:
         self.budget.check_deadline()
         self.budget.charge("steps", 1)
 
+        if self.instrument is None:
+            return await self._execute_node(node, ctx)
+        with self.instrument.node(self, node):
+            return await self._execute_node(node, ctx)
+
+    async def _execute_node(self, node: Node, ctx: Context) -> tuple["Node | None", Context]:
         if self.debugger is None:
             next_node, ctx = await node.execute(self, ctx)
         else:
@@ -363,6 +375,7 @@ class Session:
             context=child_ctx,
             event_handler=proxy_event,
             debugger=self.debugger,
+            instrument=self.instrument,
             # the allowance is the tenant's, not the graph's: a subpipeline
             # is not a way out of it, and neither is it a fresh budget
             policy=self.policy,
@@ -407,6 +420,12 @@ class Session:
         self.emit_node_event("session_terminated", node, {"artifacts": sorted(self.artifacts)})
 
     async def run(self) -> SessionResult:
+        if self.instrument is None:
+            return await self._run()
+        with self.instrument.session(self):
+            return await self._run()
+
+    async def _run(self) -> SessionResult:
         self.pipeline.typesystem.check_context(self.context, f"session '{self.id}'")
         self.budget.start()
         self.emit(Event(type="session_started", session_id=self.id))
@@ -526,6 +545,7 @@ class Session:
         *,
         policy: Policy,
         limits: Limits | None = None,
+        instrument: Instrument | None = None,
     ) -> "Session":
         """Restore a session, under the policy the host gives it now.
 
@@ -550,6 +570,7 @@ class Session:
             event_handler=event_handler,
             policy=policy,
             limits=limits,
+            instrument=instrument,
         )
         session.budget.restore(snapshot.get("meters"))
         session._current_node_id = snapshot.get("current_node_id")

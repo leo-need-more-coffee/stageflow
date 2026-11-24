@@ -41,6 +41,16 @@ dev = [
     "build",
     "twine",
 ]
+# traces and metrics through OpenTelemetry (stageflow.observability.otel)
+otel = [
+    "opentelemetry-api>=1.20",
+]
+# what the test suite needs beyond the package: property tests, and the
+# OpenTelemetry SDK to check the spans and metrics against
+test = [
+    "hypothesis>=6.100",
+    "opentelemetry-sdk>=1.20",
+]
 docs = [
     "mkdocs-material",
     "mkdocs-static-i18n",
