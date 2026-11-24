@@ -1,0 +1,62 @@
+{
+  "metadata": {"name": "expense approval", "uses": "all nine node types"},
+  "variables": {"total": "number", "decision": "string"},
+  "nodes": [
+    {"id": "start", "type": "entry", "variables": {"lines": []}, "next": "sum"},
+    {"id": "sum", "type": "stage", "stage": "Total",
+     "arguments": {"vars": ["lines"]}, "outputs": {"total": "total"}, "next": "size"},
+    {"id": "size", "type": "switch",
+     "cases": [{"when": "vars.total == 0", "next": "empty"},
+               {"when": "vars.total > 5000", "next": "too_big"}],
+     "default": "validate"},
+
+    {"id": "validate", "type": "try", "body": "each",
+     "except": [{"error_equals": ["ValueError"], "next": "invalid", "result_var": "problem"}],
+     "next": "any_high"},
+    {"id": "each", "type": "map", "items": "vars.lines", "body": "check_line",
+     "item_var": "line", "mode": "parallel", "collect": {"verdict": "verdicts"}},
+    {"id": "check_line", "type": "stage", "stage": "CheckLine",
+     "arguments": {"vars": ["line"]}, "outputs": {"verdict": "verdict"}},
+
+    {"id": "any_high", "type": "condition",
+     "condition": "vars.verdicts.exists(v, v == 'high')",
+     "then": "notify", "else": "approved_auto"},
+    {"id": "notify", "type": "subpipeline", "subpipeline_id": "tell_everyone",
+     "artifact_outputs": {"told": "sent"}, "next": "ask"},
+    {"id": "ask", "type": "stage", "stage": "AskApproval",
+     "outputs": {"decision": "decision"}, "next": "decided"},
+    {"id": "decided", "type": "condition", "condition": "vars.decision == 'approve'",
+     "then": "approved_by_hand", "else": "rejected"},
+
+    {"id": "empty", "type": "terminal", "result": {"status": "nothing to approve"}},
+    {"id": "too_big", "type": "terminal", "result": {"status": "rejected", "why": "over 5000"},
+     "artifacts": ["total"]},
+    {"id": "invalid", "type": "terminal", "result": {"status": "invalid"},
+     "artifacts": ["problem"]},
+    {"id": "approved_auto", "type": "terminal", "result": {"status": "approved", "by": "rules"},
+     "artifacts": ["total", "verdicts"]},
+    {"id": "approved_by_hand", "type": "terminal",
+     "result": {"status": "approved", "by": "person"},
+     "artifacts": ["total", "verdicts", "told", "decision"]},
+    {"id": "rejected", "type": "terminal", "result": {"status": "rejected", "why": "person"},
+     "artifacts": ["total", "decision"]}
+  ],
+  "subpipelines": {
+    "tell_everyone": {
+      "nodes": [
+        {"id": "t_start", "type": "entry", "next": "t_both"},
+        {"id": "t_both", "type": "parallel", "branches": ["t_manager", "t_finance"],
+         "next": "t_join"},
+        {"id": "t_manager", "type": "stage", "stage": "Notify",
+         "arguments": {"const": {"who": "manager"}}, "outputs": {"sent": "to_manager"}},
+        {"id": "t_finance", "type": "stage", "stage": "Notify",
+         "arguments": {"const": {"who": "finance"}}, "outputs": {"sent": "to_finance"}},
+        {"id": "t_join", "type": "stage", "stage": "Notify",
+         "arguments": {"const": {"who": "requester"}},
+         "outputs": {"sent.$": "[vars.to_manager, vars.to_finance, output.sent]"},
+         "next": "t_end"},
+        {"id": "t_end", "type": "terminal", "artifacts": ["sent"]}
+      ]
+    }
+  }
+}

@@ -133,10 +133,37 @@ class UniqueListStage(BuiltinStage):
         seen: set = set()
         unique = []
         for item in items:
-            if item not in seen:
-                seen.add(item)
+            key = _identity(item)
+            if key not in seen:
+                seen.add(key)
                 unique.append(item)
         self.set_outputs({"list": unique})
+
+
+def _identity(value):
+    """What makes two JSON values the same value, as something hashable.
+
+    Equality the way JSON and CEL see it rather than Python: objects and lists
+    are compared by content (and cannot go into a set as they are), `1` and
+    `1.0` are one number, and `true` is not `1`, which Python considers equal.
+    """
+    if isinstance(value, bool):
+        return ("bool", value)
+    if isinstance(value, (int, float)):
+        return ("number", value)
+    if isinstance(value, str):
+        return ("string", value)
+    if value is None:
+        return ("null",)
+    if isinstance(value, (list, tuple)):
+        return ("list", tuple(_identity(v) for v in value))
+    if isinstance(value, dict):
+        return ("object", tuple(sorted((str(k), _identity(v)) for k, v in value.items())))
+    try:
+        hash(value)
+    except TypeError:
+        return ("other", repr(value))
+    return ("other", value)
 
 
 @register_stage("PopListStage")

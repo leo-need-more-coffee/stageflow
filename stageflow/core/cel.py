@@ -8,6 +8,10 @@ from .context import Context
 
 CelError = ExpressionError
 
+#: "No element is bound" — as opposed to an element that is `null`. A list
+#: can hold a `None`, and `item != null` has to be able to say so.
+_UNBOUND: Any = object()
+
 _BACKEND: str | None = None
 
 try:
@@ -59,7 +63,7 @@ class CelEngine:
         ctx: Context,
         output: dict | None = None,
         error: dict | None = None,
-        item: Any = None,
+        item: Any = _UNBOUND,
         args: dict | None = None,
     ) -> Any:
         activation: dict[str, Any] = {"vars": dict(ctx.vars)}
@@ -69,7 +73,7 @@ class CelEngine:
             activation["args"] = args
         if error is not None:
             activation["error"] = error
-        if item is not None:
+        if item is not _UNBOUND:
             activation["item"] = item
 
         program = self._program(expr)
