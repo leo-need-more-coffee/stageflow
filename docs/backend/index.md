@@ -29,8 +29,9 @@ knowledge base, and either write a reply or hand the ticket to a person.
 | [3. What may be composed](3-policy.md) | a `Policy` per caller | what a *less trusted* author may draw |
 | [4. What a run costs](4-metering.md) | `reserve:` and `charge()` | how much of it they may use |
 | [5. Who is calling](5-tenants.md) | plans and a credential | which of the above applies to whom |
+| [6. Runs that wait](6-waiting.md) | a checkpoint store and `/input` | a run that waits a day for a person |
 
-The first two are all you need for a backend of your own. The last three are
+The first two are all you need for a backend of your own. The next three are
 what turns it into something you can let someone else compose pipelines on —
 and they are the ones worth reading even if you never serve a second tenant,
 because "the stage registry is global" is a sentence with consequences.
@@ -38,7 +39,7 @@ because "the stage registry is global" is a sentence with consequences.
 ## What you need
 
 ```bash
-pip install "stageflow-framework>=0.12" fastapi uvicorn
+pip install "stageflow-framework>=0.17" fastapi uvicorn
 ```
 
 Following along against the finished thing:

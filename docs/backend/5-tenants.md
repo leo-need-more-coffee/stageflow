@@ -137,8 +137,7 @@ and report honestly what it cost.
 
 ---
 
-That is the whole backend: [stages](1-stages.md), [endpoints](2-endpoints.md),
-a [policy](3-policy.md), [meters](4-metering.md) and a credential. The
-finished thing is
-[stageflow-example](https://github.com/leo-need-more-coffee/stageflow-example),
-about six hundred lines of Python.
+That is a backend others can compose on: [stages](1-stages.md),
+[endpoints](2-endpoints.md), a [policy](3-policy.md), [meters](4-metering.md)
+and a credential. What is left is runs that outlive the request that started
+them — a pipeline that waits a day for a person: [6. Runs that wait](6-waiting.md).

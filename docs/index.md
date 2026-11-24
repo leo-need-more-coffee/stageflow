@@ -45,6 +45,7 @@ apart in the order it was written.
 | [3. What may be composed](backend/3-policy.md) | a `Policy` per caller, and telling the editor |
 | [4. What a run costs](backend/4-metering.md) | `reserve:`, `charge()`, meters of your own |
 | [5. Who is calling](backend/5-tenants.md) | plans, a credential, and where the check goes |
+| [6. Runs that wait](backend/6-waiting.md) | a store, an answer endpoint, restarts and deadlines |
 
 ## Reference
 

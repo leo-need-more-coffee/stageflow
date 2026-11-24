@@ -58,6 +58,7 @@ nav:
       - 3. What may be composed: backend/3-policy.md
       - 4. What a run costs: backend/4-metering.md
       - 5. Who is calling: backend/5-tenants.md
+      - 6. Runs that wait: backend/6-waiting.md
   - Reference:
       - Nodes:
           - The entry node: entry-node.md
@@ -139,6 +140,7 @@ plugins:
             3. What may be composed: 3. Что разрешено собирать
             4. What a run costs: 4. Во что обходится прогон
             5. Who is calling: 5. Чей это запрос
+            6. Runs that wait: 6. Прогоны, которые ждут
             Reference: Справочник
             Nodes: Узлы
             The entry node: Узел entry

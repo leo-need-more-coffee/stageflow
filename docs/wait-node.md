@@ -66,6 +66,10 @@ result = await session.run()   # on from `ask` to the end, or to the next wait
 A pipeline with no `wait` node never touches the store beyond marking the run
 as started and finished, so instant pipelines pay nothing for this.
 
+The example backend does all of this over HTTP — an answer endpoint, runs
+brought back after a restart, a deadline check — in
+[Building a backend, 6. Runs that wait](backend/6-waiting.md).
+
 ## What is saved
 
 The frame, the node the run stopped at, the meters spent so far, the inputs
